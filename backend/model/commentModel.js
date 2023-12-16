@@ -8,10 +8,8 @@ const commentSchema = new mongoose.Schema({
     },
     comment: [{
         body: String,
-        meta: {
-            upvote: Number,
-            downvote: Number
-        }
+        upvote: Number,
+        downvote: Number
     }]
 }, {timestamps: true})
 

@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
-const { generateToken }= require('../middleware/authMiddleware.js')
+const { generateToken }= require('../../middleware/authMiddleware.js')
 
-const userModel = require('../model/userModel.js');
+const userModel = require('../../model/userModel.js');
 
 exports.registerUser = async (req, res) => {
     try{

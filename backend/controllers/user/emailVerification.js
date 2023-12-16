@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
-const {sendEmail} = require('../middleware/authMiddleware.js')
-const {generateToken }= require('../middleware/authMiddleware.js')
+const {sendEmail} = require('../../middleware/emailMiddleWare.js')
+const {generateToken }= require('../../middleware/authMiddleware.js')
 
-const userModel = require('../model/userModel.js');
+const userModel = require('../../model/userModel.js');
 
 exports.sendEmailVerification = async (req, res) => {
     try {

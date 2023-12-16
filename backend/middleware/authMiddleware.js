@@ -1,6 +1,4 @@
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
-
 
 const userModel = require('../model/userModel.js');
 
@@ -38,33 +36,6 @@ exports.protect = async (req, res, next) => {
     }
     if (!token) {
         res.status(401).json('No token provided')
-    }
-}
-//Email verification and password recovery
-const transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    debug: true,
-    auth: {
-        user: 'odohizuchukwusamuel@gmail.com',
-        pass: 'vcdl vpgu zrug pvqe'
-    }
-})
-
-exports.sendEmail = async (to, subject, text) => {
-    try {
-        const mailOptions = {
-            from: 'odohizuchukwusamuel@gmail.com',
-            to,
-            subject,
-            text
-        }
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Email sent:', info.response);
-    }catch(error) {
-        console.error('sendEmail error:', error)
     }
 }
 

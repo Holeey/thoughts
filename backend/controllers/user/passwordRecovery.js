@@ -1,9 +1,9 @@
-const {sendEmail} = require('../middleware/authMiddleware.js')
-const {generateToken }= require('../middleware/authMiddleware.js')
+const {sendEmail} = require('../../middleware/emailMiddleWare.js')
+const {generateToken }= require('../../middleware/authMiddleware.js')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
 
-const userModel = require('../model/userModel.js');
+const userModel = require('../../model/userModel.js');
 
 exports.passwordRecovery = async (req, res) => {
     try {
