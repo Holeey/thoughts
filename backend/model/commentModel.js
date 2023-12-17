@@ -6,11 +6,14 @@ const commentSchema = new mongoose.Schema({
         required: true,
         ref: 'User'
     },
-    comment: [{
-        body: String,
+    post: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Post'
+    },
+        comment: String,
         upvote: Number,
         downvote: Number
-    }]
 }, {timestamps: true})
 
 const commentData = mongoose.model('Comment', commentSchema)
