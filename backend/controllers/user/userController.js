@@ -69,7 +69,7 @@ exports.loginUser = async (req, res) => {
 
 exports.userProfile = async (req, res) => {
     try {
-    const {newName, newEmail, newPassword } = req.body
+    const {newName, newEmail, newPassword, profileImg, nickname, bio, dob } = req.body
     const { id } = req.params
 
     if (!id ) {
@@ -80,7 +80,7 @@ exports.userProfile = async (req, res) => {
     const hashedPassword =  await bcrypt.hash(newPassword, salt)
 
     const user = await userModel.findByIdAndUpdate( id, 
-    {name: newName, email: newEmail, password: hashedPassword },
+    {name: newName, email: newEmail, password: hashedPassword, profileImg, nickname, bio, dob },
     {new: true});
 
     if (!user) {

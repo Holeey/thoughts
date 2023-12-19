@@ -46,8 +46,11 @@ exports.verifyEmailToken = async (req, res) => {
         return res.status(401).json('user cannot be verified')
     }
 
+   const verifiedUser = await userModel.findByIdAndUpdate(user._id, {verified: true}, {new: true})
+
     return res.status(201).json({
-        message: 'user email verified'
+        message: 'user email verified',
+        verifiedUser
     })        
     } catch (error) {
         console.error('Error in emailVerification:', error);
