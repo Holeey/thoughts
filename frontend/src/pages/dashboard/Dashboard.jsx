@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
+import {  useSelector } from "react-redux";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import avatar from "../../images/avatar.jpg";
@@ -17,12 +17,15 @@ const Dashboard = () => {
   };
 
   return (
-    <>
+    <>{user &&
       <div>
         <div>
-          <img src={avatar} width={100} alt="profile" />
-          <h3>{user && user.first_name}</h3>
+          <img src={user?.profile_image || avatar} width={100} alt="profile" />
+          <h3>{user?.first_name}</h3>
           <Link to={'/profile'}><span>Account</span></Link>
+        </div>
+        <div>
+          <h4>{user?.bio}</h4>
         </div>
         <form onSubmit={handleSubmit}>
           <div>
@@ -40,7 +43,7 @@ const Dashboard = () => {
           </div>
         </form>
         <div><h2>Topics</h2></div>
-      </div>
+      </div>  }
     </>
   );
 };

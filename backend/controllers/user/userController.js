@@ -34,8 +34,11 @@ exports.registerUser = async (req, res) => {
         last_name: user.last_name,
         nick_name: user.nick_name,
         email: user.email,
-        password: hashedPassword,
-        token: generateToken(user._id),
+        verified_email: user.verified_email,
+        dob: user.dob,
+        gender: user.gender,
+        password: user.password,
+        token: generateToken(user._id)
       });
     }
   } catch (error) {
@@ -60,10 +63,15 @@ exports.loginUser = async (req, res) => {
     res.status(200).json({
       id: user._id,
       first_name: user.first_name,
+      last_name: user.last_name,
+      nick_name: user.nick_name,
       email: user.email,
+      verified_email: user.verified_email,
+      dob: user.dob,
+      gender: user.gender,
       password: user.password,
-      token: generateToken(user._id),
-    });
+      token: generateToken(user._id)
+     });
   } catch (error) {
     console.error("Login error", error);
     return res.status(500).json("Internal Server Error");
@@ -76,14 +84,14 @@ exports.userProfile = async (req, res) => {
       profile_image,
       bio,
     } = req.body;
-    const { _id } = req.params;
+    const {id}  = req.params;
 
-    if (!_id) {
+    if (!id) {
       return res.status(401).json("Not me authorized");
     }
 
     const user = await userModel.findByIdAndUpdate(
-      _id,
+        id,
       {
         profile_image,
         bio,
@@ -93,9 +101,20 @@ exports.userProfile = async (req, res) => {
 
     if (!user) {
       return res.status(401).json("User not found!");
+    }else{
+      res.status(200).json({ 
+        id: user._id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        nick_name: user.nick_name,
+        email: user.email,
+        verified_email: user.verified_email,
+        dob: user.dob,
+        gender: user.gender,
+        password: user.password,
+        token: generateToken(user._id)
+      })
     }
-
-    res.status(200).json({ user });
   } catch (error) {
     console.error("profile:", error);
     return res.status(500).json("Internal Server Error");

@@ -10,7 +10,6 @@ if (response.data) {
 }
 return response.data
 }
-
 const login = async (userData) => {
     const response = await axios.post(`${API_URL}login`, userData)
 
@@ -19,11 +18,6 @@ const login = async (userData) => {
     }
     return response.data
 }
-
-const logout = () => {
-    localStorage.removeItem('user')
-}
-
 const profile = async (userId, userData, token) => {
     const config = {
         headers: {
@@ -31,14 +25,18 @@ const profile = async (userId, userData, token) => {
         }
     }
     try {
-        const response = await axios.put(API_URL + userId, userData, config)
-        console.log('Response:', response.data)
+        const response = await axios.put(`${API_URL}/profile/${userId}`, userData, config)
+        if (response.data) {
+         localStorage.setItem('user', JSON.stringify(response.data))   
+        }
         return response.data
     } catch (error) {
         console.error('profile:', error)
     }
 }
-
+const logout = () => {
+    localStorage.removeItem('user')
+}
 
 const authService = {
     register,

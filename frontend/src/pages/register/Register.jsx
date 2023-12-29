@@ -27,11 +27,10 @@ const Register = () => {
       toast.error(message)
     }
     if (isSuccess || user) {
-      toast.success('Sign up successful')
       navigate('/dashboard')
     }
     dispatch(reset())
-   }, [isError, isSuccess, user, message, navigate, dispatch]);
+   }, [user, isError, isSuccess, message, navigate, dispatch]);
 
    const handleSubmit = (e) => {
     e.preventDefault()

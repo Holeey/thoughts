@@ -4,6 +4,7 @@ import { profile, reset } from "../../features/auth/authSlice";
 
 import avatar from "../../images/avatar.jpg";
 import { toast } from "react-toastify";
+// import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [formData, setFormData] = useState({
@@ -14,24 +15,22 @@ const Profile = () => {
   const { profile_image, bio } = formData;
 
   const dispatch = useDispatch();
+  // const navigate = useNavigate();
 
-  // const {user, isSuccess, isError, message} = useSelector((state) => state.auth)
+  const { user, isSuccess, isError, message } = useSelector((state) => state.auth)
 
-  // useEffect(() => {
-  //   if (isError) {
-  //       toast.error(message)
-  //   }
-  //   // if (isSuccess) {
-  //   //     toast.success('profile Updated!')
-  //   // }
-  // })
+  console.log('user1:', user.token, user.id)
 
-  const handleChange = (e) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [e.target.id]: e.target.value,
-    }));
-  };
+  useEffect(() => {
+    if (isError) {
+        toast.error(message)
+    }
+    else if (isSuccess) {
+        toast.success('profile Updated!')  
+    }
+    dispatch(reset())
+  }, [isSuccess, isError, message, dispatch])
+ 
   // convert image to base64 for profile pic upload
   const convsertToBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -45,18 +44,22 @@ const Profile = () => {
       };
     });
   };
-
+  const handleChange = (e) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [e.target.id]: e.target.value,
+    }))
+  };
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     const base64 = await convsertToBase64(file);
     setFormData((prevData) => ({
       ...prevData,
       profile_image: base64,
-    }));
-    console.log("profileImg:", profile_image);
+    }))
   };
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  // const user_localState = JSON.parse(localStorage.getItem("user"));
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -64,20 +67,17 @@ const Profile = () => {
       profile_image: profile_image,
       bio: bio,
     };
-    if (user) {
-      dispatch(profile({ id: user.id, userData }));
-    }
-    console.log("userId:", user.id, "userData:", userData);
+    dispatch(profile({ id: user.id, userData }));
   };
-
   return (
     <>
       <div>
         <h1>Set up your profile</h1>
       </div>
       <form onSubmit={handleSubmit}>
+        {}
         <label htmlFor="profile_image">
-          <img width={100} src={avatar} alt="profile_picture" />
+          <img width={100} src={user?.profile_image || avatar} alt="profile_picture" />
         </label>
 
         <input
