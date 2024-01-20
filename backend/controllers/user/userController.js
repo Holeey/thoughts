@@ -3,6 +3,22 @@ const { generateToken } = require("../../middleware/authMiddleware.js");
 
 const userModel = require("../../model/userModel.js");
 
+
+exports.getUserData = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userProfile = await userModel.findOne({ _id: id });
+    if (!userProfile) {
+      return res.status(404).json({ error: 'User profile not found' });
+    }
+    return res.status(201).json({ userProfile });
+  } catch (error) {
+    console.error('getUserProfile Error:', error)
+    res.status(500).json('Internal error')
+  }
+}
+
+
 exports.registerUser = async (req, res) => {
   try {
     const { first_name, last_name, nick_name, dob, gender, email, password } = req.body;
@@ -27,17 +43,16 @@ exports.registerUser = async (req, res) => {
       gender
     });
 
+    user.save()
+
     if (user) {
       res.status(200).json({
         id: user._id,
-        first_name: user.first_name,
-        last_name: user.last_name,
         nick_name: user.nick_name,
         email: user.email,
         verified_email: user.verified_email,
-        dob: user.dob,
-        gender: user.gender,
-        password: user.password,
+        profile_image: user.profile_image,
+        bio: user.bio,
         token: generateToken(user._id)
       });
     }
@@ -60,16 +75,16 @@ exports.loginUser = async (req, res) => {
     if (!(await bcrypt.compare(password, user.password))) {
       return res.status(401).json("Invalid password!");
     }
+    
+    user.save()
+
     res.status(200).json({
       id: user._id,
-      first_name: user.first_name,
-      last_name: user.last_name,
       nick_name: user.nick_name,
       email: user.email,
       verified_email: user.verified_email,
-      dob: user.dob,
-      gender: user.gender,
-      password: user.password,
+      profile_image: user.profile_image,
+      bio: user.bio,
       token: generateToken(user._id)
      });
   } catch (error) {
@@ -83,35 +98,45 @@ exports.userProfile = async (req, res) => {
     const {
       profile_image,
       bio,
+      nick_name, 
+      email,
+      password
     } = req.body;
     const {id}  = req.params;
 
     if (!id) {
-      return res.status(401).json("Not me authorized");
+      return res.status(401).json("Not authorized");
     }
 
+   const updateFields = {};
+
+   if (profile_image) updateFields.profile_image = profile_image
+   if (bio) updateFields.bio = bio
+   if (nick_name) updateFields.nick_name = nick_name
+   if (email) updateFields.email = email
+   if (password) updateFields.password = password
+
+   if (Object.keys(updateFields).length === 0) {
+    res.status(401).json({message:'No fields to update'})
+   }
     const user = await userModel.findByIdAndUpdate(
         id,
-      {
-        profile_image,
-        bio,
-      },
+      { $set: updateFields },
       { new: true }
     );
+
+    user.save()
 
     if (!user) {
       return res.status(401).json("User not found!");
     }else{
       res.status(200).json({ 
         id: user._id,
-        first_name: user.first_name,
-        last_name: user.last_name,
         nick_name: user.nick_name,
         email: user.email,
         verified_email: user.verified_email,
-        dob: user.dob,
-        gender: user.gender,
-        password: user.password,
+        profile_image: user.profile_image,
+        bio: user.bio,
         token: generateToken(user._id)
       })
     }

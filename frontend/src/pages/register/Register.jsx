@@ -13,42 +13,54 @@ const Register = () => {
     dob: "",
     gender: "",
     password: "",
-    password2: ""
+    password2: "",
   });
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
-  const { first_name, last_name, nick_name, dob, email, password, password2 } = formData
-  const { user, isError, isSuccess, message } = useSelector((state) => state.auth)
 
-   useEffect(() => {
+  const {
+    first_name,
+    last_name,
+    nick_name,
+    dob,
+    gender,
+    email,
+    password,
+    password2,
+  } = formData;
+  const { user, isError, isSuccess, message } = useSelector(
+    (state) => state.auth
+  );
+
+  useEffect(() => {
     if (isError) {
-      toast.error(message)
+      toast.error(message);
     }
     if (isSuccess || user) {
-      navigate('/dashboard')
+      navigate("/dashboard");
     }
-    dispatch(reset())
-   }, [user, isError, isSuccess, message, navigate, dispatch]);
+    dispatch(reset());
+  }, [user, isError, isSuccess, message, navigate, dispatch]);
 
-   const handleSubmit = (e) => {
-    e.preventDefault()
-  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
     if (password !== password2) {
-      toast.error('passwords do not match')
+      toast.error("passwords do not match");
     } else {
-    const userData = {
-      first_name: first_name, 
-      last_name: last_name, 
-      nick_name: nick_name,
-      email: email, 
-      dob: dob,
-      password: password
+      const userData = {
+        first_name: first_name,
+        last_name: last_name,
+        nick_name: nick_name,
+        email: email,
+        gender: gender,
+        dob: dob,
+        password: password,
+      };
+      dispatch(register(userData));
     }
-      dispatch(register( userData ))
-    }
-  }
+  };
 
   const handleChange = (e) => {
     setFormData((prevState) => ({
@@ -59,83 +71,80 @@ const Register = () => {
 
   return (
     <>
-        <div>Sign Up</div>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="first_name">
-              <input
-                onChange={handleChange}
-                type="text"
-                name="first_name"
-                id="first_name"
-                value={first_name}
-                placeholder="First Name"
-              />
-            </label>
-            <label htmlFor="last_name">
-              <input
-                onChange={handleChange}
-                type="text"
-                name="last_name"
-                id="last_name"
-                value={last_name}
-                placeholder="Last Name"
-              />
-            </label>
-          </div>
+      <div>Sign Up</div>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="first_name">First nmae: </label>
           <input
+            onChange={handleChange}
+            type="text"
+            name="first_name"
+            id="first_name"
+            value={first_name}
+          />
+
+          <label htmlFor="last_name">Last name: </label>
+          <input
+            onChange={handleChange}
+            type="text"
+            name="last_name"
+            id="last_name"
+            value={last_name}
+          />
+        </div>
+        <label htmlFor="nick_name">Psuedo name: </label>
+        <input
           onChange={handleChange}
           type="text"
           name="nick_name"
           id="nick_name"
           value={nick_name}
-          placeholder="(nickname)"
         />
-          <label htmlFor="email">
-            <input
-              onChange={handleChange}
-              type="email"
-              name="email"
-              id="email"
-              value={email}
-              placeholder="Email"
-              
-            />
-          </label>
-          <input
+        <label htmlFor="email">Email:</label>
+        <input
+          onChange={handleChange}
+          type="email"
+          name="email"
+          id="email"
+          value={email}
+        />
+
+        <label htmlFor="gender">Date of birth (dob): </label>
+        <input
           onChange={handleChange}
           type="date"
           name="dob"
           id="dob"
           value={dob}
-          placeholder="dd/mm/yy"
         />
-          <label htmlFor="password">
-            <input
-              onChange={handleChange}
-              type="text"
-              name="password"
-              id="password"
-              value={password}
-              placeholder="Enter password"
-              
-            />
-          </label>
-          <label htmlFor="password2">
-            <input
-              onChange={handleChange}
-              type="text"
-              name="password2"
-              id="password2"
-              value={password2}
-              placeholder="Confirm password"
-              
-            />
-          </label>
-          <div>
-            <button type="submit">SignUp</button>
-          </div>
-        </form>
+        <label htmlFor="gender">Gender: </label>
+        <select id="gender" name="gender">
+          <option value={"male"}>Male</option>
+          <option value={"female"}>Female</option>
+        </select>
+
+        <label htmlFor="password">Password:</label>
+        <input
+          onChange={handleChange}
+          type="text"
+          name="password"
+          id="password"
+          value={password}
+        />
+
+        <label htmlFor="password2">Confirm password:</label>
+        <input
+          onChange={handleChange}
+          type="text"
+          name="password2"
+          id="password2"
+          value={password2}
+        />
+
+        <div>
+          <button type="submit">SignUp</button>
+        </div>
+      </form>
     </>
   );
 };

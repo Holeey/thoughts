@@ -5,7 +5,7 @@ const dotenv = require('dotenv')
 
 const connectDB = require('./config/db.js');
 
-const userRoutes  = require('./routes/userRoutes.js');
+const userRoutes = require('./routes/userRoutes.js');
 const postRoutes = require('./routes/postRoutes.js');
 const commentRoutes = require('./routes/commentRoutes.js');
 const followRoutes = require('./routes/followRoutes.js')

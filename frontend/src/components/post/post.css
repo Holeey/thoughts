@@ -1,0 +1,46 @@
+.post_form_container {
+    display: flex;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent
+}
+.post_form {
+    display: flex;
+    position: relative;
+    justify-content: center;
+    flex-direction: column;
+    border: solid 1px;
+    width: 600px;
+    height: 60vh;
+    z-index: 1;
+    background-color: #fff;
+    border-radius: 6px;
+    padding: 1rem;
+}
+#post_img {
+    position: absolute;
+    bottom: 0;
+}
+#post {
+    position: absolute;
+    top: 10%;
+    width: 590px;
+    height: 40vh;
+}
+#post_button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    max-width: 100px;
+}
+#post_cancel_button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    max-width: 100px;
+}

@@ -1,0 +1,6 @@
+.dashboard {
+    display: flex;
+    justify-content: space-between;
+    padding: 1.5rem;
+    background-color: #e2e0e0;
+}
