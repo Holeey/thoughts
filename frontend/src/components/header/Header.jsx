@@ -30,9 +30,9 @@ const Header = () => {
   return (
     <>
     <div className="nav_bar">
-      <div>
+      <Link to={'/'}>
         <h1>Logo</h1>
-      </div>
+      </Link>
       { user && <>
       <div >
           <form className="search_bar" onSubmit={handleSubmit}>

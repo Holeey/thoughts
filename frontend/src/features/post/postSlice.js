@@ -1,20 +1,26 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import postService  from "./postService";
 
-const post_local_State = JSON.parse(localStorage.getItem('post')) || {}
-
 const initialState = {
-    post: post_local_State,
+    posts: [],
     isError: false,
     isSuccess: false,
-    errorMessage: '',
-    successMessage: ''
+    message: '',
 }
 
-export const createPost = createAsyncThunk('/createPost', async(payload, thunkAPI) => {
+export const createPost = createAsyncThunk('post/create', async(payload, thunkAPI) => {
     try {
         const token = thunkAPI.getState().auth.user.token
         return await postService.createPost(payload, token)
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.message)
+        || error.message || error.toString()
+        return thunkAPI.rejectWithValue(message)
+    }
+})
+export const getAllPosts = createAsyncThunk('post/getAll', async (_, thunkAPI) => {
+    try {
+        return await postService.getAllPosts()
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
         || error.message || error.toString()
@@ -41,12 +47,23 @@ const postSlice = createSlice({
         .addCase(createPost.fulfilled, (state, action) => {
             state.isLoading = false
             state.isSuccess = true
-            state.post = action.payload
-            state.successMessage = action.payload
+            state.posts = action.payload
         })
         .addCase(createPost.rejected, (state, action) => {
             state.isError = true
-            state.errorMessage = action.payload
+            state.message = action.payload
+        })
+        .addCase(getAllPosts.pending, (state) => {
+            state.isLoading = true
+        })
+        .addCase(getAllPosts.fulfilled, (state, action) => {
+            state.isLoading = false
+            state.isSuccess = true
+            state.posts = action.payload
+        })
+        .addCase(getAllPosts.rejected, (state, action) => {
+            state.isError = true
+            state.message = action.payload
         })
     }
 })

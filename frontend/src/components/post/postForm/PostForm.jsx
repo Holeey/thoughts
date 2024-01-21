@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux"
-import './post.css'
-import { createPost } from "../../features/post/postSlice";
+import './postForm.css'
+import { createPost } from "../../../features/post/postSlice";
 import {toast} from "react-toastify"
 
 const Post = () => {
@@ -14,21 +14,22 @@ const Post = () => {
   });
   const { postTitle, post_img, postBody } = formData;
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+
   const {
     isError,
     isSuccess,
-    errorMessage,
-    successMessage } = useSelector((state) => state.post)
+    message,
+    successMessage } = useSelector((state) => state.posts)
 
-  useEffect(() => {
-    if(isError) {
-      toast.error(errorMessage)
-      return
-    }else if (isSuccess){
-      toast.success(successMessage)
-    }
-  })
+  // useEffect(() => {
+  //   if(isError) {
+  //     toast.error(message)
+  //     return
+  //   }else if (isSuccess){
+  //     toast.success(successMessage)
+  //   }
+  // }, [isError, isSuccess])
 
   const converToBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -62,13 +63,10 @@ const Post = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    const Post = {
-      // post_img,
+    dispatch(createPost({
       postTitle: postTitle,
       postBody: postBody
-    }
-
-    dispatch(createPost({ Post }))
+    }))
   }
 
   return (
@@ -111,7 +109,7 @@ const Post = () => {
             />
           </div>
           <button id="post_cancel_button" onClick={() => setIsVisible(false)}>close</button>
-          <button type="submit" id="post_button" onClick={() => setIsVisible(false)}>post</button>
+          <button type="submit" id="post_button" >post</button>
         </form>
       </div>
 }
