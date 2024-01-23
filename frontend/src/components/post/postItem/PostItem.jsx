@@ -8,14 +8,26 @@ import {
   faShareNodes,
 } from "@fortawesome/free-solid-svg-icons";
 
+import PostForm from "../postForm/PostForm";
+
 import moment from "moment";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import "./postItem.css";
+
+import { editPost } from "../../../features/post/postSlice";
+
+import { useDispatch} from "react-redux"
+
+
 
 const PostItem = ({ user, post }) => {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isPostOptions, setIsPostOptions] = useState(false);
+  const [isVisible, setIsVisible] = useState(false)
+
+  const dispatch = useDispatch();
+
 
   const toggleMinimize = () => {
     setIsMinimized(!isMinimized);
@@ -23,6 +35,32 @@ const PostItem = ({ user, post }) => {
   const togglePostOptions = () => {
     setIsPostOptions(!isPostOptions);
   };
+
+  
+  const handleEditPost = () => {
+    dispatch(editPost(post))
+  }
+
+  const toggleVisibility = () => {
+    setIsVisible(!isVisible)
+    handleEditPost()
+  }
+
+  const clickRef = useRef(null);
+
+  const handleOutsideClick = (e) => {
+   if(clickRef.current && !clickRef.current.contains(e.target)) {
+      setIsPostOptions(false);
+    }
+  }
+
+  useEffect(() => {  
+    document.addEventListener("click", handleOutsideClick, true); 
+    return () => {
+      document.removeEventListener("click", handleOutsideClick, true);
+    };
+  });
+
 
   return (
     <>
@@ -38,16 +76,17 @@ const PostItem = ({ user, post }) => {
             </div>
             <h4>{user?.nick_name}</h4>
           </div>
-          <div className="post_options">
+          <div className="post_options_elipsis">
             <FontAwesomeIcon
               icon={faEllipsisVertical}
+              size="2x"
               onClick={togglePostOptions}
             />
           </div>
           {isPostOptions && (
             <>
-              <ul>
-                <li>Edit</li>
+              <ul ref={clickRef}>
+                <li onClick={toggleVisibility}>Edit</li>
                 <li>Delete</li>
                 <li onClick={toggleMinimize}>Minimize</li>
               </ul>
@@ -97,6 +136,7 @@ const PostItem = ({ user, post }) => {
           </div>
         </div>
       </div>
+      {isVisible && <PostForm isVisible={isVisible} setIsVisible={setIsVisible} /> }
     </>
   );
 };

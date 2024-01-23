@@ -35,7 +35,7 @@ exports.createPost = async (req, res) => {
 exports.updatePost = async (req, res) => {
   try {
     const { postTitle, postBody } = req.body;
-
+    
     const post = await postModel.findById(req.params.id);
 
     if (!post) {

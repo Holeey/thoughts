@@ -24,6 +24,25 @@ const getAllPosts = async () => {
         throw error
     }
 }
+const updatePost = async (id,updatedPost, token) => {
+    console.log("updatedPost:", updatedPost);
+    console.log("updatedPostId:", id);
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+        const response =  await axios.post(`${API_URL}/updatePost/${id}`, updatedPost, config)
+        return response.data
+    } catch (error) {
+        console.error(
+            "Error updating post:",
+            error.response.data || error.message || error
+          );
+        throw error
+    }
+}
 
 
 
@@ -31,6 +50,7 @@ const getAllPosts = async () => {
 const postService = {
     getAllPosts,
     createPost,
+    updatePost,
 }
 
 export default postService

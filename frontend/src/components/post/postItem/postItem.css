@@ -39,15 +39,25 @@
     margin-inline-start: 2rem;
     
 }
-.post_options{
+.post_options_elipsis{
   margin-inline-end: 2.5rem;
   position: relative;
-  border: solid 1px;
-  
+  cursor: pointer;
 }
 ul {
   position: absolute;
-  right: 0;
+  right: 520px;
+  margin-top: 3rem;
+  background-color: black;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.5rem;
+  opacity: 0.8;
+}
+li {
+  font-size: 13px;
+  list-style: none;
+  cursor: pointer;
 }
 .user_profile_img_container {
     display: flex;
