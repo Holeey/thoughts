@@ -4,10 +4,13 @@ import {logout, reset} from '../../features/auth/authSlice.js'
 import { Link } from "react-router-dom"
 import avatar from "../../images/avatar.jpg";
 import './header.css'
+import { resetSearchPosts, searchPost } from "../../features/post/postSlice.js";
+import SearchList from "../header/searchList/SearchList.jsx";
 
 const Header = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isVisible, setIsVisible] = useState(false);
+  const [isResult, setIsResult] = useState(false);
 
   const dispatch = useDispatch()
 
@@ -17,14 +20,22 @@ const Header = () => {
     setSearchTerm(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSearch = (e) => {
     e.preventDefault();
+    if (searchTerm.length > 1)
+    dispatch(searchPost(searchTerm))
+   handleResultVisibility()
+   setSearchTerm('')
   }
 
   const handleLogout = () => {
     dispatch(logout())
     dispatch(reset());
     window.location.replace('/');
+  }
+  const handleResultVisibility = () => {
+    setIsResult(!isResult)
+    dispatch(resetSearchPosts())
   }
   
   return (
@@ -35,7 +46,7 @@ const Header = () => {
       </Link>
       { user && <>
       <div >
-          <form className="search_bar" onSubmit={handleSubmit}>
+          <form className="search_bar" onSubmit={handleSearch}>
             <div>
               <input
                 type="text"
@@ -70,6 +81,9 @@ const Header = () => {
           
            </div>: ''}
       </div>
+      { isResult &&
+      <div className="searchResult"><SearchList /> <button type="button" onClick={handleResultVisibility}>close</button></div> }
+
       </>
       }
     </div>

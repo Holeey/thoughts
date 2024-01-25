@@ -19,7 +19,7 @@ const PostForm = ({ isVisible, setIsVisible }) => {
     isError,
     isSuccess,
     message,
-    successMessage, editingPost } = useSelector((state) => state.posts)
+    successMessage, editingPost } = useSelector((state) => state.post)
 
     const clickRef = useRef(null);
 
@@ -79,15 +79,31 @@ const PostForm = ({ isVisible, setIsVisible }) => {
       postTitle: postTitle,
       postBody: postBody
     }))
+    handleResetForm()
+    setIsVisible(!isVisible)
   }
-
   const handleUpdatePost = (e) => {
-    e.preventDefault()
-
-    if(editingPost) {
-    dispatch(updatePost( {id: editingPost._id}, { postTitle: postTitle , postBody: postBody} ))
+    e.preventDefault();
+  
+    if (editingPost) {
+      const updatedPost = {
+        id: editingPost._id,
+        postTitle: postTitle,  
+        postBody: postBody,
+      };
+      dispatch(updatePost(updatedPost));
+      handleResetForm()
     }
+  };
+  const handleResetForm = () => {
+    setFormData({
+      postTitle: "",
+      postBody: "",
+      post_img: ""
+    })
+    setIsVisible(!isVisible)
   }
+  
 
   return (
     <div className="post_form_container">

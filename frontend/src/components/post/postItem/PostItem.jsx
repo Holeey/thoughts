@@ -15,7 +15,7 @@ import moment from "moment";
 import { useState, useRef, useEffect } from "react";
 import "./postItem.css";
 
-import { editPost } from "../../../features/post/postSlice";
+import { deletePost, editPost } from "../../../features/post/postSlice";
 
 import { useDispatch} from "react-redux"
 
@@ -36,6 +36,9 @@ const PostItem = ({ user, post }) => {
     setIsPostOptions(!isPostOptions);
   };
 
+  const handleDeletePost = () => {
+    dispatch(deletePost(post._id))
+  }
   
   const handleEditPost = () => {
     dispatch(editPost(post))
@@ -87,7 +90,7 @@ const PostItem = ({ user, post }) => {
             <>
               <ul ref={clickRef}>
                 <li onClick={toggleVisibility}>Edit</li>
-                <li>Delete</li>
+                <li onClick={handleDeletePost}>Delete</li>
                 <li onClick={toggleMinimize}>Minimize</li>
               </ul>
             </>

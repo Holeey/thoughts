@@ -35,7 +35,7 @@ exports.protect = async (req, res, next) => {
         }
     }
     if (!token) {
-        res.status(401).json('No token provided')
+        res.status(401).json('No token provided error')
     }
 }
 

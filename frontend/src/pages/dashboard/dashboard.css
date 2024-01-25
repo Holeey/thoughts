@@ -1,6 +1,20 @@
 .dashboard {
     display: flex;
     justify-content: space-between;
-    padding: 1.5rem;
+    padding: 5rem;
     background-color: #e2e0e0;
+}
+.searchResult {
+    position: absolute;
+    display: flex;
+    width: 30%;
+    top: 90%;
+    border: solid 1px;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 1rem;
+    background-color: #fff;
+    border-radius: 6px;
+    color: black;
+    z-index: 999;
 }

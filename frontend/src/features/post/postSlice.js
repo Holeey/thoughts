@@ -4,9 +4,11 @@ import postService  from "./postService";
 const initialState = {
     posts: [],
     isError: false,
+    isLoading: false,
     isSuccess: false,
     message: '',
-    editingPost: null
+    editingPost: null,
+    searchPosts: []
 }
 
 export const createPost = createAsyncThunk('post/create', async(payload, thunkAPI) => {
@@ -28,11 +30,32 @@ export const getAllPosts = createAsyncThunk('post/getAll', async (_, thunkAPI) =
         return thunkAPI.rejectWithValue(message)
     }
 })
-export const updatePost = createAsyncThunk('post/update', async (payload, thunkAPI) => {
-    const {id, updatedPost} = payload
+export const updatePost = createAsyncThunk('post/update', async (updatedPost, thunkAPI) => {
+    const { id, postTitle, postBody } = updatedPost;
+    const updatedPostData = { postTitle, postBody };
     try {
         const token = thunkAPI.getState().auth.user.token
-        return await postService.updatePost(id, updatedPost, token)
+        return await postService.updatePost(id, updatedPostData, token)
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.message)
+        || error.message || error.toString()
+        return thunkAPI.rejectWithValue(message) 
+    }
+})
+export const deletePost = createAsyncThunk('post/delete', async (id, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().auth.user.token
+        return await postService.deletePost(id, token)
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.message)
+        || error.message || error.toString()
+        return thunkAPI.rejectWithValue(message) 
+    }
+})
+export const searchPost = createAsyncThunk('post/search', async (payload, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().auth.user.token
+        return await postService.searchPost(payload, token)
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
         || error.message || error.toString()
@@ -51,6 +74,9 @@ const postSlice = createSlice({
         },
         resetEditingPost: (state) => {
             state.editingPost = null
+        },
+        resetSearchPosts: (state) =>{
+            state.searchPosts = []
         }
     },
     extraReducers:(builder) => {
@@ -85,18 +111,41 @@ const postSlice = createSlice({
         .addCase(updatePost.fulfilled, (state, action) => {
             state.isLoading = false
             state.isSuccess = true
-            // const index = state.posts.findIndex(post => post._id === action.payload._id)
-            // if (index !== -1) {
-            //     state.posts[index] = action.payload
-            // }
-            state.posts = action.payload._id
-        })
+        const index = state.posts.findIndex(post => post._id === action.payload._id);
+        if (index !== -1) {
+        state.posts[index] = action.payload 
+        }  
+       })
         .addCase(updatePost.rejected, (state, action) => {
+            state.isError = true
+            state.message = action.payload
+        })
+        .addCase(deletePost.pending, (state) => {
+            state.isLoading = true
+        })
+        .addCase(deletePost.fulfilled, (state, action) => {
+            state.isLoading = false
+            state.isSuccess = true
+            state.posts = state.posts.filter(post => post._id !== action.payload.id);
+       })
+        .addCase(deletePost.rejected, (state, action) => {
+            state.isError = true
+            state.message = action.payload
+        })
+        .addCase(searchPost.pending, (state) => {
+            state.isLoading = true
+        })
+        .addCase(searchPost.fulfilled, (state, action) => {
+            state.isLoading = false
+            state.isSuccess = true
+            state.searchPosts = action.payload
+       })
+        .addCase(searchPost.rejected, (state, action) => {
             state.isError = true
             state.message = action.payload
         })
     }
 })
 
-export const { reset, resetEditingPost, editPost } = postSlice.actions
+export const { reset, resetEditingPost, editPost, resetSearchPosts } = postSlice.actions
 export default postSlice.reducer 

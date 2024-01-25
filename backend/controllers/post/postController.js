@@ -3,11 +3,11 @@ const postModel = require("../../model/postModel.js");
 
 exports.getAllPosts = async (req, res) => {
   const posts = await postModel.find();
-  return res.status(201).json({ posts });
+  return res.status(201).json(posts);
 };
 exports.myPost = async (req, res) => {
   const posts = await postModel.find({ user: req.user._id.toString() });
-  return res.status(201).json({ posts });
+  return res.status(201).json(posts);
 };
 exports.createPost = async (req, res) => {
   try {
@@ -25,7 +25,7 @@ exports.createPost = async (req, res) => {
     });
 
     if (post) {
-      return res.status(201).json({ post });
+      return res.status(201).json(post);
     }
   } catch (error) {
     console.error("create post error:", error);
@@ -55,7 +55,7 @@ exports.updatePost = async (req, res) => {
     );
 
     if (updatedPost) {
-      return res.status(201).json({ updatedPost });
+      return res.status(201).json(updatedPost);
     }
   } catch (error) {
     console.error("updating post error:", error);
@@ -63,7 +63,8 @@ exports.updatePost = async (req, res) => {
   }
 };
 exports.deletePost = async (req, res) => {
-  const post = await postModel.findById(req.params.id);
+  try {
+   const post = await postModel.findById(req.params.id);
 
   if (!post) {
     return res.status(404).json("No post found!");
@@ -77,12 +78,20 @@ exports.deletePost = async (req, res) => {
 
   await postModel.findByIdAndDelete(req.params.id);
 
-  return res.status(201).json({ id: req.params.id });
+  return res.status(201).json({ id: req.params.id });   
+  } catch (error) {
+    console.error("deleting post error:", error);
+    return res.status(500).json("Internal error!");
+  }
+
 };
-exports.search = async (req, res) => {
+exports.searchPost = async (req, res) => {
     try {
+      if (!req.user) {
+        return res.status(404).json('Login in')
+      }
       if (!req.query.q) {
-          return res.status(400).json('Search term is required');
+        return res.status(400).json('Search term is required');
       }
       const { q: searchTerm } = req.query;
   

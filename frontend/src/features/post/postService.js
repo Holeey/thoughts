@@ -10,10 +10,10 @@ const createPost = async (payload, token) => {
         }
     }
     const response =  await axios.post(`${API_URL}/createPost`, payload, config)
-      
     return response.data
     } catch (error) {
-        throw error; // Rethrow the error or handle it accordingly
+        console.error('create post error:', error.response.data)
+        throw error; 
         }
     }
 const getAllPosts = async () => {
@@ -21,29 +21,52 @@ const getAllPosts = async () => {
         const response = await axios.get(`${API_URL}/`)
         return response.data
     } catch (error) {
+        console.error('get all posts:', error.response.data)
         throw error
     }
 }
-const updatePost = async (id,updatedPost, token) => {
-    console.log("updatedPost:", updatedPost);
-    console.log("updatedPostId:", id);
+const updatePost = async (id, updatedPost, token) => {
     try {
         const config = {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         }
-        const response =  await axios.post(`${API_URL}/updatePost/${id}`, updatedPost, config)
+        const response =  await axios.put(`${API_URL}/updatePost/${id}`, updatedPost, config)
         return response.data
     } catch (error) {
-        console.error(
-            "Error updating post:",
-            error.response.data || error.message || error
-          );
+        console.error('update error:', error.response.data)
         throw error
     }
 }
-
+const deletePost = async (id, token) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+        const response = await axios.delete(`${API_URL}/deletePost/${id}`, config)
+        return response.data
+    } catch (error) {
+        console.error('delete error:', error.response.data)
+        throw error
+    }
+}
+const searchPost = async (payload, token) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+        const response = await axios.get(`${API_URL}/searchPost?q=${payload}`, config)
+        return response.data
+    } catch (error) {
+        console.error('search error:', error.response.data)
+        throw error
+    }
+}
 
 
 
@@ -51,6 +74,8 @@ const postService = {
     getAllPosts,
     createPost,
     updatePost,
+    deletePost,
+    searchPost
 }
 
 export default postService
