@@ -10,10 +10,21 @@ const initialState = {
     message: ''
 }
 
-export const postComment = createAsyncThunk ( async (id, comment, thunkAPI) => {
+export const getComments = createAsyncThunk('comment/get', async (postId, thunkAPI) => {
     try {
         const token = thunkAPI.getState().auth.user.token
-        return await commentService.postComment(id, comment, token)
+        return await commentService.getComments(postId, token)
+    } catch (error) {
+        const message = error.response.data
+        return thunkAPI.rejectWithValue(message) 
+    }
+})
+
+export const postComment = createAsyncThunk('comment/post', async (payload, thunkAPI) => {
+    const {postId, reply} = payload 
+    try {
+        const token = thunkAPI.getState().auth.user.token
+        return await commentService.postComment(postId, reply, token)
     } catch (error) {
         const message = error.response.data
         return thunkAPI.rejectWithValue(message)
@@ -30,6 +41,7 @@ const commentSlice = createSlice({
         state.isSuccess = false
         state.isloading = false
         state.message = ''
+    }
     },
     extraReducers: (builder) => {
         builder
@@ -46,9 +58,22 @@ const commentSlice = createSlice({
             state.isError = true
             state.message = action.payload
         })
+        .addCase(getComments.pending, (state) => {
+            state.isloading = true
+        })
+        .addCase(getComments.fulfilled, (state, action) => {
+            state.isloading = false
+            state.isSuccess = true
+            state.comments = action.payload
+        })
+        .addCase(getComments.rejected, (state, action) =>{
+            state.isSuccess = false
+            state.isError = true
+            state.message = action.payload
+        })
     }
 }
-})
+)
 
 export const {resetComment} = commentSlice.actions
 export default commentSlice.reducer

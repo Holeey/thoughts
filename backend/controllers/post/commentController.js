@@ -30,6 +30,7 @@ exports.postComment = async (req, res) => {
         return res.status(201).json({ comment })  
 
     } catch (error) {
+        console.error("postComment:", error)
         return res.status(500).json('Internal error')
     }
 }

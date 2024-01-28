@@ -15,11 +15,7 @@ const PostForm = ({ isVisible, setIsVisible }) => {
 
   const dispatch = useDispatch();
 
-  const {
-    isError,
-    isSuccess,
-    message,
-    successMessage, editingPost } = useSelector((state) => state.post)
+  const { editingPost } = useSelector((state) => state.post)
 
     const clickRef = useRef(null);
 

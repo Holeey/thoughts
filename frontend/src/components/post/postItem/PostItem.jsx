@@ -18,7 +18,7 @@ import "./postItem.css";
 
 import { deletePost, editPost } from "../../../features/post/postSlice";
 
-import { useDispatch, useSelector} from "react-redux"
+import { useDispatch } from "react-redux"
 
 
 
@@ -29,8 +29,6 @@ const PostItem = ({ user, post }) => {
   const [showComments, setShowComments] = useState(false);
 
   const dispatch = useDispatch();
-
-  const { comments } = useSelector((state) => state.comment)
 
 
   const toggleMinimize = () => {
@@ -148,7 +146,7 @@ const PostItem = ({ user, post }) => {
         </div>
       </div>
       {isVisible && <PostForm isVisible={isVisible} setIsVisible={setIsVisible} /> }
-      {showComments && <Comment />}
+      {showComments && <Comment postId={post._id} />}
     </>
   );
 };

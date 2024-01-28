@@ -61,9 +61,9 @@ const Header = () => {
                 
               />
             </div>
-            <div className="search_btn" onClick={handleSearch}>
-            <FontAwesomeIcon type="submit" icon={faMagnifyingGlass} />
-            </div>
+            <button type="submit" className="search_btn" onClick={handleSearch}>
+            <FontAwesomeIcon icon={faMagnifyingGlass} />
+            </button>
           </form>
         </div>
       <div onClick={()=> setIsVisible(!isVisible)} className="user_profile">
