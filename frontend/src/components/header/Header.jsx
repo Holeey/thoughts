@@ -6,6 +6,9 @@ import avatar from "../../images/avatar.jpg";
 import './header.css'
 import { resetSearchPosts, searchPost } from "../../features/post/postSlice.js";
 import SearchList from "../header/searchList/SearchList.jsx";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import {faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons"
 
 const Header = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -55,10 +58,11 @@ const Header = () => {
                 value={searchTerm}
                 placeholder="search"
                 onChange={handleChange}
+                
               />
             </div>
-            <div>
-              <button type="submit">search</button>
+            <div className="search_btn" onClick={handleSearch}>
+            <FontAwesomeIcon type="submit" icon={faMagnifyingGlass} />
             </div>
           </form>
         </div>
@@ -82,7 +86,9 @@ const Header = () => {
            </div>: ''}
       </div>
       { isResult &&
-      <div className="searchResult"><SearchList /> <button type="button" onClick={handleResultVisibility}>close</button></div> }
+      <div className="searchResult"><SearchList />
+      <FontAwesomeIcon onClick={handleResultVisibility} className='close_btn' icon={faXmark} />
+      </div> }
 
       </>
       }

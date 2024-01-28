@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { register, reset } from "../../features/auth/authSlice.js";
 import { useNavigate } from "react-router-dom";
+import './register.css'
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -71,10 +72,11 @@ const Register = () => {
 
   return (
     <>
+    <div >
       <div>Sign Up</div>
-      <form onSubmit={handleSubmit}>
+      <form className="register_form" onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="first_name">First nmae: </label>
+          <label htmlFor="first_name">First name: </label>
           <input
             onChange={handleChange}
             type="text"
@@ -145,6 +147,7 @@ const Register = () => {
           <button type="submit">SignUp</button>
         </div>
       </form>
+      </div>
     </>
   );
 };

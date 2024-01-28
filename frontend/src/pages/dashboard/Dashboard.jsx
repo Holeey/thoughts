@@ -34,10 +34,7 @@ const Dashboard = () => {
    
             {posts.length > 0 ? 
             posts.map((post) => (
-              <Link  key={post._id}> 
-              <PostItem post={post} user={user} />
-              </Link>
-
+              <PostItem key={post._id} post={post} user={user} />
             )) : ''}
 
             </div>

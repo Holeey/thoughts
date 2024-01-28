@@ -9,6 +9,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import PostForm from "../postForm/PostForm";
+import Comment from "./comments/Comment";
 
 import moment from "moment";
 
@@ -17,16 +18,19 @@ import "./postItem.css";
 
 import { deletePost, editPost } from "../../../features/post/postSlice";
 
-import { useDispatch} from "react-redux"
+import { useDispatch, useSelector} from "react-redux"
 
 
 
 const PostItem = ({ user, post }) => {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isPostOptions, setIsPostOptions] = useState(false);
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   const dispatch = useDispatch();
+
+  const { comments } = useSelector((state) => state.comment)
 
 
   const toggleMinimize = () => {
@@ -47,6 +51,10 @@ const PostItem = ({ user, post }) => {
   const toggleVisibility = () => {
     setIsVisible(!isVisible)
     handleEditPost()
+  }
+
+  const handleComments = () => {
+    setShowComments(!showComments)
   }
 
   const clickRef = useRef(null);
@@ -126,7 +134,7 @@ const PostItem = ({ user, post }) => {
             <span>
               <FontAwesomeIcon icon={faDownLong} />
             </span>
-            <span>
+            <span onClick={handleComments}>
               <FontAwesomeIcon icon={faComment} />
             </span>
             <span>
@@ -140,6 +148,7 @@ const PostItem = ({ user, post }) => {
         </div>
       </div>
       {isVisible && <PostForm isVisible={isVisible} setIsVisible={setIsVisible} /> }
+      {showComments && <Comment />}
     </>
   );
 };

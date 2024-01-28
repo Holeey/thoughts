@@ -7,8 +7,9 @@
 .searchResult {
     position: absolute;
     display: flex;
-    width: 30%;
-    top: 90%;
+    width: 40%;
+    height: 100px;
+    top: 10%;
     border: solid 1px;
     align-items: center;
     justify-content: flex-start;

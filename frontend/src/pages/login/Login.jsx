@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { login, reset } from "../../features/auth/authSlice.js";
 import { toast } from "react-toastify";
 import { useNavigate, Link } from "react-router-dom";
+import "./login.css"
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -49,7 +50,7 @@ const Login = () => {
       <div>
         <h1>Login</h1>
       </div>
-      <form onSubmit={handleSubmit}>
+      <form className="login_form" onSubmit={handleSubmit}>
         <input
           required
           type="email"
