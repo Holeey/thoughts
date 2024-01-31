@@ -1,6 +1,7 @@
 const commentModel = require('../../model/commentModel.js')
 const postModel = require('../../model/postModel.js')
 
+
 exports.postComment = async (req, res) => {
     try {
         const {reply} = req.body
@@ -27,7 +28,7 @@ exports.postComment = async (req, res) => {
             downvote: 0
         })
 
-        return res.status(201).json({ comment })  
+        return res.status(201).json(comment)  
 
     } catch (error) {
         console.error("postComment:", error)
@@ -41,7 +42,7 @@ exports.getComments = async (req, res) => {
         if (replies.length === 0) {
             return res.status(404).json('No replies found for the specified post');
         }
-        return res.status(201).json({replies})        
+        return res.status(201).json(replies)        
     } catch (error) {
         return res.status(500).json('Internal error')
     }

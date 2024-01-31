@@ -9,7 +9,11 @@ const postSchema = new mongoose.Schema({
     postTitle: String,
     postBody: String ,
     upvote: Number,
-    downvote: Number, 
+    downvote: Number,
+    comments: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Comment'
+    }
     
 }, {timestamps: true} )
 

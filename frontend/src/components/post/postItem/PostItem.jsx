@@ -9,7 +9,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import PostForm from "../postForm/PostForm";
-import Comment from "./comments/Comment";
+import CommentForm from "./comments/CommentForm";
+
 
 import moment from "moment";
 
@@ -50,10 +51,10 @@ const PostItem = ({ user, post }) => {
     setIsVisible(!isVisible)
     handleEditPost()
   }
-
   const handleComments = () => {
     setShowComments(!showComments)
   }
+
 
   const clickRef = useRef(null);
 
@@ -146,7 +147,7 @@ const PostItem = ({ user, post }) => {
         </div>
       </div>
       {isVisible && <PostForm isVisible={isVisible} setIsVisible={setIsVisible} /> }
-      {showComments && <Comment postId={post._id} />}
+      {showComments && <CommentForm post={post} />}
     </>
   );
 };

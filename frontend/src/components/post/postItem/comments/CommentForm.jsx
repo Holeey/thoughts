@@ -1,19 +1,16 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import  {postComment, getComments, resetComment}  from "../../../../features/comments/commentSlice.js";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import  {postComment}  from "../../../../features/comments/commentSlice.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import "./comment.css";
+import CommentList from "./CommentList.jsx";
 
-const Comment = ({ postId }) => {
+const Comment = ({ post }) => {
   const [reply, setReply] = useState("");
 
   const dispatch = useDispatch();
-  const comments = useSelector((state) => state.comment.comments)
 
-  useEffect(() => {
-    dispatch(getComments(postId))
-  }, [dispatch, postId])
   
   const handleChange = (e) => {
     setReply(e.target.value);
@@ -22,7 +19,7 @@ const Comment = ({ postId }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const commentData = {
-      postId,
+      postId: post._id,
       reply
     }
     dispatch(postComment(commentData));
@@ -48,14 +45,10 @@ const Comment = ({ postId }) => {
           </button>
         </div>
       </form>
-      <div>
-        { comments.length > 0 &&
-        comments.map((comment) => (
-          <ul>
-            <li key={comment._id}>{ comment.comment}</li>
-          </ul>
-        ))}
+       <div>
+      <CommentList post={post} />
       </div>
+
     </>
   );
 };

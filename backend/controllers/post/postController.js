@@ -2,9 +2,16 @@ const postModel = require("../../model/postModel.js");
 
 
 exports.getAllPosts = async (req, res) => {
-  const posts = await postModel.find();
-  return res.status(201).json(posts);
+  try {
+    const posts = await postModel.find().populate('comments').exec();
+    console.log("Populated Posts:", posts);
+    return res.status(201).json(posts);
+  } catch (err) {
+    console.error("Error during population:", err);
+    return res.status(500).json({ error: "Error during population" });
+  }
 };
+
 exports.myPost = async (req, res) => {
   const posts = await postModel.find({ user: req.user._id.toString() });
   return res.status(201).json(posts);
