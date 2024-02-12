@@ -11,10 +11,10 @@ const commentSchema = new mongoose.Schema({
         required: true,
         ref: 'Post'
     },
-        comment: String,
-        upvote: Number,
-        downvote: Number
-}, {timestamps: true})
+    comment: String,
+    upvote: Number,
+    downvote: Number
+}, {timestamps: true});
 
-const commentData = mongoose.model('Comment', commentSchema)
-module.exports = commentData
+const commentData = mongoose.model('Comment', commentSchema);
+module.exports = commentData;

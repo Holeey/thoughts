@@ -2,6 +2,19 @@ const commentModel = require('../../model/commentModel.js')
 const postModel = require('../../model/postModel.js')
 
 
+exports.getComments = async (req, res) => {
+    try {
+        const replies = await commentModel.find({ post: req.params.id});
+
+        if (replies.length < 1) {
+            return res.status(401).json('No replies found for the specified post');
+        }
+ 
+        return res.status(201).json(replies)        
+    } catch (error) {
+        return res.status(500).json('Internal error:', error)
+    }
+}
 exports.postComment = async (req, res) => {
     try {
         const {reply} = req.body
@@ -32,18 +45,6 @@ exports.postComment = async (req, res) => {
 
     } catch (error) {
         console.error("postComment:", error)
-        return res.status(500).json('Internal error')
-    }
-}
-exports.getComments = async (req, res) => {
-    try {
-        const replies = await commentModel.find({ post: req.params.id});
-
-        if (replies.length === 0) {
-            return res.status(404).json('No replies found for the specified post');
-        }
-        return res.status(201).json(replies)        
-    } catch (error) {
         return res.status(500).json('Internal error')
     }
 }

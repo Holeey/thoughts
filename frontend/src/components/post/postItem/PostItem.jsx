@@ -17,17 +17,16 @@ import moment from "moment";
 import { useState, useRef, useEffect } from "react";
 import "./postItem.css";
 
-import { deletePost, editPost } from "../../../features/post/postSlice";
+import { deletePost, editPost, upvotes, downvotes } from "../../../features/post/postSlice";
 
 import { useDispatch } from "react-redux"
-
-
 
 const PostItem = ({ user, post }) => {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isPostOptions, setIsPostOptions] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [isVoted, setIsVoted] = useState(false)
 
   const dispatch = useDispatch();
 
@@ -54,7 +53,22 @@ const PostItem = ({ user, post }) => {
   const handleComments = () => {
     setShowComments(!showComments)
   }
-
+  const handleUpvote = () => {
+    if (isVoted) {
+      return;
+    }
+    dispatch(upvotes(post._id));
+    setIsVoted(true);
+  };
+  
+  const handleDownvote = () => {
+    if (isVoted) {
+      return;
+    }
+    dispatch(downvotes(post._id));
+    setIsVoted(true);
+  };
+  
 
   const clickRef = useRef(null);
 
@@ -127,11 +141,13 @@ const PostItem = ({ user, post }) => {
         </div>
         <div className="post_meta_container">
           <div className="post_feedback_actions">
-            <span>
+            <span onClick={handleUpvote}>
               <FontAwesomeIcon icon={faUpLong} />
+              {post.upvote}
             </span>
-            <span>
+            <span onClick={handleDownvote}>
               <FontAwesomeIcon icon={faDownLong} />
+              {post.downvote}
             </span>
             <span onClick={handleComments}>
               <FontAwesomeIcon icon={faComment} />

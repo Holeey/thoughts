@@ -1,14 +1,56 @@
 const postModel = require("../../model/postModel.js");
 
 
+exports.upvotes = async (req, res) => {
+  try {
+    const post = await postModel.findById(req.params.id);
+    
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found!' });
+    }
+    
+    post.upvote += 1; 
+    
+    await post.save();
+    
+    res.status(200).json(post);
+  } catch (error) {
+    console.error("upvote error:", error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
+exports.downvotes = async (req, res) => {
+  try {
+    const post = await postModel.findById(req.params.id);
+    
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found!' });
+    }
+    
+    post.downvote += 1; 
+    
+    await post.save(); 
+    
+    res.status(200).json(post);
+  } catch (error) {
+    console.error("downvote error:", error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
 exports.getAllPosts = async (req, res) => {
   try {
-    const posts = await postModel.find().populate('comments').exec();
-    console.log("Populated Posts:", posts);
-    return res.status(201).json(posts);
-  } catch (err) {
-    console.error("Error during population:", err);
-    return res.status(500).json({ error: "Error during population" });
+    const post = await postModel.find()
+    
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    return res.status(200).json(post);
+  } catch (error) {
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 

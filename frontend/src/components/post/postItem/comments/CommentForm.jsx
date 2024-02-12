@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import{ Link} from "react-router-dom"
 import  {postComment}  from "../../../../features/comments/commentSlice.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
@@ -29,7 +30,7 @@ const Comment = ({ post }) => {
   return (
     <>
       <form className="comment_form" onSubmit={handleSubmit}>
-        <div>view 1234k comments...</div>
+        <Link to={'/commentList'} >view 1234k comments...</Link>
         <div className="comment_input-container">
           <input
             onChange={handleChange}
@@ -46,7 +47,7 @@ const Comment = ({ post }) => {
         </div>
       </form>
        <div>
-      <CommentList post={post} />
+      <CommentList post={post}/>
       </div>
 
     </>

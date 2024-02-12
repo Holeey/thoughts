@@ -7,15 +7,11 @@ const postSchema = new mongoose.Schema({
         ref: 'User'
     },
     postTitle: String,
-    postBody: String ,
+    postBody: String,
     upvote: Number,
     downvote: Number,
-    comments: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Comment'
-    }
-    
-}, {timestamps: true} )
 
-const postData = mongoose.model('Post', postSchema)
-module.exports = postData
+}, { timestamps: true });
+
+const postData = mongoose.model('Post', postSchema);
+module.exports = postData;

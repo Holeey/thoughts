@@ -62,6 +62,26 @@ export const searchPost = createAsyncThunk('post/search', async (payload, thunkA
         return thunkAPI.rejectWithValue(message) 
     }
 })
+export const upvotes = createAsyncThunk('post/upvote', async (id, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().auth.user.token
+        return await postService.upvotes(id, token)
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.message)
+        || error.message || error.toString()
+        return thunkAPI.rejectWithValue(message)  
+    }
+})
+export const downvotes = createAsyncThunk('post/downvote', async (id, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().auth.user.token
+        return await postService.downvotes(id, token)
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.message)
+        || error.message || error.toString()
+        return thunkAPI.rejectWithValue(message)  
+    }
+})
 
 const postSlice = createSlice({
     name: 'post',
@@ -143,6 +163,34 @@ const postSlice = createSlice({
         .addCase(searchPost.rejected, (state, action) => {
             state.isError = true
             state.message = action.payload
+        })
+        .addCase(upvotes.pending, (state) => {
+            state.isLoading = true
+        })
+        .addCase(upvotes.fulfilled, (state, action) => {
+            state.isSuccess = true
+            const index = state.posts.findIndex(post => post._id === action.payload._id)
+            if (index !== -1) {
+            state.posts[index] = action.payload 
+            } 
+        })
+        .addCase(upvotes.rejected, (state, action) => {
+            state.isSuccess = false
+            state.posts = action.payload
+        })
+        .addCase(downvotes.pending, (state) => {
+            state.isLoading = true
+        })
+        .addCase(downvotes.fulfilled, (state, action) => {
+            state.isSuccess = true
+            const index = state.posts.findIndex(post => post._id === action.payload._id)
+            if (index !== -1) {
+            state.posts[index] = action.payload 
+            } 
+        })
+        .addCase(downvotes.rejected, (state, action) => {
+            state.isSuccess = false
+            state.posts = action.payload
         })
     }
 })

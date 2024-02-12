@@ -67,6 +67,34 @@ const searchPost = async (payload, token) => {
         throw error
     }
 }
+const upvotes = async (id, token) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+        const response = await axios.post(`${API_URL}/upvotes/${id}`, config)
+        return response.data
+    } catch (error) {
+        throw error
+    }
+}
+const downvotes = async (id, token) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+        const response = await axios.post(`${API_URL}/downvotes/${id}`, config)
+        return response.data
+    } catch (error) {
+        console.error('search error:', error.response.data)
+        throw error
+    }
+}
+
 
 
 
@@ -75,7 +103,9 @@ const postService = {
     createPost,
     updatePost,
     deletePost,
-    searchPost
+    searchPost,
+    upvotes,
+    downvotes
 }
 
 export default postService
