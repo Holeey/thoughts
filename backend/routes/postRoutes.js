@@ -1,5 +1,5 @@
 const express = require('express')
-const { createPost, myPost, updatePost, getAllPosts, deletePost, searchPost, upvotes, downvotes } = require('../controllers/post/postController.js')
+const { createPost, myPost, updatePost, getAllPosts, deletePost, searchPost, upvotes, downvotes, unDownvoted, unUpvoted } = require('../controllers/post/postController.js')
 const {protect} = require('../middleware/authMiddleware.js')
 
 const router = express.Router()
@@ -12,5 +12,7 @@ router.delete('/deletePost/:id', protect, deletePost)
 router.get('/searchPost', protect, searchPost)
 router.post('/upvotes/:id', upvotes)
 router.post('/downvotes/:id', downvotes)
+router.post('/un-upvoted/:id', unUpvoted)
+router.post('/un-downvoted/:id', unDownvoted)
 
 module.exports = router

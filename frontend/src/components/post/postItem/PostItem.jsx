@@ -17,19 +17,25 @@ import moment from "moment";
 import { useState, useRef, useEffect } from "react";
 import "./postItem.css";
 
-import { deletePost, editPost, upvotes, downvotes } from "../../../features/post/postSlice";
+import { deletePost, editPost, upvotes, downvotes, unDownvoted, unUpvoted } from "../../../features/post/postSlice";
 
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 
 const PostItem = ({ user, post }) => {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isPostOptions, setIsPostOptions] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [showComments, setShowComments] = useState(false);
-  const [isVoted, setIsVoted] = useState(false)
+  const [isUpVoted, setIsUpVoted] = useState(false);
+  // const [isNotUpVoted, setIsNotUpVoted] = useState(false);
+  const [isDownVoted, setIsDownVoted] = useState(false);
+  // const [isNotDownVoted, setIsNotDownVoted] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
 
   const dispatch = useDispatch();
+  // const { upvote, downvote } = useSelector((state) => state.post.posts)
 
+  // console.log("upvotes:", upvote, "downvotes:", downvote)
 
   const toggleMinimize = () => {
     setIsMinimized(!isMinimized);
@@ -53,21 +59,41 @@ const PostItem = ({ user, post }) => {
   const handleComments = () => {
     setShowComments(!showComments)
   }
-  const handleUpvote = () => {
-    if (isVoted) {
-      return;
+  const toggle_upvoted = () => {
+    if (clickCount === 1) {
+      handleSingleClick(true);
+    } else {
+      dispatch(upvotes(post._id));
+      setClickCount(clickCount + 1);
     }
-    dispatch(upvotes(post._id));
-    setIsVoted(true);
   };
   
-  const handleDownvote = () => {
-    if (isVoted) {
-      return;
+  const toggle_downvoted = () => {
+    if (clickCount === 1) {
+      handleSingleClick(false);
+    } else {
+      dispatch(downvotes(post._id));
+      setClickCount(clickCount + 1);
     }
-    dispatch(downvotes(post._id));
-    setIsVoted(true);
   };
+  
+  const handleSingleClick = (isUpvote) => {
+    if ((isUpvote && isUpVoted) || (!isUpvote && isDownVoted)) {
+      // Handle unvote logic
+      dispatch(isUpvote ? unUpvoted(post._id) : unDownvoted(post._id));
+      setIsUpVoted(false);
+      setIsDownVoted(false);
+    } else {
+      // Handle upvote or downvote logic
+      dispatch(isUpvote ? upvotes(post._id) : downvotes(post._id));
+      dispatch(isUpvote ? unDownvoted(post._id) : unUpvoted(post._id));
+      setIsUpVoted(isUpvote);
+      setIsDownVoted(!isUpvote);
+    }
+    setClickCount(0);
+  };
+  
+
   
 
   const clickRef = useRef(null);
@@ -141,11 +167,11 @@ const PostItem = ({ user, post }) => {
         </div>
         <div className="post_meta_container">
           <div className="post_feedback_actions">
-            <span onClick={handleUpvote}>
+            <span onClick={toggle_upvoted}>
               <FontAwesomeIcon icon={faUpLong} />
               {post.upvote}
             </span>
-            <span onClick={handleDownvote}>
+            <span onClick={toggle_downvoted}>
               <FontAwesomeIcon icon={faDownLong} />
               {post.downvote}
             </span>

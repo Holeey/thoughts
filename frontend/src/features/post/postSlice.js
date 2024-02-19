@@ -82,6 +82,26 @@ export const downvotes = createAsyncThunk('post/downvote', async (id, thunkAPI) 
         return thunkAPI.rejectWithValue(message)  
     }
 })
+export const unUpvoted = createAsyncThunk('post/unUpvoted', async (id, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().auth.user.token
+        return await postService.unUpvoted(id, token)
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.message)
+        || error.message || error.toString()
+        return thunkAPI.rejectWithValue(message)  
+    }
+})
+export const unDownvoted = createAsyncThunk('post/unDownvoted', async (id, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().auth.user.token
+        return await postService.unDownvoted(id, token)
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.message)
+        || error.message || error.toString()
+        return thunkAPI.rejectWithValue(message)  
+    }
+})
 
 const postSlice = createSlice({
     name: 'post',
@@ -191,6 +211,36 @@ const postSlice = createSlice({
         .addCase(downvotes.rejected, (state, action) => {
             state.isSuccess = false
             state.posts = action.payload
+        })
+        .addCase(unUpvoted.pending, (state) => {
+            state.isLoading =true
+        })
+        .addCase(unUpvoted.fulfilled, (state, action) => {
+            state.isLoading = false
+            state.isSuccess = true
+            const index = state.posts.findIndex(post => post._id === action.payload._id)
+            if (index !== -1) {
+            state.posts[index] = action.payload 
+            }
+        })
+        .addCase(unUpvoted.rejected, (state, action) => {
+            state.isSuccess = false
+            state.message = action.payload
+        })
+        .addCase(unDownvoted.pending, (state) => {
+            state.isLoading = true
+        })
+        .addCase(unDownvoted.fulfilled, (state, action) => {
+            state.isLoading = false
+            state.isSuccess = true
+            const index = state.posts.findIndex(post => post._id === action.payload._id)
+            if (index !== -1) {
+            state.posts[index] = action.payload 
+            }
+        })
+        .addCase(unDownvoted.rejected, (state, action) => {
+            state.isSuccess = false
+            state.message = action.payload
         })
     }
 })

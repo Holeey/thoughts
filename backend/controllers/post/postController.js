@@ -1,59 +1,18 @@
+const mongoose = require("mongoose").default;
 const postModel = require("../../model/postModel.js");
-
-
-exports.upvotes = async (req, res) => {
-  try {
-    const post = await postModel.findById(req.params.id);
-    
-    if (!post) {
-      return res.status(404).json({ error: 'Post not found!' });
-    }
-    
-    post.upvote += 1; 
-    
-    await post.save();
-    
-    res.status(200).json(post);
-  } catch (error) {
-    console.error("upvote error:", error);
-    return res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
-
-
-exports.downvotes = async (req, res) => {
-  try {
-    const post = await postModel.findById(req.params.id);
-    
-    if (!post) {
-      return res.status(404).json({ error: 'Post not found!' });
-    }
-    
-    post.downvote += 1; 
-    
-    await post.save(); 
-    
-    res.status(200).json(post);
-  } catch (error) {
-    console.error("downvote error:", error);
-    return res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
-
 
 exports.getAllPosts = async (req, res) => {
   try {
-    const post = await postModel.find()
-    
+    const post = await postModel.find();
+
     if (!post) {
-      return res.status(404).json({ error: 'Post not found' });
+      return res.status(404).json({ error: "Post not found" });
     }
     return res.status(200).json(post);
   } catch (error) {
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 exports.myPost = async (req, res) => {
   const posts = await postModel.find({ user: req.user._id.toString() });
   return res.status(201).json(posts);
@@ -70,7 +29,7 @@ exports.createPost = async (req, res) => {
       postTitle: postTitle,
       postBody: postBody,
       upvote: 0,
-      downvote: 0
+      downvote: 0,
     });
 
     if (post) {
@@ -84,7 +43,7 @@ exports.createPost = async (req, res) => {
 exports.updatePost = async (req, res) => {
   try {
     const { postTitle, postBody } = req.body;
-    
+
     const post = await postModel.findById(req.params.id);
 
     if (!post) {
@@ -113,47 +72,165 @@ exports.updatePost = async (req, res) => {
 };
 exports.deletePost = async (req, res) => {
   try {
-   const post = await postModel.findById(req.params.id);
+    const post = await postModel.findById(req.params.id);
 
-  if (!post) {
-    return res.status(404).json("No post found!");
-  }
-  if (!req.user) {
-    return res.status(404).json("User not found!");
-  }
-  if (req.user._id.toString() !== post.user.toString()) {
-    return res.status(404).json("Unauthorized user!");
-  }
+    if (!post) {
+      return res.status(404).json("No post found!");
+    }
+    if (!req.user) {
+      return res.status(404).json("User not found!");
+    }
+    if (req.user._id.toString() !== post.user.toString()) {
+      return res.status(404).json("Unauthorized user!");
+    }
 
-  await postModel.findByIdAndDelete(req.params.id);
+    await postModel.findByIdAndDelete(req.params.id);
 
-  return res.status(201).json({ id: req.params.id });   
+    return res.status(201).json({ id: req.params.id });
   } catch (error) {
     console.error("deleting post error:", error);
     return res.status(500).json("Internal error!");
   }
-
 };
 exports.searchPost = async (req, res) => {
-    try {
-      if (!req.user) {
-        return res.status(404).json('Login in')
-      }
-      if (!req.query.q) {
-        return res.status(400).json('Search term is required');
-      }
-      const { q: searchTerm } = req.query;
-  
-      const result = await postModel.find({ postTitle: { $regex: searchTerm, $options: "i" } })
-  
-      if (result.length ==  0) {
-        return res.status(404).json('No post found!')
-      }else {
-        return res.status(201).json( result )   
-      } 
-      
-    } catch (error) {
-      console.error('search error:', error)
-      return res.status(500).json('Internal error!')
+  try {
+    if (!req.user) {
+      return res.status(404).json("Login in");
     }
-  };
+    if (!req.query.q) {
+      return res.status(400).json("Search term is required");
+    }
+    const { q: searchTerm } = req.query;
+
+    const result = await postModel.find({
+      postTitle: { $regex: searchTerm, $options: "i" },
+    });
+
+    if (result.length === 0) {
+      return res.status(404).json("No post found!");
+    } else {
+      return res.status(201).json(result);
+    }
+  } catch (error) {
+    console.error("search error:", error);
+    return res.status(500).json("Internal error!");
+  }
+};
+exports.upvotes = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const post = await postModel.findById(req.params.id).session(session);
+
+    if (!post) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: "Post not found!" });
+    }
+
+    post.upvote += 1;
+
+    await post.save();
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json(post);
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("upvote error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+exports.downvotes = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const post = await postModel.findById(req.params.id).session(session);
+
+    if (!post) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: "Post not found!" });
+    }
+
+    post.downvote += 1;
+
+    await post.save();
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json(post);
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("downvote error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+exports.unUpvoted = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const post = await postModel.findById(req.params.id).session(session);
+
+    if (!post) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: "Post not found!" });
+    }
+
+    if (post.upvote > 0) {
+      post.upvote -= 1;
+      await post.save();
+      await session.commitTransaction();
+      session.endSession();
+      return res.status(200).json(post);
+    } else {
+      await session.abortTransaction();
+      session.endSession();
+      return res
+        .status(400)
+        .json({ error: "Cannot decrement votes below zero" });
+    }
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("un-Upvote error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+exports.unDownvoted = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const post = await postModel.findById(req.params.id).session(session);
+
+    if (!post) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: "Post not found!" });
+    }
+
+    if (post.downvote > 0) {
+      post.downvote -= 1;
+      await post.save();
+      await session.commitTransaction();
+      session.endSession();
+      return res.status(200).json(post);
+    } else {
+      await session.abortTransaction();
+      session.endSession();
+      return res
+        .status(400)
+        .json({ error: "Cannot decrement votes below zero" });
+    }
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("un-Downvote error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
