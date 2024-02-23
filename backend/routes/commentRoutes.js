@@ -7,5 +7,5 @@ const router = express.Router()
 router.get('/:id', protect, getComments)
 router.post('/postComment/:id', protect, postComment)
 router.put('/updateComment/:id', protect, updateComment)
-router.post('/deleteComment/:id', protect, deleteComment)
+router.delete('/deleteComment/:id', protect, deleteComment)
 module.exports = router

@@ -31,10 +31,25 @@ const getComments = async (postId, token) => {
         throw error
     }
 }
+const deleteComment = async (postId, token) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    }
+    try {
+        const response = await axios.delete(`${API_URL}/deleteComment/${postId}`, config)
+        return response.data
+    } catch (error) {
+        console.error('delete error:', error.response.data)
+        throw error
+    }
+} 
 
 const commentService = {
     postComment,
-    getComments
+    getComments,
+    deleteComment,
 }
 
 export default commentService

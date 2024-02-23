@@ -12,8 +12,11 @@ const commentSchema = new mongoose.Schema({
         ref: 'Post'
     },
     comment: String,
+    replies: String,
     upvote: Number,
-    downvote: Number
+    downvote: Number,
+    upvoted: Boolean,
+    downvoted: Boolean
 }, {timestamps: true});
 
 const commentData = mongoose.model('Comment', commentSchema);

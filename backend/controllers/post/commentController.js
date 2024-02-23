@@ -1,10 +1,11 @@
 const commentModel = require('../../model/commentModel.js')
-const postModel = require('../../model/postModel.js')
+const postModel = require('../../model/postModel.js');
+const userModel = require('../../model/userModel.js');
 
 
 exports.getComments = async (req, res) => {
     try {
-        const replies = await commentModel.find({ post: req.params.id});
+        const replies = await commentModel.find({ post: req.params.id})
 
         if (replies.length < 1) {
             return res.status(401).json('No replies found for the specified post');
@@ -19,7 +20,7 @@ exports.postComment = async (req, res) => {
     try {
         const {reply} = req.body
                 
-        const post = await postModel.findById({_id: req.params.id}) 
+        const post = await postModel.findById({_id: req.params.id}); 
 
         if (!post) {
             return res.status(404).json('No post found!')
@@ -32,6 +33,7 @@ exports.postComment = async (req, res) => {
         if (!req.user) {
             return res.status(404).json('You are not logged in')
         }
+        
 
         const comment = await commentModel.create({
             user: req.user,
@@ -89,6 +91,6 @@ exports.deleteComment = async (req, res) => {
     return res.status(201).json({ id: req.params.id }); 
 
     } catch (error) {
-        return res.status(500).json('Internal error!')
+        return res.status(500).json('Internal error!', error)
     }
 }

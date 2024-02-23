@@ -29,13 +29,3 @@
     cursor: pointer;
     background-color: rgb(59, 59, 126);
 }
-.comment_list {
-    display: flex;
-    position: absolute;
-    width: 500px;
-    height: 300px;
-    overflow-y: scroll;
-    align-items: flex-start;
-    flex-direction: column;
-    justify-content: safe;
-}

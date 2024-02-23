@@ -129,6 +129,7 @@ exports.upvotes = async (req, res) => {
     }
 
     post.upvote += 1;
+    post.upvoted = true;
 
     await post.save();
 
@@ -156,6 +157,7 @@ exports.downvotes = async (req, res) => {
     }
 
     post.downvote += 1;
+     post.downvoted = true;
 
     await post.save();
 
@@ -184,6 +186,8 @@ exports.unUpvoted = async (req, res) => {
 
     if (post.upvote > 0) {
       post.upvote -= 1;
+      post.upvoted = false;
+
       await post.save();
       await session.commitTransaction();
       session.endSession();
@@ -216,6 +220,7 @@ exports.unDownvoted = async (req, res) => {
 
     if (post.downvote > 0) {
       post.downvote -= 1;
+      post.downvoted = false;
       await post.save();
       await session.commitTransaction();
       session.endSession();

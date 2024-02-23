@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import{ Link} from "react-router-dom"
-import  {postComment}  from "../../../../features/comments/commentSlice.js";
+import  {postComment}  from "../../../../../features/comments/commentSlice.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
-import "./comment.css";
-import CommentList from "./CommentList.jsx";
+import "./commentForm.css";
+import CommentList from "../commentList/CommentList.jsx";
 
 const Comment = ({ post }) => {
   const [reply, setReply] = useState("");

@@ -10,6 +10,8 @@ const postSchema = new mongoose.Schema({
     postBody: String,
     upvote: Number,
     downvote: Number,
+    upvoted: Boolean,
+    downvoted: Boolean
 
 }, { timestamps: true });
 
