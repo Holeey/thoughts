@@ -33,20 +33,49 @@ exports.postComment = async (req, res) => {
         if (!req.user) {
             return res.status(404).json('You are not logged in')
         }
-        
 
         const comment = await commentModel.create({
             user: req.user,
             post: post._id,
             comment: reply,
-            upvote: 0,
-            downvote: 0
         })
 
         return res.status(201).json(comment)  
 
     } catch (error) {
         console.error("postComment:", error)
+        return res.status(500).json('Internal error')
+    }
+}
+exports.replyComment = async (req, res) => {
+    try {
+        const {reply} = req.body;
+                
+        const comment = await commentModel.findById({_id: req.params.id}); 
+        const postId = comment.post
+
+        if (!postId) {
+            return res.status(404).json('No post found!')
+        }
+
+        if (!comment) {
+            return res.status(404).json('No comment found!')
+        }
+
+        if (!reply) {
+            return res.status(404).json('comment your thoughts!')
+        }
+
+        if (!req.user) {
+            return res.status(404).json('You are not logged in')
+        }
+        
+        comment.replies.push(reply);
+        await comment.save();
+        res.status(201).json(comment.replies); 
+
+    } catch (error) {
+        console.error("postCommentReply:", error)
         return res.status(500).json('Internal error')
     }
 }

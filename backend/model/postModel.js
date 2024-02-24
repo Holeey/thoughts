@@ -8,10 +8,22 @@ const postSchema = new mongoose.Schema({
     },
     postTitle: String,
     postBody: String,
-    upvote: Number,
-    downvote: Number,
-    upvoted: Boolean,
-    downvoted: Boolean
+    upvote: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        },
+        value: Number,
+    }],
+    downvote: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        },
+        value: Number,
+    }],
+    upvotedBycurrentUser: Boolean,
+    downvotedBycurrentUser: Boolean
 
 }, { timestamps: true });
 

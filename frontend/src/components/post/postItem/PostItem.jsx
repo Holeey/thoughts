@@ -27,7 +27,7 @@ import {
 
 import { useDispatch } from "react-redux";
 
-const PostItem = ({ user, post }) => {
+const PostItem = ({ post }) => {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isPostOptions, setIsPostOptions] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -63,9 +63,9 @@ const PostItem = ({ user, post }) => {
       return;
     } else if (clickCount === 1) {
       handleUpvoteClick(isUpVoted);
-    } else if (clickCount < 1 && post.upvoted === true) {
+    } else if (clickCount < 1 && post.upvotedBycurrentUser === true) {
       handleUpvoteClick(true);
-    } else if (clickCount < 1 && post.downvoted === true) {
+    } else if (clickCount < 1 && post.downvotedByCurrentUser === true) {
       return;
     } else {
       dispatch(upvotes(post._id));
@@ -80,9 +80,9 @@ const PostItem = ({ user, post }) => {
       return;
     } else if (clickCount === 1) {
       handleDownvoteClick(isDownVoted);
-    } else if (clickCount < 1 && post.downvoted === true) {
+    } else if (clickCount < 1 && post.downvotedByCurrentUser === true) {
       handleDownvoteClick(true);
-    } else if (clickCount < 1 && post.upvoted === true) {
+    } else if (clickCount < 1 && post.upvotedBycurrentUser === true) {
       return;
     } else {
       dispatch(downvotes(post._id));
@@ -131,11 +131,11 @@ const PostItem = ({ user, post }) => {
             <div className="user_profile_img_container">
               <img
                 className="user_profile_img"
-                src={user?.profile_image}
+                src={post.user?.profile_image}
                 alt="profile_Img"
               />
             </div>
-            <h4>{user?.nick_name}</h4>
+            <h4>{post.user?.nick_name}</h4>
           </div>
           <div className="post_options_elipsis">
             <FontAwesomeIcon
@@ -181,16 +181,16 @@ const PostItem = ({ user, post }) => {
             <span onClick={toggle_upvoted}>
               <FontAwesomeIcon
                 icon={faUpLong}
-                color={post.upvoted === true ? "blue" : "black"}
+                color={post.upvotedBycurrentUser === true ? "blue" : "black"}
               />
-              {post.upvote}
+              {post.upvote.value}
             </span>
             <span onClick={toggle_downvoted}>
               <FontAwesomeIcon
                 icon={faDownLong}
-                color={post.downvoted === true ? "red" : "black"}
+                color={post.downvotedByCurrentUser === true ? "red" : "black"}
               />
-              {post.downvote}
+              {post.downvote.value}
             </span>
             <span onClick={handleComments}>
               <FontAwesomeIcon icon={faComment} />

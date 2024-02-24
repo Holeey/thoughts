@@ -3,7 +3,7 @@ const postModel = require("../../model/postModel.js");
 
 exports.getAllPosts = async (req, res) => {
   try {
-    const post = await postModel.find();
+    const post = await postModel.find().populate('user');
 
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
@@ -28,8 +28,6 @@ exports.createPost = async (req, res) => {
       user: req.user.id,
       postTitle: postTitle,
       postBody: postBody,
-      upvote: 0,
-      downvote: 0,
     });
 
     if (post) {
@@ -116,6 +114,8 @@ exports.searchPost = async (req, res) => {
     return res.status(500).json("Internal error!");
   }
 };
+//////////////////////////////////////////////////////////////////////////////
+
 exports.upvotes = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -127,16 +127,31 @@ exports.upvotes = async (req, res) => {
       session.endSession();
       return res.status(404).json({ error: "Post not found!" });
     }
+    
+    // Ensure the downvote array exists
+    post.upvote = post.upvote || [];
 
-    post.upvote += 1;
-    post.upvoted = true;
+    // Check if the current user has already upvoted
+    const existingUpvote = post.upvote.find(upvote => upvote.user && upvote.user.equals(req.user));
+   
+    if (!existingUpvote) {
+      // If not, add a new upvote
+      post.upvote.push({ user: req.user, value: + 1});
+      post.upvotedBycurrentUser = true;
+      post.downvotedBycurrentUser = false;
 
-    await post.save();
+      await post.save();
 
-    await session.commitTransaction();
-    session.endSession();
+      await session.commitTransaction();
+      session.endSession();
 
-    res.status(200).json(post);
+      res.status(200).json(post);
+    } else {
+      // Handle case where user has already upvoted
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: "User has already upvoted this post" });
+    }
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -144,6 +159,10 @@ exports.upvotes = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+////////////////////////////////////////////////////////////////////////////
+
+
 exports.downvotes = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -156,15 +175,30 @@ exports.downvotes = async (req, res) => {
       return res.status(404).json({ error: "Post not found!" });
     }
 
-    post.downvote += 1;
-     post.downvoted = true;
+    // Ensure the downvote array exists
+    post.downvote = post.downvote || [];
 
-    await post.save();
+    // Check if the current user has already downvoted
+    const existingDownvote = post.downvote.find(downvote => downvote.user && downvote.user.equals(req.user));
 
-    await session.commitTransaction();
-    session.endSession();
+    if (!existingDownvote) {
+      // If not, add a new downvote
+      post.downvote.push({ user: req.user, value: + 1});
+      post.upvotedBycurrentUser = false;
+      post.downvotedBycurrentUser = true;
 
-    res.status(200).json(post);
+      await post.save();
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(200).json(post);
+    } else {
+      // Handle case where user has already downvoted
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: "User has already downvoted this post" });
+    }
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -172,9 +206,12 @@ exports.downvotes = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 exports.unUpvoted = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
+  const user = req.user
+  console.log('user:', user)
   try {
     const post = await postModel.findById(req.params.id).session(session);
 
@@ -184,9 +221,15 @@ exports.unUpvoted = async (req, res) => {
       return res.status(404).json({ error: "Post not found!" });
     }
 
-    if (post.upvote > 0) {
-      post.upvote -= 1;
-      post.upvoted = false;
+    const existingUpvoteIndex = post.upvote.findIndex(upvote => upvote.user.equals(req.user));
+
+    if (existingUpvoteIndex !== -1) {
+      // Remove the existing upvote with the specified user
+      post.upvote.splice(existingUpvoteIndex, 1);
+
+      // Update flags
+      post.upvotedBycurrentUser = false;
+      post.downvotedBycurrentUser = false;
 
       await post.save();
       await session.commitTransaction();
@@ -195,9 +238,7 @@ exports.unUpvoted = async (req, res) => {
     } else {
       await session.abortTransaction();
       session.endSession();
-      return res
-        .status(400)
-        .json({ error: "Cannot decrement votes below zero" });
+      return res.status(400).json({ error: "Cannot decrement votes below zero" });
     }
   } catch (error) {
     await session.abortTransaction();
@@ -206,6 +247,7 @@ exports.unUpvoted = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 exports.unDownvoted = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -218,9 +260,16 @@ exports.unDownvoted = async (req, res) => {
       return res.status(404).json({ error: "Post not found!" });
     }
 
-    if (post.downvote > 0) {
-      post.downvote -= 1;
-      post.downvoted = false;
+    const existingDownvoteIndex = post.downvote.findIndex(downvote => downvote.user.equals(req.user));
+
+    if (existingDownvoteIndex !== -1) {
+      // Remove the existing upvote with the specified user
+      post.upvote.splice(existingDownvoteIndex, 1);
+
+      // Update flags
+      post.upvotedBycurrentUser = false;
+      post.downvotedBycurrentUser = false;
+
       await post.save();
       await session.commitTransaction();
       session.endSession();
@@ -228,9 +277,7 @@ exports.unDownvoted = async (req, res) => {
     } else {
       await session.abortTransaction();
       session.endSession();
-      return res
-        .status(400)
-        .json({ error: "Cannot decrement votes below zero" });
+      return res.status(400).json({ error: "Cannot decrement votes below zero" });
     }
   } catch (error) {
     await session.abortTransaction();

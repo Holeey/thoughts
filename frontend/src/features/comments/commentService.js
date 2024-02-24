@@ -31,14 +31,29 @@ const getComments = async (postId, token) => {
         throw error
     }
 }
-const deleteComment = async (postId, token) => {
+const replyComment = async (commentId, reply, token) => {
     const config = {
         headers: {
             Authorization: `Bearer ${token}`
         }
     }
     try {
-        const response = await axios.delete(`${API_URL}/deleteComment/${postId}`, config)
+        const response = await axios.post(`${API_URL}/replyComment/${commentId}`, { reply }, config);
+        return response.data;
+    } catch (error) {
+        console.error('replyComment error:', error.response.data);
+        throw error;
+    }
+};
+
+const deleteComment = async (commentId, token) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    }
+    try {
+        const response = await axios.delete(`${API_URL}/deleteComment/${commentId}`, config)
         return response.data
     } catch (error) {
         console.error('delete error:', error.response.data)
@@ -50,6 +65,7 @@ const commentService = {
     postComment,
     getComments,
     deleteComment,
+    replyComment,
 }
 
 export default commentService

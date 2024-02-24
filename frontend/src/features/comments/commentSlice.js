@@ -30,8 +30,17 @@ export const postComment = createAsyncThunk('comment/post', async (payload, thun
         return thunkAPI.rejectWithValue(message)
     }
 })
-export const deleteComment = createAsyncThunk('comment/delete', async (payload, thunkAPI) => {
-    const {commentId} = payload
+export const replyComment = createAsyncThunk('/comment/reply', async (payload, thunkAPI) => {
+    const {commentId, reply} = payload
+    try {
+        const token = thunkAPI.getState().auth.user.token
+        return await commentService.replyComment(commentId, reply, token)
+    } catch (error) {
+        const message = error.response.data
+        return thunkAPI.rejectWithValue(message)
+    }
+})
+export const deleteComment = createAsyncThunk('comment/delete', async (commentId, thunkAPI) => {
     try {
         const token = thunkAPI.getState().auth.user.token
         return await commentService.deleteComment(commentId, token)
@@ -77,6 +86,19 @@ const commentSlice = createSlice({
             state.comments = action.payload
         })
         .addCase(getComments.rejected, (state, action) =>{
+            state.isSuccess = false
+            state.isError = true
+            state.message = action.payload
+        })
+        .addCase(replyComment.pending, (state) => {
+            state.isloading = true
+        })
+        .addCase(replyComment.fulfilled, (state, action) => {
+            state.isloading = false
+            state.isSuccess = true
+            state.comments.push(action.payload)
+        })
+        .addCase(replyComment.rejected, (state, action) =>{
             state.isSuccess = false
             state.isError = true
             state.message = action.payload

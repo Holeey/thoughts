@@ -10,9 +10,9 @@ router.post('/createPost', protect, createPost)
 router.put('/updatePost/:id', protect, updatePost)
 router.delete('/deletePost/:id', protect, deletePost)
 router.get('/searchPost', protect, searchPost)
-router.post('/upvotes/:id', upvotes)
-router.post('/downvotes/:id', downvotes)
-router.post('/un-upvoted/:id', unUpvoted)
-router.post('/un-downvoted/:id', unDownvoted)
+router.post('/upvotes/:id', protect, upvotes)
+router.post('/downvotes/:id', protect, downvotes)
+router.post('/un-upvoted/:id', protect, unUpvoted)
+router.post('/un-downvoted/:id', protect, unDownvoted)
 
 module.exports = router

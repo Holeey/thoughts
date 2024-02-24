@@ -9,7 +9,7 @@ import {
   faReply
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
-import { deleteComment, getComments } from "../../../../../features/comments/commentSlice.js";
+import { deleteComment, getComments, replyComment } from "../../../../../features/comments/commentSlice.js";
 import './commentList.css'
 
 const CommentList = ({ post }) => {
@@ -30,16 +30,17 @@ const CommentList = ({ post }) => {
   const handleSubmit = (e, commentId) => {
     e.preventDefault();
     const commentData = {
-      postId: post._id,
+      commentId,
       reply
     };
-    dispatch();
+    dispatch(replyComment(commentData));
     setReply("");
     setSelectedCommentId(null); // Close the reply form after submitting
   };
   const handleDeleteComment = (commentId) => {
     dispatch(deleteComment(commentId))
   }
+  
 
   useEffect(() => {
     dispatch(getComments(post._id));
@@ -52,7 +53,7 @@ const CommentList = ({ post }) => {
           <div className="comment_list">
             {comments.map((comment) => (
               <div key={comment._id} className="comment_item">
-                <p>User: {comment.user.nick_name}</p>
+                <p>User: {comment._id}</p>
                 <p>{comment.comment}</p>
                 <div className="comment_feedback-options">
                   <span>
@@ -81,12 +82,12 @@ const CommentList = ({ post }) => {
                   </span>
                   <span>
                    <FontAwesomeIcon icon={faTrash} color="crimson" onClick={() => handleDeleteComment(comment._id)} />
-
                   </span>
                 </div>
               </div>
             ))}
           </div>
+         
         )}
       </div>
     </div>

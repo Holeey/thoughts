@@ -8,15 +8,33 @@ const commentSchema = new mongoose.Schema({
     },
     post: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
+        required: false,
         ref: 'Post'
     },
     comment: String,
-    replies: String,
-    upvote: Number,
-    downvote: Number,
-    upvoted: Boolean,
-    downvoted: Boolean
+    replies: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        },
+        type: String
+    }],
+    upvote: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        },
+        value: Number,
+    }],
+    downvote: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        },
+        value: Number,
+    }],
+    upvotedBycurrentUser: Boolean,
+    downvotedBycurrentUser: Boolean
 }, {timestamps: true});
 
 const commentData = mongoose.model('Comment', commentSchema);

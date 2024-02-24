@@ -34,7 +34,7 @@ const Dashboard = () => {
    
             {posts.length > 0 ? 
             posts.map((post) => (
-              <PostItem key={post._id} post={post} user={user} />
+              <PostItem key={post._id} post={post} />
             )) : ''}
 
             </div>

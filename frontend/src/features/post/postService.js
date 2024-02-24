@@ -74,6 +74,7 @@ const upvotes = async (id, token) => {
                 Authorization: `Bearer ${token}`
             }
         }
+        console.log('token:', token)
         const response = await axios.post(`${API_URL}/upvotes/${id}`, config)
         return response.data
     } catch (error) {
