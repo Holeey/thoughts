@@ -1,6 +1,6 @@
 const express = require('express')
 const { createPost, myPost, updatePost, getAllPosts, deletePost, searchPost, upvotes, downvotes, unDownvoted, unUpvoted } = require('../controllers/post/postController.js')
-const {protect} = require('../middleware/authMiddleware.js')
+const { protect } = require('../middleware/authMiddleware.js')
 
 const router = express.Router()
 

@@ -183,14 +183,14 @@ const PostItem = ({ post }) => {
                 icon={faUpLong}
                 color={post.upvotedBycurrentUser === true ? "blue" : "black"}
               />
-              {post.upvote.value}
+              {post.upvoteValue}
             </span>
             <span onClick={toggle_downvoted}>
               <FontAwesomeIcon
                 icon={faDownLong}
                 color={post.downvotedByCurrentUser === true ? "red" : "black"}
               />
-              {post.downvote.value}
+              {post.downvoteValue}
             </span>
             <span onClick={handleComments}>
               <FontAwesomeIcon icon={faComment} />

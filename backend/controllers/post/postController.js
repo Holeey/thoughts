@@ -91,6 +91,7 @@ exports.deletePost = async (req, res) => {
   }
 };
 exports.searchPost = async (req, res) => {
+  console.log('searchPost-userId:', req.user)
   try {
     if (!req.user) {
       return res.status(404).json("Login in");
@@ -114,53 +115,75 @@ exports.searchPost = async (req, res) => {
     return res.status(500).json("Internal error!");
   }
 };
-//////////////////////////////////////////////////////////////////////////////
+//////////////
 
 exports.upvotes = async (req, res) => {
   const session = await mongoose.startSession();
-  session.startTransaction();
+   session.startTransaction();
   try {
-    const post = await postModel.findById(req.params.id).session(session);
-
-    if (!post) {
+    const post = await postModel.findById({_id: req.params.id})
+    if(!post) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(404).json({ error: "Post not found!" });
+      res.status(401).json({error: 'post not found!'})
     }
-    
-    // Ensure the downvote array exists
-    post.upvote = post.upvote || [];
+    if (!req.user) {
+      await session.abortTransaction();
+      session.endSession();
+      res.status(401).json('Unauthorized user!')
+    }
+    const existingUpvote = post.upvote.find(vote => vote.user && vote.user.equals(req.user._id));
 
-    // Check if the current user has already upvoted
-    const existingUpvote = post.upvote.find(upvote => upvote.user && upvote.user.equals(req.user));
-   
     if (!existingUpvote) {
-      // If not, add a new upvote
-      post.upvote.push({ user: req.user, value: + 1});
-      post.upvotedBycurrentUser = true;
-      post.downvotedBycurrentUser = false;
+      post.upvote.push({user: req.user});
+      post.upvoteValue += 1
 
-      await post.save();
+              // Update flags
+              post.upvotedBycurrentUser = true;
+              post.downvotedBycurrentUser = false;
 
-      await session.commitTransaction();
-      session.endSession();
-
-      res.status(200).json(post);
+    await post.save();
+    
+    await session.commitTransaction();
+    session.endSession();    
+    return res.status(201).json(post)
     } else {
-      // Handle case where user has already upvoted
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(400).json({ error: "User has already upvoted this post" });
+      const existingUpvoteIndex = post.upvote.findIndex(vote => vote.user._id.equals(req.user._id));
+
+      if (existingUpvoteIndex !== -1) {
+        // Remove the existing upvote with the specified user
+        post.upvote.splice(existingUpvoteIndex, 1);
+        post.upvoteValue -= 1
+  
+        // Update flags
+        post.upvotedBycurrentUser = false;
+        post.downvotedBycurrentUser = false;
+  
+        await post.save();
+        await session.commitTransaction();
+        session.endSession();
+        return res.status(200).json(post);
     }
+  }
+
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("upvote error:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
+    console.error('upvote error:', error);
+    throw error
   }
-};
+}
 
-////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
 
 
 exports.downvotes = async (req, res) => {

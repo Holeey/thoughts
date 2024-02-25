@@ -12,16 +12,16 @@ const postSchema = new mongoose.Schema({
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
-        },
-        value: Number,
+        }
     }],
+    upvoteValue: Number,
     downvote: [{
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
-        },
-        value: Number,
+        }
     }],
+    downvoteValue: Number,
     upvotedBycurrentUser: Boolean,
     downvotedBycurrentUser: Boolean
 

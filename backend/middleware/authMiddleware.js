@@ -4,7 +4,7 @@ const userModel = require('../model/userModel.js');
 
 exports.generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: '30d'
+        expiresIn: '90d'
     })
 }
 
@@ -24,7 +24,7 @@ exports.protect = async (req, res, next) => {
         next();
 
         } catch(error) {
-            console.log(error)
+            console.error(error)
             if (error.name === "JsonWebTokenError") {
                return res.status(401).json('Invalid token')
             }else if (error.name === "TokenExpiredError") {

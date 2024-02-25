@@ -74,8 +74,7 @@ const upvotes = async (id, token) => {
                 Authorization: `Bearer ${token}`
             }
         }
-        console.log('token:', token)
-        const response = await axios.post(`${API_URL}/upvotes/${id}`, config)
+        const response = await axios.post(`${API_URL}/upvotes/${id}`, null, config)
         return response.data
     } catch (error) {
         console.error('upvote error:', error.response.data)
@@ -89,7 +88,7 @@ const downvotes = async (id, token) => {
                 Authorization: `Bearer ${token}`
             }
         }
-        const response = await axios.post(`${API_URL}/downvotes/${id}`, config)
+        const response = await axios.post(`${API_URL}/downvotes/${id}`, null, config)
         return response.data
     } catch (error) {
         console.error('downvote error:', error.response.data)
@@ -103,7 +102,7 @@ const unUpvoted = async (id, token) => {
                 Authorization: `Bearer ${token}`
             }
         }
-        const response = await axios.post(`${API_URL}/un-upvoted/${id}`, config)
+        const response = await axios.post(`${API_URL}/un-upvoted/${id}`, null, config)
         return response.data
     } catch (error) {
         throw error
@@ -116,7 +115,7 @@ const unDownvoted = async (id, token) => {
                 Authorization: `Bearer ${token}`
             }
         }
-        const response = await axios.post(`${API_URL}/un-downvoted/${id}`, config)
+        const response = await axios.post(`${API_URL}/un-downvoted/${id}`, null, config)
         return response.data
     } catch (error) {
         console.error('search error:', error.response.data)

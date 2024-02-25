@@ -65,6 +65,7 @@ export const searchPost = createAsyncThunk('post/search', async (payload, thunkA
 export const upvotes = createAsyncThunk('post/upvote', async (id, thunkAPI) => {
     try {
         const token = thunkAPI.getState().auth.user.token
+        console.log('upvotes-slice:', token)
         return await postService.upvotes(id, token)
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
