@@ -29,18 +29,17 @@ const CommentList = ({ post }) => {
 
   const handleSubmit = (e, commentId) => {
     e.preventDefault();
-    const commentData = {
+    const replyData = {
       commentId,
       reply
     };
-    dispatch(replyComment(commentData));
+    dispatch(replyComment(replyData));
     setReply("");
     setSelectedCommentId(null); // Close the reply form after submitting
   };
   const handleDeleteComment = (commentId) => {
     dispatch(deleteComment(commentId))
   }
-  
 
   useEffect(() => {
     dispatch(getComments(post._id));
@@ -53,8 +52,9 @@ const CommentList = ({ post }) => {
           <div className="comment_list">
             {comments.map((comment) => (
               <div key={comment._id} className="comment_item">
-                <p>User: {comment._id}</p>
+                <p>user:{comment.user.nick_name}</p>
                 <p>{comment.comment}</p>
+                <p>replies: {comment.replies}</p>
                 <div className="comment_feedback-options">
                   <span>
                     <FontAwesomeIcon icon={faUpLong} />
@@ -90,6 +90,7 @@ const CommentList = ({ post }) => {
          
         )}
       </div>
+      {}
     </div>
   );
 };

@@ -3,16 +3,18 @@ const postModel = require("../../model/postModel.js");
 
 exports.getAllPosts = async (req, res) => {
   try {
-    const post = await postModel.find().populate('user');
+    const posts = await postModel.find().populate({ path: 'user' });
 
-    if (!post) {
-      return res.status(404).json({ error: "Post not found" });
+    if (!posts) {
+      return res.status(404).json({ error: "Posts not found" });
     }
-    return res.status(200).json(post);
+    return res.status(200).json(posts);
   } catch (error) {
+    console.error("Error fetching posts:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 exports.myPost = async (req, res) => {
   const posts = await postModel.find({ user: req.user._id.toString() });
   return res.status(201).json(posts);
@@ -91,7 +93,7 @@ exports.deletePost = async (req, res) => {
   }
 };
 exports.searchPost = async (req, res) => {
-  console.log('searchPost-userId:', req.user)
+  console.log("searchPost-userId:", req.user);
   try {
     if (!req.user) {
       return res.status(404).json("Login in");
@@ -115,82 +117,13 @@ exports.searchPost = async (req, res) => {
     return res.status(500).json("Internal error!");
   }
 };
-//////////////
-
+////// votes routes handler ///////////
 exports.upvotes = async (req, res) => {
   const session = await mongoose.startSession();
-   session.startTransaction();
-  try {
-    const post = await postModel.findById({_id: req.params.id})
-    if(!post) {
-      await session.abortTransaction();
-      session.endSession();
-      res.status(401).json({error: 'post not found!'})
-    }
-    if (!req.user) {
-      await session.abortTransaction();
-      session.endSession();
-      res.status(401).json('Unauthorized user!')
-    }
-    const existingUpvote = post.upvote.find(vote => vote.user && vote.user.equals(req.user._id));
-
-    if (!existingUpvote) {
-      post.upvote.push({user: req.user});
-      post.upvoteValue += 1
-
-              // Update flags
-              post.upvotedBycurrentUser = true;
-              post.downvotedBycurrentUser = false;
-
-    await post.save();
-    
-    await session.commitTransaction();
-    session.endSession();    
-    return res.status(201).json(post)
-    } else {
-      const existingUpvoteIndex = post.upvote.findIndex(vote => vote.user._id.equals(req.user._id));
-
-      if (existingUpvoteIndex !== -1) {
-        // Remove the existing upvote with the specified user
-        post.upvote.splice(existingUpvoteIndex, 1);
-        post.upvoteValue -= 1
-  
-        // Update flags
-        post.upvotedBycurrentUser = false;
-        post.downvotedBycurrentUser = false;
-  
-        await post.save();
-        await session.commitTransaction();
-        session.endSession();
-        return res.status(200).json(post);
-    }
-  }
-
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    console.error('upvote error:', error);
-    throw error
-  }
-}
-
-
-////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-exports.downvotes = async (req, res) => {
-  const session = await mongoose.startSession();
   session.startTransaction();
+
   try {
-    const post = await postModel.findById(req.params.id).session(session);
+    const post = await postModel.findById(req.params.id);
 
     if (!post) {
       await session.abortTransaction();
@@ -198,30 +131,85 @@ exports.downvotes = async (req, res) => {
       return res.status(404).json({ error: "Post not found!" });
     }
 
-    // Ensure the downvote array exists
-    post.downvote = post.downvote || [];
-
-    // Check if the current user has already downvoted
-    const existingDownvote = post.downvote.find(downvote => downvote.user && downvote.user.equals(req.user));
-
-    if (!existingDownvote) {
-      // If not, add a new downvote
-      post.downvote.push({ user: req.user, value: + 1});
-      post.upvotedBycurrentUser = false;
-      post.downvotedBycurrentUser = true;
-
-      await post.save();
-
-      await session.commitTransaction();
-      session.endSession();
-
-      res.status(200).json(post);
-    } else {
-      // Handle case where user has already downvoted
+    if (!req.user) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(400).json({ error: "User has already downvoted this post" });
+      return res.status(401).json({ error: "Unauthorized user!" });
     }
+
+    const existingUpvoteIndex = post.upvote.findIndex((vote) =>
+      vote.user && vote.user._id.equals(req.user._id)
+    );
+
+    if (existingUpvoteIndex === -1) {
+      // User has not upvoted, add the upvote
+      post.upvote.push({ user: req.user });
+      post.upvoteValue += 1;
+    } else {
+      // User has already upvoted, remove the upvote
+      post.upvote.splice(existingUpvoteIndex, 1);
+      post.upvoteValue -= 1;
+    }
+
+    const updatedPost = await postModel.findByIdAndUpdate(
+      req.params.id,
+      post,
+      { new: true }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+    return res.status(200).json(updatedPost);
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("upvote error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.downvotes = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const post = await postModel.findById(req.params.id);
+
+    if (!post) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: "Post not found!" });
+    }
+
+    if (!req.user) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(401).json({ error: "Unauthorized user!" });
+    }
+
+    const existingDownvoteIndex = post.downvote.findIndex((vote) =>
+      vote.user && vote.user._id.equals(req.user._id)
+    );
+
+    if (existingDownvoteIndex === -1) {
+      // User has not downvoted, add the downvote
+      post.downvote.push({ user: req.user });
+      post.downvoteValue += 1;
+    } else {
+      // User has already downvoted, remove the downvote
+      post.downvote.splice(existingDownvoteIndex, 1);
+      post.downvoteValue -= 1;
+    }
+
+    const updatedPost = await postModel.findByIdAndUpdate(
+      req.params.id,
+      post,
+      { new: true }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+    return res.status(200).json(updatedPost);
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -230,82 +218,3 @@ exports.downvotes = async (req, res) => {
   }
 };
 
-exports.unUpvoted = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-  const user = req.user
-  console.log('user:', user)
-  try {
-    const post = await postModel.findById(req.params.id).session(session);
-
-    if (!post) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(404).json({ error: "Post not found!" });
-    }
-
-    const existingUpvoteIndex = post.upvote.findIndex(upvote => upvote.user.equals(req.user));
-
-    if (existingUpvoteIndex !== -1) {
-      // Remove the existing upvote with the specified user
-      post.upvote.splice(existingUpvoteIndex, 1);
-
-      // Update flags
-      post.upvotedBycurrentUser = false;
-      post.downvotedBycurrentUser = false;
-
-      await post.save();
-      await session.commitTransaction();
-      session.endSession();
-      return res.status(200).json(post);
-    } else {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(400).json({ error: "Cannot decrement votes below zero" });
-    }
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    console.error("un-Upvote error:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-exports.unDownvoted = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-  try {
-    const post = await postModel.findById(req.params.id).session(session);
-
-    if (!post) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(404).json({ error: "Post not found!" });
-    }
-
-    const existingDownvoteIndex = post.downvote.findIndex(downvote => downvote.user.equals(req.user));
-
-    if (existingDownvoteIndex !== -1) {
-      // Remove the existing upvote with the specified user
-      post.upvote.splice(existingDownvoteIndex, 1);
-
-      // Update flags
-      post.upvotedBycurrentUser = false;
-      post.downvotedBycurrentUser = false;
-
-      await post.save();
-      await session.commitTransaction();
-      session.endSession();
-      return res.status(200).json(post);
-    } else {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(400).json({ error: "Cannot decrement votes below zero" });
-    }
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    console.error("un-Downvote error:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-};

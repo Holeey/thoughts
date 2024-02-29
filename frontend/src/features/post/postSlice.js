@@ -65,7 +65,6 @@ export const searchPost = createAsyncThunk('post/search', async (payload, thunkA
 export const upvotes = createAsyncThunk('post/upvote', async (id, thunkAPI) => {
     try {
         const token = thunkAPI.getState().auth.user.token
-        console.log('upvotes-slice:', token)
         return await postService.upvotes(id, token)
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
@@ -213,36 +212,7 @@ const postSlice = createSlice({
             state.isSuccess = false
             state.posts = action.payload
         })
-        .addCase(unUpvoted.pending, (state) => {
-            state.isLoading =true
-        })
-        .addCase(unUpvoted.fulfilled, (state, action) => {
-            state.isLoading = false
-            state.isSuccess = true
-            const index = state.posts.findIndex(post => post._id === action.payload._id)
-            if (index !== -1) {
-            state.posts[index] = action.payload 
-            }
-        })
-        .addCase(unUpvoted.rejected, (state, action) => {
-            state.isSuccess = false
-            state.message = action.payload
-        })
-        .addCase(unDownvoted.pending, (state) => {
-            state.isLoading = true
-        })
-        .addCase(unDownvoted.fulfilled, (state, action) => {
-            state.isLoading = false
-            state.isSuccess = true
-            const index = state.posts.findIndex(post => post._id === action.payload._id)
-            if (index !== -1) {
-            state.posts[index] = action.payload 
-            }
-        })
-        .addCase(unDownvoted.rejected, (state, action) => {
-            state.isSuccess = false
-            state.message = action.payload
-        })
+
     }
 })
 

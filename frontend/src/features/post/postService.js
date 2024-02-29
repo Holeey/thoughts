@@ -95,33 +95,6 @@ const downvotes = async (id, token) => {
         throw error
     }
 }
-const unUpvoted = async (id, token) => {
-    try {
-        const config = {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        }
-        const response = await axios.post(`${API_URL}/un-upvoted/${id}`, null, config)
-        return response.data
-    } catch (error) {
-        throw error
-    }
-}
-const unDownvoted = async (id, token) => {
-    try {
-        const config = {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        }
-        const response = await axios.post(`${API_URL}/un-downvoted/${id}`, null, config)
-        return response.data
-    } catch (error) {
-        console.error('search error:', error.response.data)
-        throw error
-    }
-}
 
 
 
@@ -133,8 +106,6 @@ const postService = {
     searchPost,
     upvotes,
     downvotes,
-    unUpvoted,
-    unDownvoted
 }
 
 export default postService

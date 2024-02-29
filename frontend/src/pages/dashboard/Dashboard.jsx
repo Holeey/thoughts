@@ -14,12 +14,10 @@ const Dashboard = () => {
   const posts  = useSelector((state) => state.post.posts)  
 
   const dispatch = useDispatch();
+
     useEffect(() => {
       dispatch(getAllPosts())
-      return ()=> {
-        dispatch(reset())
-      } 
-    }, [dispatch])
+    }, [posts, dispatch])
 
   return (
     <>

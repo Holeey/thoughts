@@ -9,7 +9,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import PostForm from "../postForm/PostForm";
-import CommentForm from "../postItem/comments/commentForm/CommentForm"
+import CommentForm from "../postItem/comments/commentForm/CommentForm";
 
 import moment from "moment";
 
@@ -21,22 +21,18 @@ import {
   editPost,
   upvotes,
   downvotes,
-  unDownvoted,
-  unUpvoted,
 } from "../../../features/post/postSlice";
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const PostItem = ({ post }) => {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isPostOptions, setIsPostOptions] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [showComments, setShowComments] = useState(false);
-  const [isUpVoted, setIsUpVoted] = useState(false);
-  const [isDownVoted, setIsDownVoted] = useState(false);
-  const [clickCount, setClickCount] = useState(0);
 
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
 
   const toggleMinimize = () => {
     setIsMinimized(!isMinimized);
@@ -57,55 +53,29 @@ const PostItem = ({ post }) => {
   const handleComments = () => {
     setShowComments(!showComments);
   };
-  //function for toggling the upvote using both backend/frontend to persist state
+
+  // Get user vote status from the database state
+  const upvoted = post.upvote.findIndex((vote) => vote.user._id === user.id);
+  const downvoted = post.downvote.findIndex(
+    (vote) => vote.user._id === user.id
+  );
+
+  //function for toggling the upvote
   const toggle_upvoted = () => {
-    if (clickCount === 1 && isDownVoted) {
-      return;
-    } else if (clickCount === 1) {
-      handleUpvoteClick(isUpVoted);
-    } else if (clickCount < 1 && post.upvotedBycurrentUser === true) {
-      handleUpvoteClick(true);
-    } else if (clickCount < 1 && post.downvotedByCurrentUser === true) {
+    if (downvoted !== -1) {
       return;
     } else {
       dispatch(upvotes(post._id));
-      setClickCount(clickCount + 1);
-      setIsUpVoted(true);
-      setIsDownVoted(false);
     }
   };
-  //function for toggling downvote using both backend/frontend to persist state
+
+  //function for toggling downvote
   const toggle_downvoted = () => {
-    if (clickCount === 1 && isUpVoted) {
-      return;
-    } else if (clickCount === 1) {
-      handleDownvoteClick(isDownVoted);
-    } else if (clickCount < 1 && post.downvotedByCurrentUser === true) {
-      handleDownvoteClick(true);
-    } else if (clickCount < 1 && post.upvotedBycurrentUser === true) {
+    if (upvoted !== -1) {
       return;
     } else {
       dispatch(downvotes(post._id));
-      setClickCount(clickCount + 1);
-      setIsDownVoted(true);
-      setIsUpVoted(false);
     }
-  };
-  //upvote callback function
-  const handleUpvoteClick = (isUpVoted) => {
-    if (isUpVoted) {
-      dispatch(unUpvoted(post._id));
-      setIsUpVoted(false);
-    }
-    setClickCount(0);
-  };
-  //downvote callback function
-  const handleDownvoteClick = (isDownVoted) => {
-    if (isDownVoted) {
-      dispatch(unDownvoted(post._id));
-      setIsDownVoted(false);
-    }
-    setClickCount(0);
   };
 
   const clickRef = useRef(null);
@@ -131,11 +101,11 @@ const PostItem = ({ post }) => {
             <div className="user_profile_img_container">
               <img
                 className="user_profile_img"
-                src={post.user?.profile_image}
+                src={post.user.profile_image}
                 alt="profile_Img"
               />
             </div>
-            <h4>{post.user?.nick_name}</h4>
+            <h4>{post.user.nick_name}</h4>
           </div>
           <div className="post_options_elipsis">
             <FontAwesomeIcon
@@ -181,14 +151,14 @@ const PostItem = ({ post }) => {
             <span onClick={toggle_upvoted}>
               <FontAwesomeIcon
                 icon={faUpLong}
-                color={post.upvotedBycurrentUser === true ? "blue" : "black"}
+                color={upvoted !== -1 ? "blue" : "black"}
               />
               {post.upvoteValue}
             </span>
             <span onClick={toggle_downvoted}>
               <FontAwesomeIcon
                 icon={faDownLong}
-                color={post.downvotedByCurrentUser === true ? "red" : "black"}
+                color={downvoted !== -1 ? "red" : "black"}
               />
               {post.downvoteValue}
             </span>
