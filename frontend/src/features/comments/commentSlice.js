@@ -96,7 +96,9 @@ const commentSlice = createSlice({
         .addCase(replyComment.fulfilled, (state, action) => {
             state.isloading = false
             state.isSuccess = true
-            state.comments.push(action.payload)
+            let index 
+            index = state.comments.findIndex((comment) => comment._id === action.payload._id)
+            state.comments[index] = action.payload
         })
         .addCase(replyComment.rejected, (state, action) =>{
             state.isSuccess = false

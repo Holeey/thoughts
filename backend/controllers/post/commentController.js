@@ -5,13 +5,13 @@ const userModel = require('../../model/userModel.js');
 
 exports.getComments = async (req, res) => {
     try {
-        const comments = await commentModel.findById({ post: req.params.id})
+        const replies = await commentModel.find({ post: req.params.id}).populate({path: 'user'})
 
-        if (comments.length < 1) {
+        if (replies.length < 1) {
             return res.status(401).json('No replies found for the specified post');
         }
  
-        return res.status(201).json(comments)        
+        return res.status(201).json(replies)        
     } catch (error) {
         return res.status(500).json('Internal error:', error)
     }
@@ -19,8 +19,8 @@ exports.getComments = async (req, res) => {
 exports.postComment = async (req, res) => {
     try {
         const {reply} = req.body
-                
-        const post = await postModel.findById({_id: req.params.id}); 
+            
+        const post = await postModel.findById({_id: req.params.postId}); 
 
         if (!post) {
             return res.status(404).json('No post found!')
@@ -35,7 +35,7 @@ exports.postComment = async (req, res) => {
         }
 
         const comment = await commentModel.create({
-            user: req.user._id,
+            user: req.user,
             post: post._id,
             comment: reply,
         })
@@ -51,7 +51,7 @@ exports.replyComment = async (req, res) => {
     try {
         const {reply} = req.body;
                 
-        const comment = await commentModel.findById({_id: req.params.id}); 
+        const comment = await commentModel.findById({_id: req.params.commentId}); 
         const postId = comment.post
 
         if (!postId) {
@@ -69,43 +69,43 @@ exports.replyComment = async (req, res) => {
         if (!req.user) {
             return res.status(404).json('You are not logged in')
         }
-        comment.replies.push(reply);
+        
+        comment.replies.push({user: req.user, reply: reply});
 
-        const replies = await commentModel.findByIdAndUpdate({_id: req.params.id}, comment, {new: true}); 
-       
-        res.status(201).json(replies); 
+        const updatedComment = await commentModel.findByIdAndUpdate({_id: req.params.commentId}, comment, {new: true})
+        res.status(201).json(updatedComment); 
 
     } catch (error) {
         console.error("postCommentReply:", error)
         return res.status(500).json('Internal error')
     }
 }
-// exports.updateComment = async (req, res) => {
-//     try {
-//         const {reply} = req.body
+exports.updateComment = async (req, res) => {
+    try {
+        const {reply} = req.body
         
-//         if (!req.user) {
-//             return res.status(400).json('Unauthorized user!')
-//         }
-//         if (!reply) {
-//             return res.status(400).json('Comment your thoughts!')
-//         }
+        if (!req.user) {
+            return res.status(400).json('Unauthorized user!')
+        }
+        if (!reply) {
+            return res.status(400).json('Comment your thoughts!')
+        }
 
-//         const comment = await commentModel.findById({_id: req.params.id})
+        const comment = await commentModel.findById({_id: req.params.id})
 
-//         if (req.user._id.toString() !== comment.user.toString()) {
-//             return res.status(400).json('Unauthorized user!')
-//         }
+        if (req.user._id.toString() !== comment.user.toString()) {
+            return res.status(400).json('Unauthorized user!')
+        }
 
-//         const updatedComment = await commentModel.findByIdAndUpdate(req.params.id, { comment: reply }, { new: true })
+        const updatedComment = await commentModel.findByIdAndUpdate(req.params.id, { comment: reply }, { new: true })
 
-//         if (updatedComment) {
-//             return res.status(201).json({ updatedComment })
-//         }
-//     }catch(error) {
-//         return res.status.json('Internal error')
-//     }
-// }
+        if (updatedComment) {
+            return res.status(201).json({ updatedComment })
+        }
+    }catch(error) {
+        return res.status.json('Internal error')
+    }
+}
 exports.deleteComment = async (req, res) => {
     try {
     if (!req.user) {

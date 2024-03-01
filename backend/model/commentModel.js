@@ -8,32 +8,21 @@ const commentSchema = new mongoose.Schema({
     },
     post: {
         type: mongoose.Schema.Types.ObjectId,
-        required: false,
+        required: true,
         ref: 'Post'
     },
     comment: String,
-    replies: [{
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            required: true,
-            ref: 'User',
-        },
-        type: String
-    }],
-    upvote: [{
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-        },
-        value: Number,
-    }],
-    downvote: [{
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-        },
-        value: Number,
-    }],
+    replies: [],
+    upvote: [],
+    upvoteValue: {
+        type: Number,
+        default: 0  // Set a default value for upvote value
+    },
+    downvote: [],
+    downvoteValue: {
+        type: Number,
+        default: 0  // Set a default value for downvote value
+    },
     upvotedBycurrentUser: Boolean,
     downvotedBycurrentUser: Boolean
 }, {timestamps: true});

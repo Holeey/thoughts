@@ -11,6 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { deleteComment, getComments, replyComment } from "../../../../../features/comments/commentSlice.js";
 import './commentList.css'
+import Reply from "./Reply.jsx";
 
 const CommentList = ({ post }) => {
   const [reply, setReply] = useState("");
@@ -52,10 +53,11 @@ const CommentList = ({ post }) => {
           <div className="comment_list">
             {comments.map((comment) => (
               <div key={comment._id} className="comment_item">
-                <p>user:{comment.user.nick_name}</p>
+                <p>user: {comment.user.nick_name}</p>
                 <p>{comment.comment}</p>
-                <p>replies: {comment.replies}</p>
+                 <Reply comment={comment} />
                 <div className="comment_feedback-options">
+                  
                   <span>
                     <FontAwesomeIcon icon={faUpLong} />
                     {comment.upvote}
@@ -87,7 +89,6 @@ const CommentList = ({ post }) => {
               </div>
             ))}
           </div>
-         
         )}
       </div>
       {}
