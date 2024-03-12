@@ -1,5 +1,28 @@
 const mongoose = require('mongoose');
 
+const replySchema = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
+    },
+    reply: String,
+    upvote: [],
+    upvoteValue: {
+        type: Number,
+        default: 0
+    },
+    downvote: [],
+    downvoteValue: {
+        type: Number,
+        default: 0
+    },
+    replies: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Reply'
+    }]  // Nested replies
+}, { timestamps: true });
+
 const commentSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -12,20 +35,23 @@ const commentSchema = new mongoose.Schema({
         ref: 'Post'
     },
     comment: String,
-    replies: [],
+    replies: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Reply'
+    }], // Top-level replies
     upvote: [],
     upvoteValue: {
         type: Number,
-        default: 0  // Set a default value for upvote value
+        default: 0
     },
     downvote: [],
     downvoteValue: {
         type: Number,
-        default: 0  // Set a default value for downvote value
+        default: 0
     },
-    upvotedBycurrentUser: Boolean,
-    downvotedBycurrentUser: Boolean
-}, {timestamps: true});
+}, { timestamps: true });
 
-const commentData = mongoose.model('Comment', commentSchema);
-module.exports = commentData;
+const commentModel = mongoose.model('Comment', commentSchema);
+const replyModel = mongoose.model('Reply', replySchema);
+
+module.exports = { commentModel, replyModel };

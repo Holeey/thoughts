@@ -40,6 +40,15 @@ export const replyComment = createAsyncThunk('/comment/reply', async (payload, t
         return thunkAPI.rejectWithValue(message)
     }
 })
+export const replyReplies = createAsyncThunk('/reply/replies', async (payload, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().auth.user.token
+        return await commentService.replyReplies(payload, token)
+    } catch (error) {
+        const message = error.response.data
+        return thunkAPI.rejectWithValue(message)
+    }
+})
 export const deleteComment = createAsyncThunk('comment/delete', async (commentId, thunkAPI) => {
     try {
         const token = thunkAPI.getState().auth.user.token
@@ -47,6 +56,26 @@ export const deleteComment = createAsyncThunk('comment/delete', async (commentId
     } catch (error) {
         const message = error.response.data
         return thunkAPI.rejectWithValue(message)
+    }
+})
+export const commentUpvotes = createAsyncThunk('comment/upvote', async (id, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().auth.user.token
+        return await commentService.upvotes(id, token)
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.message)
+        || error.message || error.toString()
+        return thunkAPI.rejectWithValue(message)  
+    }
+})
+export const commentDownvotes = createAsyncThunk('comment/downvote', async (id, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().auth.user.token
+        return await commentService.downvotes(id, token)
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.message)
+        || error.message || error.toString()
+        return thunkAPI.rejectWithValue(message)  
     }
 })
 
@@ -100,11 +129,49 @@ const commentSlice = createSlice({
             index = state.comments.findIndex((comment) => comment._id === action.payload._id)
             state.comments[index] = action.payload
         })
-        .addCase(replyComment.rejected, (state, action) =>{
+        .addCase(replyReplies.pending, (state) => {
+            state.isloading = true
+        })
+        .addCase(replyReplies.fulfilled, (state, action) => {
+            state.isloading = false
+            state.isSuccess = true
+            let index 
+            index = state.comments.findIndex((comment) => comment._id === action.payload._id)
+            state.comments[index] = action.payload
+        })
+        .addCase(replyReplies.rejected, (state, action) =>{
             state.isSuccess = false
             state.isError = true
             state.message = action.payload
         })
+        // .addCase(upvotes.pending, (state) => {
+        //     state.isLoading = true
+        // })
+        // .addCase(upvotes.fulfilled, (state, action) => {
+        //     state.isSuccess = true
+        //     const index = state.posts.findIndex(post => post._id === action.payload._id)
+        //     if (index !== -1) {
+        //     state.posts[index] = action.payload 
+        //     } 
+        // })
+        // .addCase(upvotes.rejected, (state, action) => {
+        //     state.isSuccess = false
+        //     state.posts = action.payload
+        // })
+        // .addCase(downvotes.pending, (state) => {
+        //     state.isLoading = true
+        // })
+        // .addCase(downvotes.fulfilled, (state, action) => {
+        //     state.isSuccess = true
+        //     const index = state.posts.findIndex(post => post._id === action.payload._id)
+        //     if (index !== -1) {
+        //     state.posts[index] = action.payload 
+        //     } 
+        // })
+        // .addCase(downvotes.rejected, (state, action) => {
+        //     state.isSuccess = false
+        //     state.posts = action.payload
+        // })
         .addCase(deleteComment.pending, (state) => {
             state.isloading = true
         })

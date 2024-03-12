@@ -9,20 +9,51 @@ import {
   faReply
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
-import { deleteComment, getComments, replyComment } from "../../../../../features/comments/commentSlice.js";
+import { commentDownvotes, commentUpvotes, deleteComment, getComments, replyComment } from "../../../../../features/comments/commentSlice.js";
 import './commentList.css'
-import Reply from "./Reply.jsx";
+import Reply from "./reply/Reply.jsx";
 
 const CommentList = ({ post }) => {
   const [reply, setReply] = useState("");
   const [selectedCommentId, setSelectedCommentId] = useState(null);
+  const [viewReplies, setViewReplies] = useState('');
 
   const dispatch = useDispatch();
   const { comments } = useSelector((state) => state.comment);
-
+  const { user } = useSelector((state) => state.auth);
+  
   const toggleVisibility = (commentId) => {
     setSelectedCommentId(commentId === selectedCommentId ? null : commentId);
   };
+  const replyVisibilty = () => {
+    setViewReplies(!viewReplies)
+  }
+
+  let upvoted;
+  let downvoted;
+  
+  
+    //function for toggling the upvote
+    const toggle_upvoted = (commentId, comment) => {
+      // Get user vote status from the database state
+      downvoted = comment.downvote.findIndex((vote) => vote.user._id === user.id);
+      if (downvoted !== -1) {
+        return;
+      } else {
+        dispatch(commentUpvotes(commentId))
+      }
+    };
+  
+    //function for toggling downvote
+    const toggle_downvoted = (commentId, comment) => {
+     // Get user vote status from the database state
+      upvoted = comment.upvote.findIndex((vote) => vote.user._id === user.id);
+      if (upvoted !== -1) {
+        return;
+      } else {
+        dispatch(commentDownvotes(commentId))
+      }
+    };
 
   const handleChange = (e) => {
     setReply(e.target.value);
@@ -55,15 +86,23 @@ const CommentList = ({ post }) => {
               <div key={comment._id} className="comment_item">
                 <p>user: {comment.user.nick_name}</p>
                 <p>{comment.comment}</p>
-                 <Reply comment={comment} />
+                <h6 onClick={replyVisibilty} style={{cursor: "pointer"}} >View replies</h6>
+                { viewReplies && ( <Reply comment={comment} />) }
+                
                 <div className="comment_feedback-options">
                   
                   <span>
-                    <FontAwesomeIcon icon={faUpLong} />
+                    <FontAwesomeIcon icon={faUpLong} 
+                    onClick={() => toggle_upvoted(comment._id, comment)}
+                    color={upvoted !== -1 ? "blue" : "black"}
+                    />
                     {comment.upvote}
                   </span>
                   <span>
-                    <FontAwesomeIcon icon={faDownLong} />
+                    <FontAwesomeIcon icon={faDownLong} 
+                    onClick={() => toggle_downvoted(comment._id, comment)}
+                    color={downvoted !== -1 ? "blue" : "black"}
+                    />
                     {comment.downvote}
                   </span>
                   <span>

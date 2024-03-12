@@ -45,6 +45,22 @@ const replyComment = async (commentId, reply, token) => {
         throw error;
     }
 };
+const replyReplies = async (payload, token) => {
+    const { commentId, replyId, newReply } = payload
+    
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    }
+    try {
+        const response = await axios.post(`${API_URL}/replyComment/${commentId}/replies/${replyId}`, {newReply} , config);
+        return response.data;
+    } catch (error) {
+        console.error('replyComment error:', error.response.data);
+        throw error;
+    }
+};
 
 const deleteComment = async (commentId, token) => {
     const config = {
@@ -59,6 +75,34 @@ const deleteComment = async (commentId, token) => {
         console.error('delete error:', error.response.data)
         throw error
     }
+}
+const upvotes = async (id, token) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+        const response = await axios.post(`${API_URL}/upvotes/${id}`, null, config)
+        return response.data
+    } catch (error) {
+        console.error('upvote error:', error.response.data)
+        throw error
+    }
+}
+const downvotes = async (id, token) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+        const response = await axios.post(`${API_URL}/downvotes/${id}`, null, config)
+        return response.data
+    } catch (error) {
+        console.error('downvote error:', error.response.data)
+        throw error
+    }
 } 
 
 const commentService = {
@@ -66,6 +110,9 @@ const commentService = {
     getComments,
     deleteComment,
     replyComment,
+    replyReplies,
+    upvotes,
+    downvotes
 }
 
 export default commentService

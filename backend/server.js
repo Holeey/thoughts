@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+require('events').EventEmitter.defaultMaxListeners = 15;
 
 const dotenv = require('dotenv')
 
