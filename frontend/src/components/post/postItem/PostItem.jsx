@@ -101,11 +101,11 @@ const PostItem = ({ post }) => {
             <div className="user_profile_img_container">
               <img
                 className="user_profile_img"
-                src={post.user.profile_image}
+                src={post.user?.profile_image}
                 alt="profile_Img"
               />
             </div>
-            <h4>{post.user.nick_name}</h4>
+            <h4>{post.user?.nick_name}</h4>
           </div>
           <div className="post_options_elipsis">
             <FontAwesomeIcon

@@ -144,41 +144,41 @@ const commentSlice = createSlice({
             state.isError = true
             state.message = action.payload
         })
-        // .addCase(upvotes.pending, (state) => {
-        //     state.isLoading = true
-        // })
-        // .addCase(upvotes.fulfilled, (state, action) => {
-        //     state.isSuccess = true
-        //     const index = state.posts.findIndex(post => post._id === action.payload._id)
-        //     if (index !== -1) {
-        //     state.posts[index] = action.payload 
-        //     } 
-        // })
-        // .addCase(upvotes.rejected, (state, action) => {
-        //     state.isSuccess = false
-        //     state.posts = action.payload
-        // })
-        // .addCase(downvotes.pending, (state) => {
-        //     state.isLoading = true
-        // })
-        // .addCase(downvotes.fulfilled, (state, action) => {
-        //     state.isSuccess = true
-        //     const index = state.posts.findIndex(post => post._id === action.payload._id)
-        //     if (index !== -1) {
-        //     state.posts[index] = action.payload 
-        //     } 
-        // })
-        // .addCase(downvotes.rejected, (state, action) => {
-        //     state.isSuccess = false
-        //     state.posts = action.payload
-        // })
+        .addCase(commentUpvotes.pending, (state) => {
+            state.isloading = true
+        })
+        .addCase(commentUpvotes.fulfilled, (state, action) => {
+            state.isSuccess = true
+            const index = state.comments.findIndex(comment => comment._id === action.payload._id)
+            if (index !== -1) {
+            state.comments[index] = action.payload 
+            } 
+        })
+        .addCase(commentUpvotes.rejected, (state, action) => {
+            state.isSuccess = false
+            state.comments = action.payload
+        })
+        .addCase(commentDownvotes.pending, (state) => {
+            state.isloading = true
+        })
+        .addCase(commentDownvotes.fulfilled, (state, action) => {
+            state.isSuccess = true
+            const index = state.comments.findIndex(comment => comment._id === action.payload._id)
+            if (index !== -1) {
+            state.comments[index] = action.payload 
+            } 
+        })
+        .addCase(commentDownvotes.rejected, (state, action) => {
+            state.isSuccess = false
+            state.comments = action.payload
+        })
         .addCase(deleteComment.pending, (state) => {
             state.isloading = true
         })
         .addCase(deleteComment.fulfilled, (state, action) => {
             state.isloading = false
             state.isSuccess = true
-            state.comments = state.comments.filter(post => post._id !== action.payload.id);
+            state.comments = state.comments.filter(comment => comment._id !== action.payload.id);
         })
         .addCase(deleteComment.rejected, (state, action) =>{
             state.isSuccess = false

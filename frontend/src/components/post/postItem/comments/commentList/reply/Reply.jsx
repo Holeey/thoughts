@@ -6,7 +6,7 @@ import { replyReplies } from "../../../../../../features/comments/commentSlice";
 const RecursiveReply = ({ reply }) => {
   const [newReply, setNewReply] = useState("");
   const [selectedCommentId, setSelectedCommentId] = useState(null);
-  const [viewReplies, setViewReplies] = useState("");
+  const [viewReplies, setViewReplies] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -45,8 +45,8 @@ const RecursiveReply = ({ reply }) => {
             </div>
           </div>
           <div>
-            <span>upvote:{reply.upvote}</span>
-            <span>downvote: {reply.downvote}</span>
+            <span>upvote:{reply.upvoteValue}</span>
+            <span>downvote: {reply.downvoteValue}</span>
           </div>
           <h6 onClick={() => toggleVisibility(reply._id)}>Reply</h6>
 

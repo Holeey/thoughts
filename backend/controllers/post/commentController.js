@@ -26,25 +26,23 @@ const populateComments = async (comment) => {
     const populatedReply = await populateReplies(reply);
     populatedReplies.push(populatedReply);
   }
-  return { ...comment.toObject(), replies: populatedReplies };
+  return {...comment.toObject(), replies: populatedReplies } ;
 };
-
 exports.getComments = async (req, res) => {
   try {
-    const comments = await commentModel
-      .find({ post: req.params.id })
-      .populate("user");
-
+    const comments = await commentModel.find({ post: req.params.id }).populate('user')
+    console.log('comments:', comments)
     const populatedComments = await Promise.all(
       comments.map(async (comment) => {
-        return await populateComments(comment);
+      return await populateComments(comment)
       })
     );
 
     if (populatedComments.length === 0) {
       return res.status(401).json("No replies found for the specified post");
-    }
+    }console.log('populated:', populatedComments)
     return res.status(201).json(populatedComments);
+    
 
 } catch (error) {
     console.error("getComment:", error);
