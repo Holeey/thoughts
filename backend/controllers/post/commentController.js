@@ -31,7 +31,6 @@ const populateComments = async (comment) => {
 exports.getComments = async (req, res) => {
   try {
     const comments = await commentModel.find({ post: req.params.id }).populate('user')
-    console.log('comments:', comments)
     const populatedComments = await Promise.all(
       comments.map(async (comment) => {
       return await populateComments(comment)
@@ -40,7 +39,7 @@ exports.getComments = async (req, res) => {
 
     if (populatedComments.length === 0) {
       return res.status(401).json("No replies found for the specified post");
-    }console.log('populated:', populatedComments)
+    }
     return res.status(201).json(populatedComments);
     
 
@@ -84,7 +83,7 @@ exports.replyComment = async (req, res) => {
     const { reply } = req.body;
 
     const comment = await commentModel.findById({ _id: req.params.commentId });
-    const postId = comment.post;
+    const {postId} = comment.post;
 
     if (!postId) {
       return res.status(404).json("No post found!");
@@ -206,15 +205,16 @@ exports.deleteComment = async (req, res) => {
   }
 };
 
-////// votes routes handler ///////////
+////// votes routes handler for comment and replies ///////////
 exports.commentUpvotes = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
   
     try {
-      const comment = await commentModel.findById(req.params.id);
+      const comment = await commentModel.findOne({ _id: req.params.id });
+      const reply = await replyModel.findOne({ _id: req.params.id });
   
-      if (!comment) {
+      if (!(comment || reply)) {
         await session.abortTransaction();
         session.endSession();
         return res.status(404).json({ error: "comment not found!" });
@@ -225,18 +225,17 @@ exports.commentUpvotes = async (req, res) => {
         session.endSession();
         return res.status(401).json({ error: "Unauthorized user!" });
       }
-  
-      const existingUpvoteIndex = comment.upvote.findIndex((vote) =>
-        vote.user && vote.user._id.equals(req.user._id)
-      );
-  
-      if (existingUpvoteIndex === -1) {
+      
+      if (comment) {
+         const existingCommentUpvoteIndex = comment.upvote.findIndex((vote) =>
+        vote.user && vote.user._id.equals(req.user._id));  
+      if (existingCommentUpvoteIndex === -1) {
         // User has not upvoted, add the upvote
         comment.upvote.push({ user: req.user });
         comment.upvoteValue += 1;
       } else {
         // User has already upvoted, remove the upvote
-        comment.upvote.splice(existingUpvoteIndex, 1);
+        comment.upvote.splice(existingCommentUpvoteIndex, 1);
         comment.upvoteValue -= 1;
       }
   
@@ -249,11 +248,38 @@ exports.commentUpvotes = async (req, res) => {
       await session.commitTransaction();
       session.endSession();
       return res.status(200).json(updatedComment);
+      
+      }else if (reply){
+       const existingReplyUpvoteIndex = reply.upvote.findIndex((vote) =>
+      vote.user && vote.user._id.equals(req.user._id)
+    );     
+
+    if (existingReplyUpvoteIndex === -1) {
+      // User has not upvoted, add the upvote
+      reply.upvote.push({ user: req.user });
+      reply.upvoteValue += 1;
+    } else {
+      // User has already upvoted, remove the upvote
+      reply.upvote.splice(existingReplyUpvoteIndex, 1);
+      reply.upvoteValue -= 1;
+    }
+
+    const updatedReply = await replyModel.findByIdAndUpdate(
+      req.params.id,
+      reply,
+      { new: true }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+    return res.status(200).json(updatedReply);
+      }
+
 
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
-      console.error("comment-upvote error:", error);
+      console.error("comment/reply-upvote error:", error);
       return res.status(500).json({ error: "Internal Server Error" });
     }
   };
@@ -263,12 +289,13 @@ exports.commentUpvotes = async (req, res) => {
     session.startTransaction();
   
     try {
-      const comment = await commentModel.findById(req.params.id);
+      const comment = await commentModel.findOne({ _id: req.params.id });
+      const reply = await replyModel.findOne({ _id: req.params.id });
   
-      if (!comment) {
+      if (!(comment || reply)) {
         await session.abortTransaction();
         session.endSession();
-        return res.status(404).json({ error: "Post not found!" });
+        return res.status(404).json({ error: "comment not found!" });
       }
   
       if (!req.user) {
@@ -276,18 +303,19 @@ exports.commentUpvotes = async (req, res) => {
         session.endSession();
         return res.status(401).json({ error: "Unauthorized user!" });
       }
-  
-      const existingDownvoteIndex = comment.downvote.findIndex((vote) =>
+
+      if (comment) {
+       const existingCommentDownvoteIndex = comment.downvote.findIndex((vote) =>
         vote.user && vote.user._id.equals(req.user._id)
       );
   
-      if (existingDownvoteIndex === -1) {
+      if (existingCommentDownvoteIndex === -1) {
         // User has not downvoted, add the downvote
         comment.downvote.push({ user: req.user });
         comment.downvoteValue += 1;
       } else {
         // User has already downvoted, remove the downvote
-        comment.downvote.splice(existingDownvoteIndex, 1);
+        comment.downvote.splice(existingCommentDownvoteIndex, 1);
         comment.downvoteValue -= 1;
       }
   
@@ -299,11 +327,38 @@ exports.commentUpvotes = async (req, res) => {
   
       await session.commitTransaction();
       session.endSession();
-      return res.status(200).json(updatedComment);
+      return res.status(200).json(updatedComment); 
+      } else if (reply) {
+        const existingReplyDownvoteIndex = reply.downvote.findIndex((vote) =>
+        vote.user && vote.user._id.equals(req.user._id)
+      );
+  
+      if (existingReplyDownvoteIndex === -1) {
+        // User has not downvoted, add the downvote
+        reply.downvote.push({ user: req.user });
+        reply.downvoteValue += 1;
+      } else {
+        // User has already downvoted, remove the downvote
+        reply.downvote.splice(existingReplyDownvoteIndex, 1);
+        reply.downvoteValue -= 1;
+      }
+  
+      const updatedReply = await replyModel.findByIdAndUpdate(
+        req.params.id,
+        reply,
+        { new: true }
+      );
+  
+      await session.commitTransaction();
+      session.endSession();
+      return res.status(200).json(updatedReply); 
+      }
+  
+    
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
-      console.error("comment-downvote error:", error);
+      console.error("comment/reply-downvote error:", error);
       return res.status(500).json({ error: "Internal Server Error" });
     }
   };

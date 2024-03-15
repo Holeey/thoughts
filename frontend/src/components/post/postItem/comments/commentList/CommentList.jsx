@@ -6,11 +6,16 @@ import {
   faUpLong,
   faPaperPlane,
   faDownLong,
-  faReply
+  faReply,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
-import { commentUpvotes, deleteComment, getComments, replyComment } from "../../../../../features/comments/commentSlice.js";
-import './commentList.css'
+import {
+  commentUpvotes,
+  deleteComment,
+  getComments,
+  replyComment,
+} from "../../../../../features/comments/commentSlice.js";
+import "./commentList.css";
 import Reply from "./reply/Reply.jsx";
 
 const CommentList = ({ post }) => {
@@ -22,12 +27,13 @@ const CommentList = ({ post }) => {
   const { comments } = useSelector((state) => state.comment);
   const { user } = useSelector((state) => state.auth);
 
-  let upvoted
+  let upvoted;
+  let downvoted;
 
   const replyVisibilty = () => {
     setViewReplies(!viewReplies);
   };
-  
+
   const toggleVisibility = (commentId) => {
     setSelectedCommentId(commentId === selectedCommentId ? null : commentId);
   };
@@ -40,15 +46,15 @@ const CommentList = ({ post }) => {
     e.preventDefault();
     const replyData = {
       commentId,
-      reply
+      reply,
     };
     dispatch(replyComment(replyData));
     setReply("");
     setSelectedCommentId(null); // Close the reply form after submitting
   };
   const handleDeleteComment = (commentId) => {
-    dispatch(deleteComment(commentId))
-  }
+    dispatch(deleteComment(commentId));
+  };
 
   useEffect(() => {
     dispatch(getComments(post._id));
@@ -64,32 +70,59 @@ const CommentList = ({ post }) => {
                 <p>user: {comment.user.nick_name}</p>
                 <p>{comment.comment}</p>
 
-                <h6 onClick={replyVisibilty} style={{cursor: 'pointer'}}>view replies</h6>
-                { viewReplies && <Reply comment={comment} />}
+                <h6 onClick={replyVisibilty} style={{ cursor: "pointer" }}>
+                  view replies
+                </h6>
+                {viewReplies && <Reply comment={comment} />}
                 <div className="comment_feedback-options">
-                  
-                  <span>
-                    <FontAwesomeIcon icon={faUpLong}
+                  <span
                     onClick={() => {
-                       upvoted = comment.upvote.findIndex(( vote ) => vote && vote.user._id === user.id)
-                      if (upvoted === -1) {
-                        dispatch(commentUpvotes(comment._id))
-                      }else {
-                        return
+                      downvoted = comment.downvote.findIndex(
+                        (vote) => vote && vote.user._id === user.id
+                      );
+                      if (downvoted !== -1) {
+                        return;
+                      } else {
+                        dispatch(commentUpvotes(comment._id));
                       }
                     }}
-                    color={upvoted ? 'blue' : 'white'}
-                     />
+                  >
+                    <FontAwesomeIcon
+                      icon={faUpLong}
+                      color={upvoted !== -1 ? "blue" : "white"}
+                      cursor={"pointer"}
+                    />
                     {comment.upvoteValue}
                   </span>
-                  <span>
-                    <FontAwesomeIcon icon={faDownLong} />
+                  <span
+                    onClick={() => {
+                      upvoted = comment.upvote.findIndex(
+                        (vote) => vote && vote.user._id === user.id
+                      );
+                      if (upvoted !== -1) {
+                        return;
+                      } else {
+                        dispatch(commentUpvotes(comment._id));
+                      }
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faDownLong}
+                      color={downvoted !== -1 ? "red" : "white"}
+                      cursor={"pointer"}
+                    />
                     {comment.downvoteValue}
                   </span>
                   <span>
-                    <FontAwesomeIcon icon={faReply} onClick={() => toggleVisibility(comment._id)} />
+                    <FontAwesomeIcon
+                      icon={faReply}
+                      onClick={() => toggleVisibility(comment._id)}
+                    />
                     {selectedCommentId === comment._id && (
-                      <form onSubmit={(e) => handleSubmit(e, comment._id)} className="reply_form">
+                      <form
+                        onSubmit={(e) => handleSubmit(e, comment._id)}
+                        className="reply_form"
+                      >
                         <input
                           onChange={handleChange}
                           type="text"
@@ -98,12 +131,18 @@ const CommentList = ({ post }) => {
                           name="reply"
                           id="reply"
                         />
-                        <button type="submit"><FontAwesomeIcon icon={faPaperPlane} /></button>
+                        <button type="submit">
+                          <FontAwesomeIcon icon={faPaperPlane} />
+                        </button>
                       </form>
                     )}
                   </span>
                   <span>
-                   <FontAwesomeIcon icon={faTrash} color="crimson" onClick={() => handleDeleteComment(comment._id)} />
+                    <FontAwesomeIcon
+                      icon={faTrash}
+                      color="crimson"
+                      onClick={() => handleDeleteComment(comment._id)}
+                    />
                   </span>
                 </div>
               </div>

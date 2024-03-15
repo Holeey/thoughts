@@ -1,7 +1,13 @@
 import { useSelector, useDispatch } from "react-redux";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEllipsisVertical,
+  faUpLong,
+  faDownLong,
+} from "@fortawesome/free-solid-svg-icons";
 import "./reply.css";
 import { Fragment, useState } from "react";
-import { replyReplies } from "../../../../../../features/comments/commentSlice";
+import { commentDownvotes, commentUpvotes, replyReplies } from "../../../../../../features/comments/commentSlice";
 
 const RecursiveReply = ({ reply }) => {
   const [newReply, setNewReply] = useState("");
@@ -9,6 +15,31 @@ const RecursiveReply = ({ reply }) => {
   const [viewReplies, setViewReplies] = useState(false);
 
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+
+    // Get user vote status from the database state
+    const upvoted = reply.upvote.findIndex((vote) => vote.user._id === user.id);
+    const downvoted = reply.downvote.findIndex(
+      (vote) => vote.user._id === user.id
+    );
+  
+    //function for toggling the upvote
+    const toggle_upvoted = () => {
+      if (downvoted !== -1) {
+        return;
+      } else {
+        dispatch(commentUpvotes(reply._id));
+      }
+    };
+  
+    //function for toggling downvote
+    const toggle_downvoted = () => {
+      if (upvoted !== -1) {
+        return;
+      } else {
+        dispatch(commentDownvotes(reply._id));
+      }
+    };
 
   const replyVisibilty = () => {
     setViewReplies(!viewReplies);
@@ -45,10 +76,23 @@ const RecursiveReply = ({ reply }) => {
             </div>
           </div>
           <div>
-            <span>upvote:{reply.upvoteValue}</span>
-            <span>downvote: {reply.downvoteValue}</span>
+            <span onClick={toggle_upvoted}>
+            <FontAwesomeIcon icon={faUpLong} 
+            cursor={'pointer'}
+            color={upvoted !== -1 ? "blue" : "white"}
+            />
+            {reply.upvoteValue}
+            </span>
+            <span onClick={toggle_downvoted}>
+            <FontAwesomeIcon icon={faDownLong} 
+            cursor={'pointer'}
+            color={downvoted !== -1 ? "red" : "white"}
+            /> 
+            {reply.downvoteValue}
+            </span>
+            <h6 onClick={() => toggleVisibility(reply._id)} style={{cursor: 'pointer'}}>Reply</h6>
           </div>
-          <h6 onClick={() => toggleVisibility(reply._id)}>Reply</h6>
+          
 
           {selectedCommentId === reply._id && (
             <>
@@ -74,14 +118,14 @@ const RecursiveReply = ({ reply }) => {
         {reply.replies && (
           <div className="nested-replies">
             {reply.replies.map((nestedReply) => (
-              <>
+              <Fragment key={nestedReply._id}>
                 <h6 onClick={replyVisibilty} style={{ cursor: "pointer" }}>
                   view replies
                 </h6>
                 {viewReplies && (
                   <RecursiveReply key={nestedReply._id} reply={nestedReply} />
                 )}
-              </>
+              </Fragment>
             ))}
           </div>
         )}
