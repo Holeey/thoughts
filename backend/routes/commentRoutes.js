@@ -11,5 +11,5 @@ router.post('/replyComment/:commentId/replies/:replyId', protect, replyReplies);
 router.post('/upvotes/:id', protect, commentUpvotes)
 router.post('/downvotes/:id', protect, commentDownvotes)
 router.put('/updateComment/:id', protect, updateComment)
-router.delete('/deleteComment/:id', protect, deleteComment)
+router.delete('/deleteComment/:commentId', protect, deleteComment)
 module.exports = router

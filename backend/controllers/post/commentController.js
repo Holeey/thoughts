@@ -2,58 +2,42 @@ const { commentModel, replyModel } = require("../../model/commentModel.js");
 const postModel = require("../../model/postModel.js");
 const mongoose = require("mongoose");
 
-const populateReplies = async (reply) => {
-    //create a new instance of the object to convert it to a mongoose document
-    if (!reply || reply.replies) {
-      return 
-    }
-    reply = await replyModel.findOne({ _id: reply._id }).populate("user");
-  console.log('reply:', reply)
-    // If there are nested replies, recursively populate them
-    if (reply.replies && reply.replies.length > 0) {
-      // Add null check for reply.replies
-      reply.replies = await Promise.all(
-        reply.replies.map(async (nestedReply) => {
-          return await populateReplies(nestedReply);
-        })
-      );
-    }
-  
-  return reply;
-};
-const populateComments = async (comment) => {
-  const populatedReplies = [];
-
-  // Check if comment has replies before iterating
-  if (comment.replies && comment.replies.length > 0) {
-      for (const reply of comment.replies) {
-          const populatedReply = await populateReplies(reply);
-          populatedReplies.push(populatedReply);
-      }
-  }
-  return { ...comment.toObject(), replies: populatedReplies };
-};
-
 exports.getComments = async (req, res) => {
-  try {
-    const comments = await commentModel
-      .find({ post: req.params.id })
-      .populate("user");
-    const populatedComments = await Promise.all(
-      comments.map(async (comment) => {
-        return await populateComments(comment);
-      })
-    );
+  const populateReplies = async (replyId) => {
+    const reply = await replyModel.findById(replyId).populate('user');
+    if (!reply) return null;
+    const populatedReplies = await Promise.all((reply.replies || []).map(async (nestedReply) => {
+      return await populateReplies(nestedReply);
+    }));
+    return { ...reply.toObject(), replies: populatedReplies };
+  };
 
-    if (populatedComments.length === 0) {
-      return res.status(401).json("No replies found for the specified post");
+  const populateComments = async (commentId) => {
+    const comment = await commentModel.findById(commentId).populate('user');
+    if (!comment) return null;
+    const populatedReplies = await Promise.all((comment.replies || []).map(async (replyId) => {
+      return await populateReplies(replyId);
+    }));
+    return { ...comment.toObject(), replies: populatedReplies };
+  };
+
+  try {
+    const comments = await commentModel.find({ post: req.params.id });
+    if (!comments || comments.length === 0) {
+      return res.status(404).json("No comments found for the specified post");
     }
-    return res.status(201).json(populatedComments);
+
+    const populatedComments = await Promise.all(comments.map(async (comment) => {
+      return await populateComments(comment._id);
+    }));
+
+    return res.status(200).json(populatedComments);
   } catch (error) {
-    console.error("getComment:", error);
-    return res.status(500).json("Internal error:", error);
+    console.error("getComments:", error);
+    return res.status(500).json("Internal error:", error.message);
   }
 };
+
 exports.postComment = async (req, res) => {
   try {
     const { reply } = req.body;
@@ -189,58 +173,75 @@ exports.updateComment = async (req, res) => {
 };
 
 // Delete route handler
-
- const recursivelyDeleteReply = async (replyId) => {
-    const reply = await replyModel.findById({_id: replyId})
-    if(!reply) {
-      return
-    }
-    //recursively delete replies
-    for (const childReplyId of reply.replies) {
-      await recursivelyDeleteReply(childReplyId)
-    }
-    //delete current reply
-    await replyModel.findByIdAndDelete({_id: replyId})
-  }
-exports.deleteComment = async (req, res) => {
+const recursivelyDeleteReply = async (replyId) => {
   try {
-    if (!req.user) {
-      return res.status(400).json("Unauthorized user!");
-    }
-    const comment = await commentModel.findById({ _id: req.params.id });
-    const reply = await replyModel.findById({ _id: req.params.id });
-
-    if (comment) {
-      if (req.user._id.toString() !== comment.user.toString()) {
-        return res.status(400).json("Unauthorized user!");
+      const reply = await replyModel.findById(replyId);
+      if (!reply) {
+          return;
       }
-      await commentModel.findByIdAndDelete(req.params.id);
-
-     // Recursively delete the replies of the comment
-    for (const replyId of comment.replies) {
-      await recursivelyDeleteReply(replyId);
-    }
-
-      return res.status(201).json({ id: req.params.id });
-    } else if (reply) {
-      if (req.user._id.toString() !== reply.user.toString()) {
-        return res.status(400).json("Unauthorized user!");
+      // Recursively delete child replies
+      for (const childReplyId of reply.replies) {
+          await recursivelyDeleteReply(childReplyId); // Correct usage of childReplyId
       }
-      // Delete the reply
-      await replyModel.findByIdAndDelete(req.params.id);
-
-      // Remove the deleted reply from its parent's replies array
-      await commentModel.updateOne(
-        { replies: req.params.id },
-        { $pull: { replies: req.params.id } }
-      );
-
-      return res.status(201).json({ id: req.params.id });
-    }
+      // Delete current reply
+      await replyModel.findByIdAndDelete(replyId);
   } catch (error) {
-    return res.status(500).json("Internal error!", error);
+      console.error('Error deleting reply:', error);
   }
 };
+
+exports.deleteComment = async (req, res) => {
+  try {
+      if (!req.user) {
+          return res.status(400).json("Unauthorized user!");
+      }
+
+      // Check if the ID corresponds to a parent comment
+      const parentComment = await commentModel.findById(req.params.commentId);
+      if (parentComment) {
+          // Check if the user is authorized to delete the parent comment
+          if (req.user._id.toString() !== parentComment.user.toString()) {
+              return res.status(400).json("Unauthorized user!");
+          }
+
+          // Recursively delete the replies of the parent comment
+          for (const replyId of parentComment.replies) {
+              await recursivelyDeleteReply(replyId);
+          }
+
+          // Delete the parent comment
+          await commentModel.findByIdAndDelete(req.params.parentCommentId);
+
+          return res.status(201).json({ id: req.params.parentCommentId, type: 'parent' });
+      }
+
+      // Check if the ID corresponds to a child comment
+      const childComment = await replyModel.findById(req.params.commentId);
+      if (childComment) {
+          // Check if the user is authorized to delete the child comment
+          if (req.user._id.toString() !== childComment.user.toString()) {
+              return res.status(400).json("Unauthorized user!");
+          }
+
+          // Delete the child comment
+          await replyModel.findByIdAndDelete(req.params.childCommentId);
+
+          // Remove the deleted child comment from its parent's replies array
+          await commentModel.updateOne(
+              { replies: req.params.childCommentId },
+              { $pull: { replies: req.params.childCommentId } }
+          );
+
+          return res.status(201).json({ id: req.params.childCommentId, type: 'child' });
+      }
+
+      // If neither a parent nor child comment was found
+      return res.status(404).json("Comment not found!");
+  } catch (error) {
+      return res.status(500).json("Internal error!", error);
+  }
+};
+
 
 ////// votes routes handler for comment and replies ///////////
 exports.commentUpvotes = async (req, res) => {
