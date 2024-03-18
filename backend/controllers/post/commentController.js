@@ -3,37 +3,45 @@ const postModel = require("../../model/postModel.js");
 const mongoose = require("mongoose");
 
 const populateReplies = async (reply) => {
-  // Check if 'reply' is a Mongoose document
-  if (!(reply instanceof mongoose.Document)) {
     //create a new instance of the object to convert it to a mongoose document
+    if (!reply || reply.replies) {
+      return 
+    }
     reply = await replyModel.findOne({ _id: reply._id }).populate("user");
-
+  console.log('reply:', reply)
     // If there are nested replies, recursively populate them
-    if (reply.replies.length > 0) {
+    if (reply.replies && reply.replies.length > 0) {
+      // Add null check for reply.replies
       reply.replies = await Promise.all(
         reply.replies.map(async (nestedReply) => {
           return await populateReplies(nestedReply);
         })
       );
     }
-  }
+  
   return reply;
 };
 const populateComments = async (comment) => {
   const populatedReplies = [];
 
-  for (const reply of comment.replies) {
-    const populatedReply = await populateReplies(reply);
-    populatedReplies.push(populatedReply);
+  // Check if comment has replies before iterating
+  if (comment.replies && comment.replies.length > 0) {
+      for (const reply of comment.replies) {
+          const populatedReply = await populateReplies(reply);
+          populatedReplies.push(populatedReply);
+      }
   }
-  return {...comment.toObject(), replies: populatedReplies } ;
+  return { ...comment.toObject(), replies: populatedReplies };
 };
+
 exports.getComments = async (req, res) => {
   try {
-    const comments = await commentModel.find({ post: req.params.id }).populate('user')
+    const comments = await commentModel
+      .find({ post: req.params.id })
+      .populate("user");
     const populatedComments = await Promise.all(
       comments.map(async (comment) => {
-      return await populateComments(comment)
+        return await populateComments(comment);
       })
     );
 
@@ -41,9 +49,7 @@ exports.getComments = async (req, res) => {
       return res.status(401).json("No replies found for the specified post");
     }
     return res.status(201).json(populatedComments);
-    
-
-} catch (error) {
+  } catch (error) {
     console.error("getComment:", error);
     return res.status(500).json("Internal error:", error);
   }
@@ -124,7 +130,6 @@ exports.replyReplies = async (req, res) => {
 
     const replyId = await replyModel.findById({ _id: req.params.replyId });
 
-
     if (!replyId) {
       return res.status(404).json("No comment found!");
     }
@@ -182,6 +187,21 @@ exports.updateComment = async (req, res) => {
     return res.status.json("Internal error");
   }
 };
+
+// Delete route handler
+
+ const recursivelyDeleteReply = async (replyId) => {
+    const reply = await replyModel.findById({_id: replyId})
+    if(!reply) {
+      return
+    }
+    //recursively delete replies
+    for (const childReplyId of reply.replies) {
+      await recursivelyDeleteReply(childReplyId)
+    }
+    //delete current reply
+    await replyModel.findByIdAndDelete({_id: replyId})
+  }
 exports.deleteComment = async (req, res) => {
   try {
     if (!req.user) {
@@ -191,22 +211,32 @@ exports.deleteComment = async (req, res) => {
     const reply = await replyModel.findById({ _id: req.params.id });
 
     if (comment) {
-       if (req.user._id.toString() !== comment.user.toString()) {
-      return res.status(400).json("Unauthorized user!");
+      if (req.user._id.toString() !== comment.user.toString()) {
+        return res.status(400).json("Unauthorized user!");
+      }
+      await commentModel.findByIdAndDelete(req.params.id);
+
+     // Recursively delete the replies of the comment
+    for (const replyId of comment.replies) {
+      await recursivelyDeleteReply(replyId);
     }
-    await commentModel.findByIdAndDelete(req.params.id);
 
-    return res.status(201).json({ id: req.params.id });
-
+      return res.status(201).json({ id: req.params.id });
     } else if (reply) {
       if (req.user._id.toString() !== reply.user.toString()) {
         return res.status(400).json("Unauthorized user!");
       }
+      // Delete the reply
       await replyModel.findByIdAndDelete(req.params.id);
-  
+
+      // Remove the deleted reply from its parent's replies array
+      await commentModel.updateOne(
+        { replies: req.params.id },
+        { $pull: { replies: req.params.id } }
+      );
+
       return res.status(201).json({ id: req.params.id });
     }
-    
   } catch (error) {
     return res.status(500).json("Internal error!", error);
   }
@@ -214,28 +244,29 @@ exports.deleteComment = async (req, res) => {
 
 ////// votes routes handler for comment and replies ///////////
 exports.commentUpvotes = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-  
-    try {
-      const comment = await commentModel.findOne({ _id: req.params.id });
-      const reply = await replyModel.findOne({ _id: req.params.id });
-  
-      if (!(comment || reply)) {
-        await session.abortTransaction();
-        session.endSession();
-        return res.status(404).json({ error: "comment not found!" });
-      }
-  
-      if (!req.user) {
-        await session.abortTransaction();
-        session.endSession();
-        return res.status(401).json({ error: "Unauthorized user!" });
-      }
-      
-      if (comment) {
-         const existingCommentUpvoteIndex = comment.upvote.findIndex((vote) =>
-        vote.user && vote.user._id.equals(req.user._id));  
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const comment = await commentModel.findOne({ _id: req.params.id });
+    const reply = await replyModel.findOne({ _id: req.params.id });
+
+    if (!(comment || reply)) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ error: "comment not found!" });
+    }
+
+    if (!req.user) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(401).json({ error: "Unauthorized user!" });
+    }
+
+    if (comment) {
+      const existingCommentUpvoteIndex = comment.upvote.findIndex(
+        (vote) => vote.user && vote.user._id.equals(req.user._id)
+      );
       if (existingCommentUpvoteIndex === -1) {
         // User has not upvoted, add the upvote
         comment.upvote.push({ user: req.user });
@@ -245,77 +276,74 @@ exports.commentUpvotes = async (req, res) => {
         comment.upvote.splice(existingCommentUpvoteIndex, 1);
         comment.upvoteValue -= 1;
       }
-  
+
       const updatedComment = await commentModel.findByIdAndUpdate(
         req.params.id,
         comment,
         { new: true }
       );
-  
+
       await session.commitTransaction();
       session.endSession();
       return res.status(200).json(updatedComment);
-      
-      }else if (reply){
-       const existingReplyUpvoteIndex = reply.upvote.findIndex((vote) =>
-      vote.user && vote.user._id.equals(req.user._id)
-    );     
+    } else if (reply) {
+      const existingReplyUpvoteIndex = reply.upvote.findIndex(
+        (vote) => vote.user && vote.user._id.equals(req.user._id)
+      );
 
-    if (existingReplyUpvoteIndex === -1) {
-      // User has not upvoted, add the upvote
-      reply.upvote.push({ user: req.user });
-      reply.upvoteValue += 1;
-    } else {
-      // User has already upvoted, remove the upvote
-      reply.upvote.splice(existingReplyUpvoteIndex, 1);
-      reply.upvoteValue -= 1;
-    }
-
-    const updatedReply = await replyModel.findByIdAndUpdate(
-      req.params.id,
-      reply,
-      { new: true }
-    );
-
-    await session.commitTransaction();
-    session.endSession();
-    return res.status(200).json(updatedReply);
+      if (existingReplyUpvoteIndex === -1) {
+        // User has not upvoted, add the upvote
+        reply.upvote.push({ user: req.user });
+        reply.upvoteValue += 1;
+      } else {
+        // User has already upvoted, remove the upvote
+        reply.upvote.splice(existingReplyUpvoteIndex, 1);
+        reply.upvoteValue -= 1;
       }
 
+      const updatedReply = await replyModel.findByIdAndUpdate(
+        req.params.id,
+        reply,
+        { new: true }
+      );
 
-    } catch (error) {
+      await session.commitTransaction();
+      session.endSession();
+      return res.status(200).json(updatedReply);
+    }
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("comment/reply-upvote error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.commentDownvotes = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const comment = await commentModel.findOne({ _id: req.params.id });
+    const reply = await replyModel.findOne({ _id: req.params.id });
+
+    if (!(comment || reply)) {
       await session.abortTransaction();
       session.endSession();
-      console.error("comment/reply-upvote error:", error);
-      return res.status(500).json({ error: "Internal Server Error" });
+      return res.status(404).json({ error: "comment not found!" });
     }
-  };
-  
-  exports.commentDownvotes = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-  
-    try {
-      const comment = await commentModel.findOne({ _id: req.params.id });
-      const reply = await replyModel.findOne({ _id: req.params.id });
-  
-      if (!(comment || reply)) {
-        await session.abortTransaction();
-        session.endSession();
-        return res.status(404).json({ error: "comment not found!" });
-      }
-  
-      if (!req.user) {
-        await session.abortTransaction();
-        session.endSession();
-        return res.status(401).json({ error: "Unauthorized user!" });
-      }
 
-      if (comment) {
-       const existingCommentDownvoteIndex = comment.downvote.findIndex((vote) =>
-        vote.user && vote.user._id.equals(req.user._id)
+    if (!req.user) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(401).json({ error: "Unauthorized user!" });
+    }
+
+    if (comment) {
+      const existingCommentDownvoteIndex = comment.downvote.findIndex(
+        (vote) => vote.user && vote.user._id.equals(req.user._id)
       );
-  
+
       if (existingCommentDownvoteIndex === -1) {
         // User has not downvoted, add the downvote
         comment.downvote.push({ user: req.user });
@@ -325,21 +353,21 @@ exports.commentUpvotes = async (req, res) => {
         comment.downvote.splice(existingCommentDownvoteIndex, 1);
         comment.downvoteValue -= 1;
       }
-  
+
       const updatedComment = await commentModel.findByIdAndUpdate(
         req.params.id,
         comment,
         { new: true }
       );
-  
+
       await session.commitTransaction();
       session.endSession();
-      return res.status(200).json(updatedComment); 
-      } else if (reply) {
-        const existingReplyDownvoteIndex = reply.downvote.findIndex((vote) =>
-        vote.user && vote.user._id.equals(req.user._id)
+      return res.status(200).json(updatedComment);
+    } else if (reply) {
+      const existingReplyDownvoteIndex = reply.downvote.findIndex(
+        (vote) => vote.user && vote.user._id.equals(req.user._id)
       );
-  
+
       if (existingReplyDownvoteIndex === -1) {
         // User has not downvoted, add the downvote
         reply.downvote.push({ user: req.user });
@@ -349,25 +377,21 @@ exports.commentUpvotes = async (req, res) => {
         reply.downvote.splice(existingReplyDownvoteIndex, 1);
         reply.downvoteValue -= 1;
       }
-  
+
       const updatedReply = await replyModel.findByIdAndUpdate(
         req.params.id,
         reply,
         { new: true }
       );
-  
+
       await session.commitTransaction();
       session.endSession();
-      return res.status(200).json(updatedReply); 
-      }
-  
-    
-    } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
-      console.error("comment/reply-downvote error:", error);
-      return res.status(500).json({ error: "Internal Server Error" });
+      return res.status(200).json(updatedReply);
     }
-  };
-  
-  
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("comment/reply-downvote error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};

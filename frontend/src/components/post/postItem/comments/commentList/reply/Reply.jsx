@@ -8,10 +8,10 @@ import {
 import "./reply.css";
 import { Fragment, useState } from "react";
 import {
-  commentDownvotes,
-  commentUpvotes,
   replyReplies,
-  deleteComment
+  deleteReply,
+  replyDownvotes,
+  replyUpvotes
 } from "../../../../../../features/comments/commentSlice";
 
 const RecursiveReply = ({ reply }) => {
@@ -33,7 +33,7 @@ const RecursiveReply = ({ reply }) => {
     if (downvoted !== -1) {
       return;
     } else {
-      dispatch(commentUpvotes(reply._id));
+      dispatch(replyUpvotes(reply._id));
     }
   };
 
@@ -42,7 +42,7 @@ const RecursiveReply = ({ reply }) => {
     if (upvoted !== -1) {
       return;
     } else {
-      dispatch(commentDownvotes(reply._id));
+      dispatch(replyDownvotes(reply._id));
     }
   };
 
@@ -70,7 +70,7 @@ const RecursiveReply = ({ reply }) => {
     setSelectedCommentId(null);
   };
   const handleDeleteComment = (commentId) => {
-    dispatch(deleteComment(commentId));
+    dispatch(deleteReply(commentId));
   };
 
   return (
@@ -114,6 +114,7 @@ const RecursiveReply = ({ reply }) => {
                               <span>
                     <FontAwesomeIcon
                       icon={faTrash}
+                      cursor={'pointer'}
                       color="crimson"
                       onClick={() => handleDeleteComment(reply._id)}
                     />

@@ -78,6 +78,35 @@ export const commentDownvotes = createAsyncThunk('comment/downvote', async (id, 
         return thunkAPI.rejectWithValue(message)  
     }
 })
+export const replyUpvotes = createAsyncThunk('reply/upvote', async (id, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().auth.user.token
+        return await commentService.upvotes(id, token)
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.message)
+        || error.message || error.toString()
+        return thunkAPI.rejectWithValue(message)  
+    }
+})
+export const replyDownvotes = createAsyncThunk('reply/downvote', async (id, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().auth.user.token
+        return await commentService.downvotes(id, token)
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.message)
+        || error.message || error.toString()
+        return thunkAPI.rejectWithValue(message)  
+    }
+})
+export const deleteReply = createAsyncThunk('reply/delete', async (commentId, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().auth.user.token
+        return await commentService.deleteComment(commentId, token)
+    } catch (error) {
+        const message = error.response.data
+        return thunkAPI.rejectWithValue(message)
+    }
+})
 
 
 const commentSlice = createSlice({
@@ -173,6 +202,66 @@ const commentSlice = createSlice({
             state.isSuccess = false
             state.comments = action.payload
         })
+        .addCase(replyUpvotes.pending, (state) => {
+            state.isloading = true
+        })
+        .addCase(replyUpvotes.fulfilled, (state, action) => {
+            state.isSuccess = true;
+            const { payload } = action;
+            
+            // Iterate over each comment in the state
+            state.comments = state.comments.map(comment => {
+                // Find the index of the reply in the current comment's replies array
+                const index = comment.replies.findIndex(reply => reply._id === payload._id);
+                
+                // If the reply is found in the current comment's replies array
+                if (index !== -1) {
+                    // Create a new array to update the replies while preserving immutability
+                    const updatedReplies = [...comment.replies];
+                    // Update the specific reply within the array
+                    updatedReplies[index] = payload;
+                    // Update the replies array of the current comment
+                    return { ...comment, replies: updatedReplies };
+                }
+                // If the reply is not found, return the comment as is
+                return comment;
+            });
+        })
+        
+        .addCase(replyUpvotes.rejected, (state, action) => {
+            state.isSuccess = false
+            state.comments = action.payload
+        })
+        .addCase(replyDownvotes.pending, (state) => {
+            state.isloading = true
+        })
+        .addCase(replyDownvotes.fulfilled, (state, action) => {
+            state.isSuccess = true;
+            const { payload } = action;
+            
+            // Iterate over each comment in the state
+            state.comments = state.comments.map(comment => {
+                // Find the index of the reply in the current comment's replies array
+                const index = comment.replies.findIndex(reply => reply._id === payload._id);
+                
+                // If the reply is found in the current comment's replies array
+                if (index !== -1) {
+                    // Create a new array to update the replies while preserving immutability
+                    const updatedReplies = [...comment.replies];
+                    // Update the specific reply within the array
+                    updatedReplies[index] = payload;
+                    // Update the replies array of the current comment
+                    return { ...comment, replies: updatedReplies };
+                }
+                // If the reply is not found, return the comment as is
+                return comment;
+            });
+        })
+        
+        .addCase(replyDownvotes.rejected, (state, action) => {
+            state.isSuccess = false
+            state.comments = action.payload
+        })
         .addCase(deleteComment.pending, (state) => {
             state.isloading = true
         })
@@ -182,6 +271,25 @@ const commentSlice = createSlice({
             state.comments = state.comments.filter(comment => comment._id !== action.payload.id);
         })
         .addCase(deleteComment.rejected, (state, action) =>{
+            state.isSuccess = false
+            state.isError = true
+            state.message = action.payload
+        })
+        .addCase(deleteReply.pending, (state) => {
+            state.isloading = true
+        })
+        .addCase(deleteReply.fulfilled, (state, action) => {
+            state.isloading = false;
+            state.isSuccess = true;
+            // Map over each comment in state
+            state.comments = state.comments.map(comment => {
+                // Filter out the deleted reply from the comment's replies array
+                const updatedReplies = comment.replies.filter(reply => reply._id !== action.payload.id);
+                // Return the comment with updated replies array
+                return { ...comment, replies: updatedReplies };
+            });
+        })       
+        .addCase(deleteReply.rejected, (state, action) =>{
             state.isSuccess = false
             state.isError = true
             state.message = action.payload
