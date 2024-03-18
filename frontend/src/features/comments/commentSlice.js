@@ -85,6 +85,7 @@ const commentSlice = createSlice({
     initialState,
     reducers: {
         resetComment: (state) => {
+        state.comments = []
         state.isError = false
         state.isSuccess = false
         state.isloading = false

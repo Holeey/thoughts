@@ -83,7 +83,7 @@ exports.replyComment = async (req, res) => {
     const { reply } = req.body;
 
     const comment = await commentModel.findById({ _id: req.params.commentId });
-    const {postId} = comment.post;
+    const postId = comment.post;
 
     if (!postId) {
       return res.status(404).json("No post found!");
@@ -122,15 +122,10 @@ exports.replyReplies = async (req, res) => {
   try {
     const { newReply } = req.body;
 
-    const comment = await commentModel.findById({ _id: req.params.commentId });
     const replyId = await replyModel.findById({ _id: req.params.replyId });
-    const postId = comment.post;
 
-    if (!postId) {
-      return res.status(404).json("No post found!");
-    }
 
-    if (!(comment || replyId)) {
+    if (!replyId) {
       return res.status(404).json("No comment found!");
     }
 
@@ -153,7 +148,7 @@ exports.replyReplies = async (req, res) => {
 
     res.status(201).json(updatedReply);
   } catch (error) {
-    console.error("postCommentReply:", error);
+    console.error("postReplyReplies:", error);
     return res.status(500).json("Internal error");
   }
 };
@@ -193,13 +188,25 @@ exports.deleteComment = async (req, res) => {
       return res.status(400).json("Unauthorized user!");
     }
     const comment = await commentModel.findById({ _id: req.params.id });
+    const reply = await replyModel.findById({ _id: req.params.id });
 
-    if (req.user._id.toString() !== comment.user.toString()) {
+    if (comment) {
+       if (req.user._id.toString() !== comment.user.toString()) {
       return res.status(400).json("Unauthorized user!");
     }
     await commentModel.findByIdAndDelete(req.params.id);
 
     return res.status(201).json({ id: req.params.id });
+
+    } else if (reply) {
+      if (req.user._id.toString() !== reply.user.toString()) {
+        return res.status(400).json("Unauthorized user!");
+      }
+      await replyModel.findByIdAndDelete(req.params.id);
+  
+      return res.status(201).json({ id: req.params.id });
+    }
+    
   } catch (error) {
     return res.status(500).json("Internal error!", error);
   }
