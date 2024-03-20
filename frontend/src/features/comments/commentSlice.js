@@ -9,6 +9,22 @@ const initialState = {
     isSuccess: false,
     message: ''
 }
+// Recursive function to update replies in state
+function recursivelyUpdateReplies(comments, deletedReplyId) {
+    const updatedComments = comments.map( (comment) => {
+      if (comment.replies && comment.replies.length > 0) {
+        // Recursively update replies for nested comments
+        const updatedNestedComments = recursivelyUpdateReplies(comment.replies, deletedReplyId);
+        // Filter out the deleted reply from the comment's replies array
+        const updatedReplies = updatedNestedComments.filter((reply) => reply._id !== deletedReplyId);
+        // Return the comment with updated replies array
+        return { ...comment, replies: updatedReplies };
+      }
+      return comment;
+    });
+  
+    return updatedComments;
+  }
 
 export const getComments = createAsyncThunk('comment/get', async (postId, thunkAPI) => {
     try {
@@ -52,6 +68,7 @@ export const replyReplies = createAsyncThunk('/reply/replies', async (payload, t
 export const deleteComment = createAsyncThunk('comment/delete', async (commentId, thunkAPI) => {
     try {
         const token = thunkAPI.getState().auth.user.token
+        console.log('delete_commentId:', commentId)
         return await commentService.deleteComment(commentId, token)
     } catch (error) {
         const message = error.response.data
@@ -281,13 +298,8 @@ const commentSlice = createSlice({
         .addCase(deleteReply.fulfilled, (state, action) => {
             state.isloading = false;
             state.isSuccess = true;
-            // Map over each comment in state
-            state.comments = state.comments.map(comment => {
-                // Filter out the deleted reply from the comment's replies array
-                const updatedReplies = comment.replies.filter(reply => reply._id !== action.payload.id);
-                // Return the comment with updated replies array
-                return { ...comment, replies: updatedReplies };
-            });
+      // Recursively update state
+     state.comments = recursivelyUpdateReplies(state.comments, action.payload.id);
         })       
         .addCase(deleteReply.rejected, (state, action) =>{
             state.isSuccess = false
@@ -297,6 +309,7 @@ const commentSlice = createSlice({
     }
 }
 )
+  
 
 export const {resetComment} = commentSlice.actions
 export default commentSlice.reducer

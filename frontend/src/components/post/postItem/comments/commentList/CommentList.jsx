@@ -69,105 +69,111 @@ const CommentList = ({ post }) => {
           <div className="comment_list">
             {comments.map((comment) => (
               <div key={comment._id} className="comment_item">
-                <p>user: {comment.user.nick_name}</p>
-                <p>{comment.comment}</p>
-                {comment.replies.length > 0 &&
-                <h6 onClick={replyVisibilty} style={{ cursor: "pointer" }}>
-                  view replies
-                </h6>}
-                {viewReplies && <Reply comment={comment} />}
-                <div className="comment_feedback-options">
-                  <span
-                    onClick={() => {
-                      const downvoted = comment.downvote.findIndex(
-                        (vote) => vote.user && vote.user._id === user.id
-                      );
-                      if (downvoted !== -1) {
-                        return;
-                      } else {
-                        dispatch(commentUpvotes(comment._id));
-                      }
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      icon={faUpLong}
-                      color={
-                        comment.upvote.findIndex(
-                          (vote) => vote.user && vote.user._id === user.id
-                        ) !== -1
-                          ? "blue"
-                          : "white"
-                      }
-                      cursor={"pointer"}
-                    />
-
-                    {comment.upvoteValue}
-                  </span>
-                  <span
-                    onClick={() => {
-                      const upvoted = comment.upvote.findIndex(
-                        (vote) => vote.user && vote.user._id === user.id
-                      );
-                      if (upvoted !== -1) {
-                        return;
-                      } else {
-                        dispatch(commentDownvotes(comment._id));
-                      }
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      icon={faDownLong}
-                      color={
-                        comment.downvote.findIndex(
-                          (vote) => vote.user && vote.user._id === user.id
-                        ) !== -1
-                          ? "red"
-                          : "white"
-                      }
-                      cursor={"pointer"}
-                    />
-
-                    {comment.downvoteValue}
-                  </span>
-                  <span>
-                    <FontAwesomeIcon
-                      icon={faReply}
-                      cursor={'pointer'}
-                      onClick={() => toggleVisibility(comment._id)}
-                    />
-                    {selectedCommentId === comment._id && (
-                      <form
-                        onSubmit={(e) => handleSubmit(e, comment._id)}
-                        className="reply_form"
-                      >
-                        <input
-                          onChange={handleChange}
-                          type="text"
-                          placeholder="reply"
-                          value={reply}
-                          name="reply"
-                          id="reply"
-                        />
-                        <button type="submit">
-                          <FontAwesomeIcon icon={faPaperPlane} />
-                        </button>
-                      </form>
+                {/* Check if comment exists */}
+                {comment && (
+                  <>
+                    <p>user: {comment.user.nick_name}</p>
+                    <p>{comment.comment}</p>
+                    {comment.replies.length > 0 && (
+                      <h6 onClick={replyVisibilty} style={{ cursor: "pointer" }}>
+                        view replies
+                      </h6>
                     )}
-                  </span>
-                  <span>
-                    <FontAwesomeIcon
-                      icon={faTrash}
-                      color="crimson"
-                      onClick={() => handleDeleteComment(comment._id)}
-                    />
-                  </span>
-                </div>
+                    {viewReplies && <Reply comment={comment} />}
+                    <div className="comment_feedback-options">
+                      <span
+                        onClick={() => {
+                          const downvoted = comment.downvote.findIndex(
+                            (vote) => vote.user && vote.user._id === user.id
+                          );
+                          if (downvoted !== -1) {
+                            return;
+                          } else {
+                            dispatch(commentUpvotes(comment._id));
+                          }
+                        }}
+                      >
+                        <FontAwesomeIcon
+                          icon={faUpLong}
+                          color={
+                            comment.upvote.findIndex(
+                              (vote) => vote.user && vote.user._id === user.id
+                            ) !== -1
+                              ? "blue"
+                              : "white"
+                          }
+                          cursor={"pointer"}
+                        />
+
+                        {comment.upvoteValue}
+                      </span>
+                      <span
+                        onClick={() => {
+                          const upvoted = comment.upvote.findIndex(
+                            (vote) => vote.user && vote.user._id === user.id
+                          );
+                          if (upvoted !== -1) {
+                            return;
+                          } else {
+                            dispatch(commentDownvotes(comment._id));
+                          }
+                        }}
+                      >
+                        <FontAwesomeIcon
+                          icon={faDownLong}
+                          color={
+                            comment.downvote.findIndex(
+                              (vote) => vote.user && vote.user._id === user.id
+                            ) !== -1
+                              ? "red"
+                              : "white"
+                          }
+                          cursor={"pointer"}
+                        />
+
+                        {comment.downvoteValue}
+                      </span>
+                      <span>
+                        <FontAwesomeIcon
+                          icon={faReply}
+                          cursor={"pointer"}
+                          onClick={() => toggleVisibility(comment._id)}
+                        />
+                        {selectedCommentId === comment._id && (
+                          <form
+                            onSubmit={(e) => handleSubmit(e, comment._id)}
+                            className="reply_form"
+                          >
+                            <input
+                              onChange={handleChange}
+                              type="text"
+                              placeholder="reply"
+                              value={reply}
+                              name="reply"
+                              id="reply"
+                            />
+                            <button type="submit">
+                              <FontAwesomeIcon icon={faPaperPlane} />
+                            </button>
+                          </form>
+                        )}
+                      </span>
+                      <span>
+                        <FontAwesomeIcon
+                          cursor={"pointer"}
+                          icon={faTrash}
+                          color="crimson"
+                          onClick={() => handleDeleteComment(comment._id)}
+                        />
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
           </div>
         )}
       </div>
-      {}
     </div>
   );
 };

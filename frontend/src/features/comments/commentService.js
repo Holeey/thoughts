@@ -70,6 +70,7 @@ const deleteComment = async (commentId, token) => {
     }
     try {
         const response = await axios.delete(`${API_URL}/deleteComment/${commentId}`, config)
+        console.log('delete_service-commentId:', commentId)
         return response.data
     } catch (error) {
         console.error('delete error:', error.response.data)

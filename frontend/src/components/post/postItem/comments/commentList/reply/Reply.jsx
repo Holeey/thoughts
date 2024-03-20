@@ -163,7 +163,7 @@ const Reply = ({ comment }) => {
   return (
     <div>
       <div className="reply_section">
-        {comment.replies?.map((reply) => (
+        {comment.replies.length > 0 && comment.replies.map((reply) => (
           <RecursiveReply key={reply._id} reply={reply} />
         ))}
       </div>

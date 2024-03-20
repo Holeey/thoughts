@@ -189,56 +189,68 @@ const recursivelyDeleteReply = async (replyId) => {
       console.error('Error deleting reply:', error);
   }
 };
-
 exports.deleteComment = async (req, res) => {
   try {
-      if (!req.user) {
-          return res.status(400).json("Unauthorized user!");
+    if (!req.user) {
+      return res.status(400).json("Unauthorized user!");
+    }
+
+    // Check if the ID corresponds to a parent comment
+    const parentComment = await commentModel.findById(req.params.commentId);
+    if (parentComment) {
+      // Check if the user is authorized to delete the parent comment
+      if (req.user._id.toString() !== parentComment.user.toString()) {
+        return res.status(400).json("Unauthorized user!");
       }
 
-      // Check if the ID corresponds to a parent comment
-      const parentComment = await commentModel.findById(req.params.commentId);
-      if (parentComment) {
-          // Check if the user is authorized to delete the parent comment
-          if (req.user._id.toString() !== parentComment.user.toString()) {
-              return res.status(400).json("Unauthorized user!");
-          }
-
-          // Recursively delete the replies of the parent comment
-          for (const replyId of parentComment.replies) {
-              await recursivelyDeleteReply(replyId);
-          }
-
-          // Delete the parent comment
-          await commentModel.findByIdAndDelete(req.params.parentCommentId);
-
-          return res.status(201).json({ id: req.params.parentCommentId, type: 'parent' });
+      // Recursively delete the replies of the parent comment
+      if (parentComment.replies && parentComment.replies.length > 0) {
+        for (const replyId of parentComment.replies) {
+          await recursivelyDeleteReply(replyId);
+        }
       }
 
-      // Check if the ID corresponds to a child comment
-      const childComment = await replyModel.findById(req.params.commentId);
-      if (childComment) {
-          // Check if the user is authorized to delete the child comment
-          if (req.user._id.toString() !== childComment.user.toString()) {
-              return res.status(400).json("Unauthorized user!");
-          }
+      // Delete the parent comment
+      await commentModel.findByIdAndDelete(req.params.commentId);
 
-          // Delete the child comment
-          await replyModel.findByIdAndDelete(req.params.childCommentId);
+      return res.status(201).json({ id: req.params.commentId });
+    }
 
-          // Remove the deleted child comment from its parent's replies array
-          await commentModel.updateOne(
-              { replies: req.params.childCommentId },
-              { $pull: { replies: req.params.childCommentId } }
-          );
-
-          return res.status(201).json({ id: req.params.childCommentId, type: 'child' });
+    // Check if the ID corresponds to a child comment
+    const childComment = await replyModel.findById(req.params.commentId);
+    if (childComment) {
+      // Check if the user is authorized to delete the child comment
+      if (req.user._id.toString() !== childComment.user.toString()) {
+        return res.status(400).json("Unauthorized user!");
       }
 
-      // If neither a parent nor child comment was found
-      return res.status(404).json("Comment not found!");
+      // Delete the child comment
+      await replyModel.findByIdAndDelete(req.params.commentId);
+
+      // Check if the parent is a root comment or a reply comment
+      const rootComment = await commentModel.findOne({ replies: req.params.commentId });
+      if (rootComment) {
+        // Remove the deleted child comment from the root comment's replies array
+        await commentModel.updateOne(
+          { _id: rootComment._id },
+          { $pull: { replies: req.params.commentId } }
+        );
+      } else {
+        const replyComment = await replyModel.findOne({ replies: req.params.commentId });
+        // Remove the deleted child comment from its parent's replies array
+        await replyModel.updateOne(
+          { _id: replyComment._id },
+          { $pull: { replies: req.params.commentId } }
+        );
+      }
+
+      return res.status(201).json({ id: req.params.commentId });
+    }
+
+    // If neither a parent nor child comment was found
+    return res.status(404).json("Comment not found!");
   } catch (error) {
-      return res.status(500).json("Internal error!", error);
+    return res.status(500).json("Internal error!", error);
   }
 };
 
