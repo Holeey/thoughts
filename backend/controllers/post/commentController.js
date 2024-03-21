@@ -2,25 +2,40 @@ const { commentModel, replyModel } = require("../../model/commentModel.js");
 const postModel = require("../../model/postModel.js");
 const mongoose = require("mongoose");
 
-exports.getComments = async (req, res) => {
-  const populateReplies = async (replyId) => {
-    const reply = await replyModel.findById(replyId).populate('user');
-    if (!reply) return null;
-    const populatedReplies = await Promise.all((reply.replies || []).map(async (nestedReply) => {
+const populateReplies = async (replyId) => {
+  const reply = await replyModel.findById(replyId).populate({
+    path: 'user',
+    select: '_id nick_name', // Specify the fields you want to populate
+  });
+  
+  if (!reply) return null;
+  
+  let populatedReplies = [];
+  
+  if (reply.replies.length > 0) {
+    populatedReplies = await Promise.all((reply.replies || []).map(async (nestedReply) => {
       return await populateReplies(nestedReply);
     }));
-    return { ...reply.toObject(), replies: populatedReplies };
-  };
+  }
 
-  const populateComments = async (commentId) => {
-    const comment = await commentModel.findById(commentId).populate('user');
-    if (!comment) return null;
-    const populatedReplies = await Promise.all((comment.replies || []).map(async (replyId) => {
-      return await populateReplies(replyId);
-    }));
-    return { ...comment.toObject(), replies: populatedReplies };
-  };
+  return { ...reply.toObject(), replies: populatedReplies };
+};
 
+
+const populateComments = async (commentId) => {
+   const comment = await commentModel.findById(commentId).populate({
+   path: 'user',
+   select: '_id nick_name', // Specify the fields you want to populate
+ });
+  if (!comment) return null;
+  const populatedReplies = await Promise.all((comment.replies || []).map(async (replyId) => {
+    return await populateReplies(replyId);
+  }));
+  return { ...comment.toObject(), replies: populatedReplies };
+};
+
+
+exports.getComments = async (req, res) => {
   try {
     const comments = await commentModel.find({ post: req.params.id });
     if (!comments || comments.length === 0) {
@@ -290,15 +305,15 @@ exports.commentUpvotes = async (req, res) => {
         comment.upvoteValue -= 1;
       }
 
-      const updatedComment = await commentModel.findByIdAndUpdate(
-        req.params.id,
-        comment,
-        { new: true }
-      );
+      await comment.save();
+
+      const updatedComment = await populateComments(comment._id);
 
       await session.commitTransaction();
       session.endSession();
+
       return res.status(200).json(updatedComment);
+
     } else if (reply) {
       const existingReplyUpvoteIndex = reply.upvote.findIndex(
         (vote) => vote.user && vote.user._id.equals(req.user._id)
@@ -313,15 +328,14 @@ exports.commentUpvotes = async (req, res) => {
         reply.upvote.splice(existingReplyUpvoteIndex, 1);
         reply.upvoteValue -= 1;
       }
+      await reply.save();
 
-      const updatedReply = await replyModel.findByIdAndUpdate(
-        req.params.id,
-        reply,
-        { new: true }
-      );
+     
+      const updatedReply = await populateReplies(reply._id)
 
       await session.commitTransaction();
       session.endSession();
+
       return res.status(200).json(updatedReply);
     }
   } catch (error) {
@@ -366,16 +380,15 @@ exports.commentDownvotes = async (req, res) => {
         comment.downvote.splice(existingCommentDownvoteIndex, 1);
         comment.downvoteValue -= 1;
       }
-
-      const updatedComment = await commentModel.findByIdAndUpdate(
-        req.params.id,
-        comment,
-        { new: true }
-      );
+       await comment.save()
+  
+      const updatedComment = await populateComments(comment._id);
 
       await session.commitTransaction();
       session.endSession();
+      
       return res.status(200).json(updatedComment);
+    
     } else if (reply) {
       const existingReplyDownvoteIndex = reply.downvote.findIndex(
         (vote) => vote.user && vote.user._id.equals(req.user._id)
@@ -390,15 +403,13 @@ exports.commentDownvotes = async (req, res) => {
         reply.downvote.splice(existingReplyDownvoteIndex, 1);
         reply.downvoteValue -= 1;
       }
+      await reply.save();
 
-      const updatedReply = await replyModel.findByIdAndUpdate(
-        req.params.id,
-        reply,
-        { new: true }
-      );
+      const updatedReply = await populateReplies(reply._id);
 
       await session.commitTransaction();
       session.endSession();
+
       return res.status(200).json(updatedReply);
     }
   } catch (error) {
