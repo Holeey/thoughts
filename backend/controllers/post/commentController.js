@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const populateReplies = async (replyId) => {
    const reply = await replyModel.findById(replyId).populate({
      path: 'user',
-     select: '_id nick_name', // Specify the fields you want to populate
+     select: '_id nick_name profile_image', // Specify the fields you want to populate
    });
   
    if (!reply) return null;
@@ -22,7 +22,7 @@ const populateReplies = async (replyId) => {
  const populateComments = async (commentId) => {
     const comment = await commentModel.findById(commentId).populate({
     path: 'user',
-    select: '_id nick_name', // Specify the fields you want to populate
+    select: '_id nick_name profile_image', // Specify the fields you want to populate
   });
    if (!comment) return null;
    const populatedReplies = await Promise.all((comment.replies || []).map(async (replyId) => {

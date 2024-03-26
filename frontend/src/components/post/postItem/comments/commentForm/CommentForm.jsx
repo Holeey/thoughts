@@ -5,7 +5,6 @@ import  {postComment}  from "../../../../../features/comments/commentSlice.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import "./commentForm.css";
-import CommentList from "../commentList/CommentList.jsx";
 
 const Comment = ({ post }) => {
   const [reply, setReply] = useState("");
@@ -46,9 +45,9 @@ const Comment = ({ post }) => {
           </button>
         </div>
       </form>
-       <div>
+       {/* <div>
       <CommentList post={post}/>
-      </div>
+      </div> */}
 
     </>
   );

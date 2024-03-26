@@ -1,11 +1,11 @@
 import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTrash,
   faUpLong,
   faPaperPlane,
   faDownLong,
-  faReply,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import {
@@ -23,10 +23,15 @@ const CommentList = ({ post }) => {
   const [reply, setReply] = useState("");
   const [selectedCommentId, setSelectedCommentId] = useState(null);
   const [viewReplies, setViewReplies] = useState(null);
+  const [isMinimized, setIsMinimized] = useState(true);
 
   const dispatch = useDispatch();
   const { comments } = useSelector((state) => state.comment);
   const { user } = useSelector((state) => state.auth);
+
+  const toggleMinimize = () => {
+    setIsMinimized(!isMinimized);
+  };
 
   const replyVisibilty = (commentId) => {
     setViewReplies(commentId === viewReplies ? null : commentId);
@@ -69,19 +74,35 @@ const CommentList = ({ post }) => {
             {comments.map((comment) => (
               <div key={comment._id} className="comment_item">
                 <>
-                  <p>user: {comment.user.nick_name}</p>
-                  <p>{comment.comment}</p>
-                  {comment.replies.length > 0 && (
-                    <h6
-                      onClick={() => replyVisibilty(comment._id)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      view replies
-                    </h6>
+                  <div className="comment_user">
+                    <div className="comment_user_profile_img_container">
+                      <img
+                        className="comment_user_profile_img"
+                        src={comment.user.profile_image}
+                        alt="profile"
+                      />
+                    </div>
+                    <p>{comment.user.nick_name}</p>
+                    <h6>{moment(comment.createdAt).fromNow()}</h6>
+                  </div>
+
+                  <div
+                    className={`comment_body_container ${
+                      isMinimized ? "minimized" : "expanded"
+                    }`}
+                  >
+                    <p>{comment.comment}</p>{" "}
+                  </div>
+                  {isMinimized && comment.comment.length > 100 ? (
+                    <div onClick={toggleMinimize} className="comment_elipsis">
+                      <h6>See more...</h6>
+                    </div>
+                  ) : (
+                    " "
                   )}
-                  {viewReplies === comment._id && <Reply comment={comment} />}
+
                   <div className="comment_feedback-options">
-                    <span
+                    <div
                       onClick={() => {
                         const downvoted = comment.downvote.findIndex(
                           (vote) => vote.user && vote.user._id === user.id
@@ -106,8 +127,9 @@ const CommentList = ({ post }) => {
                       />
 
                       {comment.upvoteValue}
-                    </span>
-                    <span
+                    </div>
+
+                    <div
                       onClick={() => {
                         const upvoted = comment.upvote.findIndex(
                           (vote) => vote.user && vote.user._id === user.id
@@ -132,43 +154,74 @@ const CommentList = ({ post }) => {
                       />
 
                       {comment.downvoteValue}
-                    </span>
-                    <span>
-                      <FontAwesomeIcon
-                        icon={faReply}
-                        cursor={"pointer"}
+                    </div>
+
+                    <div>
+                      {" "}
+                      <h6
+                        style={{ cursor: "pointer" }}
                         onClick={() => toggleVisibility(comment._id)}
-                      />
-                      {selectedCommentId === comment._id && (
-                        <form
-                          onSubmit={(e) => handleSubmit(e, comment._id)}
-                          className="reply_form"
-                        >
-                          <input
-                            onChange={handleChange}
-                            type="text"
-                            placeholder="reply"
-                            value={reply}
-                            name="reply"
-                            id="reply"
-                          />
-                          <button type="submit">
-                            <FontAwesomeIcon icon={faPaperPlane} />
-                          </button>
-                        </form>
-                      )}
-                    </span>
-                    <span>
+                      >
+                        Reply
+                      </h6>
+                    </div>
+
+                    {comment.replies.length > 0 && (
+                      <h6
+                        onClick={() => replyVisibilty(comment._id)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        view replies
+                      </h6>
+                    )}
+
+                    <div>
                       <FontAwesomeIcon
                         cursor={"pointer"}
                         icon={faTrash}
                         color="crimson"
                         onClick={() => handleDeleteComment(comment._id)}
                       />
-                    </span>
+                    </div>
                   </div>
                 </>
+      
+
+                {selectedCommentId === comment._id && (
+                  <form
+                    onSubmit={(e) => handleSubmit(e, comment._id)}
+                    className="reply_form"
+                  >
+                    <div>
+                      <div className="comment_user_profile_img_container">
+                        <img
+                          className="comment_user_profile_img"
+                          src={user.profile_image}
+                          alt="profile"
+                        />
+                      </div>
+                    </div>
+                    <div className="reply_form_input">
+                      {" "}
+                      <input
+                      
+                        onChange={handleChange}
+                        type="text"
+                        placeholder={`reply to @${comment.user.nick_name}`}
+                        value={reply}
+                        name="reply"
+                        id="reply"
+                      />
+                      <button className="reply_btn" type="submit">
+                        <FontAwesomeIcon icon={faPaperPlane} />
+                      </button>
+                    </div>
+                  </form>
+                  
+                )}
+                {viewReplies === comment._id && <Reply comment={comment} />}
               </div>
+              
             ))}
           </div>
         )}

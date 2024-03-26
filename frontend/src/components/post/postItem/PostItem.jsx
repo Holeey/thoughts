@@ -10,6 +10,7 @@ import {
 
 import PostForm from "../postForm/PostForm";
 import CommentForm from "../postItem/comments/commentForm/CommentForm";
+import CommentList from "./comments/commentList/CommentList"
 
 import moment from "moment";
 
@@ -158,7 +159,7 @@ const PostItem = ({ post }) => {
             </span>
             <span onClick={toggle_downvoted}>
               <FontAwesomeIcon
-                icon={faDownLong}
+                icon={faDownLong} 
                 color={downvoted !== -1 ? "red" : "black"}
               />
               {post.downvoteValue}
@@ -180,6 +181,9 @@ const PostItem = ({ post }) => {
         <PostForm isVisible={isVisible} setIsVisible={setIsVisible} />
       )}
       {openCommentFormId === post._id && <CommentForm post={post} />}
+      <div>
+     {openCommentFormId === post._id &&  <CommentList post={post}/>}
+      </div>
     </>
   );
 };
