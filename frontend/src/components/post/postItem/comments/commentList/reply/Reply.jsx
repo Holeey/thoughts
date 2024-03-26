@@ -11,7 +11,7 @@ import {
   replyReplies,
   deleteReply,
   replyDownvotes,
-  replyUpvotes
+  replyUpvotes,
 } from "../../../../../../features/comments/commentSlice";
 
 const RecursiveReply = ({ reply }) => {
@@ -23,7 +23,9 @@ const RecursiveReply = ({ reply }) => {
   const { user } = useSelector((state) => state.auth);
 
   // Get user vote status from the database state
-  const upvoted = reply.upvote.findIndex((vote) => vote.user && vote.user._id === user.id);
+  const upvoted = reply.upvote.findIndex(
+    (vote) => vote.user && vote.user._id === user.id
+  );
   const downvoted = reply.downvote.findIndex(
     (vote) => vote.user && vote.user._id === user.id
   );
@@ -47,7 +49,7 @@ const RecursiveReply = ({ reply }) => {
   };
 
   const replyVisibilty = () => {
-    setViewReplies(!viewReplies);
+    setViewReplies((prevState) => !prevState);
   };
 
   const toggleVisibility = (commentId) => {
@@ -75,7 +77,7 @@ const RecursiveReply = ({ reply }) => {
 
   return (
     <div>
-      <div className="reply_section">
+      <div className="parent_reply">
         <Fragment key={reply._id}>
           <div className="replies">
             <p>{reply.user?.nick_name}</p>
@@ -111,14 +113,14 @@ const RecursiveReply = ({ reply }) => {
                 view replies
               </h6>
             )}
-                              <span>
-                    <FontAwesomeIcon
-                      icon={faTrash}
-                      cursor={'pointer'}
-                      color="crimson"
-                      onClick={() => handleDeleteComment(reply._id)}
-                    />
-                  </span>
+            <span>
+              <FontAwesomeIcon
+                icon={faTrash}
+                cursor={"pointer"}
+                color="crimson"
+                onClick={() => handleDeleteComment(reply._id)}
+              />
+            </span>
           </div>
 
           {selectedCommentId === reply._id && (
@@ -144,7 +146,7 @@ const RecursiveReply = ({ reply }) => {
 
         {reply.replies && (
           <div className="nested-replies">
-            {reply.replies.length > 0 &&
+            {reply.replies?.length > 0 &&
               reply.replies.map((nestedReply) => (
                 <Fragment key={nestedReply._id}>
                   {viewReplies && (
@@ -163,9 +165,10 @@ const Reply = ({ comment }) => {
   return (
     <div>
       <div className="reply_section">
-        {comment.replies.length > 0 && comment.replies.map((reply) => (
-          <RecursiveReply key={reply._id} reply={reply} />
-        ))}
+        {comment.replies.length > 0 &&
+          comment.replies.map((reply) => (
+            <RecursiveReply key={reply._id} reply={reply} />
+          ))}
       </div>
     </div>
   );

@@ -3,36 +3,33 @@ const postModel = require("../../model/postModel.js");
 const mongoose = require("mongoose");
 
 const populateReplies = async (replyId) => {
-  const reply = await replyModel.findById(replyId).populate({
+   const reply = await replyModel.findById(replyId).populate({
+     path: 'user',
+     select: '_id nick_name', // Specify the fields you want to populate
+   });
+  
+   if (!reply) return null;
+  
+   let populatedReplies = [];
+  
+   if (reply.replies.length > 0) {
+    populatedReplies = await Promise.all((reply.replies || []).map(async (nestedReply) => {
+       return await populateReplies(nestedReply._id);
+     }));
+   }
+   return { ...reply.toObject(), replies: populatedReplies };
+ };
+ const populateComments = async (commentId) => {
+    const comment = await commentModel.findById(commentId).populate({
     path: 'user',
     select: '_id nick_name', // Specify the fields you want to populate
   });
-  
-  if (!reply) return null;
-  
-  let populatedReplies = [];
-  
-  if (reply.replies.length > 0) {
-    populatedReplies = await Promise.all((reply.replies || []).map(async (nestedReply) => {
-      return await populateReplies(nestedReply);
-    }));
-  }
-
-  return { ...reply.toObject(), replies: populatedReplies };
-};
-
-
-const populateComments = async (commentId) => {
-   const comment = await commentModel.findById(commentId).populate({
-   path: 'user',
-   select: '_id nick_name', // Specify the fields you want to populate
- });
-  if (!comment) return null;
-  const populatedReplies = await Promise.all((comment.replies || []).map(async (replyId) => {
-    return await populateReplies(replyId);
-  }));
-  return { ...comment.toObject(), replies: populatedReplies };
-};
+   if (!comment) return null;
+   const populatedReplies = await Promise.all((comment.replies || []).map(async (replyId) => {
+     return await populateReplies(replyId);
+   }));
+   return { ...comment.toObject(), replies: populatedReplies };
+ };
 
 
 exports.getComments = async (req, res) => {
@@ -52,7 +49,6 @@ exports.getComments = async (req, res) => {
     return res.status(500).json("Internal error:", error.message);
   }
 };
-
 exports.postComment = async (req, res) => {
   try {
     const { reply } = req.body;
@@ -115,9 +111,9 @@ exports.replyComment = async (req, res) => {
       { $push: { replies: { _id: newReply._id } } }
     );
 
-    await newReply.save();
+     const updatedPopulatedComment = await populateComments(updatedComment._id)
 
-    res.status(201).json(updatedComment);
+    res.status(201).json(updatedPopulatedComment);
   } catch (error) {
     console.error("postCommentReply:", error);
     return res.status(500).json("Internal error");
@@ -150,7 +146,9 @@ exports.replyReplies = async (req, res) => {
       { $push: { replies: { _id: reply._id } } }
     );
 
-    res.status(201).json(updatedReply);
+    const updatedPopulatedReply = await populateReplies(updatedReply._id)
+
+    res.status(201).json(updatedPopulatedReply);
   } catch (error) {
     console.error("postReplyReplies:", error);
     return res.status(500).json("Internal error");
@@ -196,7 +194,7 @@ const recursivelyDeleteReply = async (replyId) => {
       }
       // Recursively delete child replies
       for (const childReplyId of reply.replies) {
-          await recursivelyDeleteReply(childReplyId); // Correct usage of childReplyId
+          await recursivelyDeleteReply(childReplyId); 
       }
       // Delete current reply
       await replyModel.findByIdAndDelete(replyId);
@@ -328,10 +326,10 @@ exports.commentUpvotes = async (req, res) => {
         reply.upvote.splice(existingReplyUpvoteIndex, 1);
         reply.upvoteValue -= 1;
       }
-      await reply.save();
 
-     
-      const updatedReply = await populateReplies(reply._id)
+       await reply.save();
+
+       const updatedReply = await populateReplies(reply._id);
 
       await session.commitTransaction();
       session.endSession();
@@ -405,7 +403,7 @@ exports.commentDownvotes = async (req, res) => {
       }
       await reply.save();
 
-      const updatedReply = await populateReplies(reply._id);
+       const updatedReply = await populateReplies(reply._id);
 
       await session.commitTransaction();
       session.endSession();

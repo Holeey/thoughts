@@ -29,7 +29,7 @@ const PostItem = ({ post }) => {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isPostOptions, setIsPostOptions] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [showComments, setShowComments] = useState(false);
+  const [openCommentFormId, setOpenCommentFormId] = useState(null);
 
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
@@ -50,8 +50,9 @@ const PostItem = ({ post }) => {
     setIsVisible(!isVisible);
     handleEditPost();
   };
-  const handleComments = () => {
-    setShowComments(!showComments);
+  const toggleCommentForm = (postId) => {
+    // Close any open comment form if it's not the one being clicked
+    setOpenCommentFormId(openCommentFormId === postId ? null : postId);
   };
 
   // Get user vote status from the database state
@@ -162,7 +163,7 @@ const PostItem = ({ post }) => {
               />
               {post.downvoteValue}
             </span>
-            <span onClick={handleComments}>
+            <span onClick={() => toggleCommentForm(post._id)}>
               <FontAwesomeIcon icon={faComment} />
             </span>
             <span>
@@ -178,7 +179,7 @@ const PostItem = ({ post }) => {
       {isVisible && (
         <PostForm isVisible={isVisible} setIsVisible={setIsVisible} />
       )}
-      {showComments && <CommentForm post={post} />}
+      {openCommentFormId === post._id && <CommentForm post={post} />}
     </>
   );
 };

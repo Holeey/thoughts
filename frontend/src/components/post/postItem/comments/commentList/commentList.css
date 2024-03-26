@@ -2,7 +2,8 @@
     display: flex;
     position: absolute;
     width: 600px;
-    height: 500px;
+    height: auto;
+    border-radius: 6px;
     overflow-y: scroll;
     align-items: flex-start;
     flex-direction: column;
@@ -10,12 +11,15 @@
     background-color: black;
     color: aliceblue;
     z-index: 1;
-    padding: 10px;
+    padding: 20px;
+    
 }
 .comment_item {
-    border-bottom: solid 1px;
+    border: solid 1px;
     width: 100%;
     height: auto;
+    margin-bottom: 10px;
+    padding: 10px;
 }
 .comment_feedback-options {
     display: flex;

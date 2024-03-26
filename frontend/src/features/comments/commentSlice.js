@@ -9,12 +9,12 @@ const initialState = {
     isSuccess: false,
     message: ''
 }
-// Recursive function to update replies in state
-function recursivelyUpdateReplies(comments, deletedReplyId) {
+// Recursive function to update deleted replies in comments state
+function recursivelyDeleteReplies(comments, deletedReplyId) {
     const updatedComments = comments.map( (comment) => {
       if (comment.replies && comment.replies.length > 0) {
         // Recursively update replies for nested comments
-        const updatedNestedComments = recursivelyUpdateReplies(comment.replies, deletedReplyId);
+        const updatedNestedComments = recursivelyDeleteReplies(comment.replies, deletedReplyId);
         // Filter out the deleted reply from the comment's replies array
         const updatedReplies = updatedNestedComments.filter((reply) => reply._id !== deletedReplyId);
         // Return the comment with updated replies array
@@ -25,6 +25,25 @@ function recursivelyUpdateReplies(comments, deletedReplyId) {
   
     return updatedComments;
   }
+  // Recursive function to update upvoted/downvoted replies in comments state
+  function recursivelyVoteReply(comments, upvoteReply) {
+    return comments.map((comment) => {
+        if (comment.replies && comment.replies.length > 0) {
+            // Recursively update replies for nested comments
+            const updatedReplies = recursivelyVoteReply(comment.replies, upvoteReply);
+            // Find index of the voted reply from the comment's replies array
+            const index = updatedReplies.findIndex((reply) => reply._id === upvoteReply?._id);
+            //check if the index exists
+            if (index !== -1) {
+                updatedReplies[index] = upvoteReply;
+            }
+            // Return the comment with updated replies array
+            return { ...comment, replies: updatedReplies };
+        } else {
+            return comment;
+        }
+    });
+}
 
 export const getComments = createAsyncThunk('comment/get', async (postId, thunkAPI) => {
     try {
@@ -35,7 +54,6 @@ export const getComments = createAsyncThunk('comment/get', async (postId, thunkA
         return thunkAPI.rejectWithValue(message) 
     }
 })
-
 export const postComment = createAsyncThunk('comment/post', async (payload, thunkAPI) => {
     const {postId, reply} = payload 
     try {
@@ -182,9 +200,7 @@ const commentSlice = createSlice({
         .addCase(replyReplies.fulfilled, (state, action) => {
             state.isloading = false
             state.isSuccess = true
-            let index 
-            index = state.comments.findIndex((comment) => comment._id === action.payload._id)
-            state.comments[index] = action.payload
+            state.comments = recursivelyVoteReply(state.comments, action.payload)
         })
         .addCase(replyReplies.rejected, (state, action) =>{
             state.isSuccess = false
@@ -223,28 +239,10 @@ const commentSlice = createSlice({
             state.isloading = true
         })
         .addCase(replyUpvotes.fulfilled, (state, action) => {
-            state.isSuccess = true;
-            const { payload } = action;
-            
-            // Iterate over each comment in the state
-            state.comments = state.comments.map(comment => {
-                // Find the index of the reply in the current comment's replies array
-                const index = comment.replies.findIndex(reply => reply._id === payload._id);
-                
-                // If the reply is found in the current comment's replies array
-                if (index !== -1) {
-                    // Create a new array to update the replies while preserving immutability
-                    const updatedReplies = [...comment.replies];
-                    // Update the specific reply within the array
-                    updatedReplies[index] = payload;
-                    // Update the replies array of the current comment
-                    return { ...comment, replies: updatedReplies };
-                }
-                // If the reply is not found, return the comment as is
-                return comment;
-            });
+            state.isSuccess = true
+            state.isloading = false
+            state.comments = recursivelyVoteReply(state.comments, action.payload)
         })
-        
         .addCase(replyUpvotes.rejected, (state, action) => {
             state.isSuccess = false
             state.comments = action.payload
@@ -253,28 +251,10 @@ const commentSlice = createSlice({
             state.isloading = true
         })
         .addCase(replyDownvotes.fulfilled, (state, action) => {
-            state.isSuccess = true;
-            const { payload } = action;
-            
-            // Iterate over each comment in the state
-            state.comments = state.comments.map(comment => {
-                // Find the index of the reply in the current comment's replies array
-                const index = comment.replies.findIndex(reply => reply._id === payload._id);
-                
-                // If the reply is found in the current comment's replies array
-                if (index !== -1) {
-                    // Create a new array to update the replies while preserving immutability
-                    const updatedReplies = [...comment.replies];
-                    // Update the specific reply within the array
-                    updatedReplies[index] = payload;
-                    // Update the replies array of the current comment
-                    return { ...comment, replies: updatedReplies };
-                }
-                // If the reply is not found, return the comment as is
-                return comment;
-            });
+            state.isSuccess = true
+            state.isloading = false
+            state.comments = recursivelyVoteReply(state.comments, action.payload)
         })
-        
         .addCase(replyDownvotes.rejected, (state, action) => {
             state.isSuccess = false
             state.comments = action.payload
@@ -298,8 +278,7 @@ const commentSlice = createSlice({
         .addCase(deleteReply.fulfilled, (state, action) => {
             state.isloading = false;
             state.isSuccess = true;
-      // Recursively update state
-     state.comments = recursivelyUpdateReplies(state.comments, action.payload.id);
+            state.comments = recursivelyDeleteReplies(state.comments, action.payload.id);
         })       
         .addCase(deleteReply.rejected, (state, action) =>{
             state.isSuccess = false
