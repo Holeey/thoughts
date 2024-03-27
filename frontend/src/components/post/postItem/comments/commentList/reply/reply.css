@@ -1,13 +1,90 @@
 .reply_section {
-    display: flex;
-    flex-direction: column;
-    
+  display: flex;
+  flex-direction: column;
+}
+.reply_user_profile_img_container {
+  display: flex;
+  align-items: center;
+  background-color: gray;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  object-fit: cover;
+  overflow: hidden;
+}
+.reply_user_profile_img {
+  max-width: 100%;
 }
 .parent_reply {
-    border: solid 1px;
-    border-color: aqua;
+  margin-top: 0.5rem;
+  margin-left: 0.1rem;
+  border-left: dashed 0.5px;
+  padding: 1rem;
+  /* border-color: aqua; */
 }
-.nested-replies {
-    border: solid 1px;
-    border-color: red;
+.reply_box {
+ padding: 10px;
+ background-color: #ffffff; 
+ color: black;
+ border-radius: 10px; 
+ box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5); 
+}
+.reply_profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.reply_text {
+    overflow: hidden;
+    word-break: break-word;
+    max-height: 100px;
+    padding-inline: 0.5rem;
+    transition: max-height 0.3s ease-in-out;
+}
+.reply_elipsis {
+    margin-top: -1rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: rgb(73, 73, 232);
+}
+.repy_text.minimized {
+    max-height: 100px; 
+}
+.reply_text.expanded {
+    max-height: none;
+  }
+.replies_feedback-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 50%;
+  margin: 10px;
+}
+.nested_reply_form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.nested_reply_input {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.nested_reply_input > input {
+  width: 100%;
+  height: 30px;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  font-size: 15px;
+  border: none;
+  outline: none;
+}
+.nested_reply_btn {
+  width: 40px;
+  height: 30px;
+  margin: 0;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  border: none;
 }

@@ -1,10 +1,8 @@
 .comment_list {
   display: flex;
   width: 600px;
-  height: auto;
   border-radius: 6px;
   margin-top: 1rem;
-  overflow-y: scroll;
   align-items: flex-start;
   flex-direction: column;
   justify-content: safe;
@@ -12,12 +10,19 @@
   color: aliceblue;
   padding: 20px;
 }
-.comment_item {
-  border: solid 1px;
+.comment_item_container {
   width: 100%;
   height: auto;
   margin-bottom: 10px;
   padding: 10px;
+}
+.comment_item {
+    padding: 10px;
+ background-color: #ffffff; /* Set background color */
+ color: black;
+ border-radius: 10px; /* Optional: Add border radius for rounded corners */
+ box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5); /* Add box shadow */
+      
 }
 .comment_feedback-options {
   display: flex;
@@ -55,12 +60,15 @@
     border: none;
 }
 .comment_elipsis {
-    margin-top: 1rem;
+    padding: 0.5rem;
+    margin-top: -1rem;
     cursor: pointer;
-    color: rgb(169, 169, 198);
+    color: rgb(73, 73, 232);
 }
 .comment_body_container {
+  padding-inline: 0.5rem;
   overflow: hidden;
+  word-break: break-word;
   max-height: 100px;
   transition: max-height 0.3s ease-in-out;
 }

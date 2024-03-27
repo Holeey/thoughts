@@ -108,6 +108,9 @@ const PostItem = ({ post }) => {
               />
             </div>
             <h4>{post.user?.nick_name}</h4>
+            <div className="post_time">
+            <h6>{moment(post.createdAt).fromNow()}</h6>
+          </div>
           </div>
           <div className="post_options_elipsis">
             <FontAwesomeIcon
@@ -125,11 +128,11 @@ const PostItem = ({ post }) => {
               </ul>
             </>
           )}
-        </div>
-        <div className={`post_item_content`}>
-          <div className="post_title">
-            <h4>{post.postTitle}</h4>
+        </div>          <div className="post_title">
+            <h5>{post.postTitle}</h5>
           </div>
+        <div className={`post_item_content`}>
+
 
           <div
             className={`post_body_container ${
@@ -137,6 +140,10 @@ const PostItem = ({ post }) => {
             }`}
           >
             <p className="post_body">{post.postBody}</p>
+          </div>
+
+          <div className="postImg">
+            <img src={post.postImg} alt="postimg"/>
           </div>
 
           {isMinimized && post.postBody.length > 100 ? (
@@ -172,9 +179,7 @@ const PostItem = ({ post }) => {
             </span>{" "}
           </div>
 
-          <div className="post_time">
-            <span>posted {moment(post.createdAt).fromNow()}</span>
-          </div>
+      
         </div>
       </div>
       {isVisible && (

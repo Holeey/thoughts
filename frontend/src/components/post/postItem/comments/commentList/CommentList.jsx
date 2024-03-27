@@ -72,8 +72,8 @@ const CommentList = ({ post }) => {
         {comments && comments.length > 0 && (
           <div className="comment_list">
             {comments.map((comment) => (
-              <div key={comment._id} className="comment_item">
-                <>
+              <div key={comment._id} className="comment_item_container">
+                <div className="comment_item">
                   <div className="comment_user">
                     <div className="comment_user_profile_img_container">
                       <img
@@ -82,7 +82,7 @@ const CommentList = ({ post }) => {
                         alt="profile"
                       />
                     </div>
-                    <p>{comment.user.nick_name}</p>
+                    <h4>{comment.user.nick_name}</h4>
                     <h6>{moment(comment.createdAt).fromNow()}</h6>
                   </div>
 
@@ -121,7 +121,7 @@ const CommentList = ({ post }) => {
                             (vote) => vote.user && vote.user._id === user.id
                           ) !== -1
                             ? "blue"
-                            : "white"
+                            : "black"
                         }
                         cursor={"pointer"}
                       />
@@ -148,7 +148,7 @@ const CommentList = ({ post }) => {
                             (vote) => vote.user && vote.user._id === user.id
                           ) !== -1
                             ? "red"
-                            : "white"
+                            : "black"
                         }
                         cursor={"pointer"}
                       />
@@ -184,44 +184,40 @@ const CommentList = ({ post }) => {
                       />
                     </div>
                   </div>
-                </>
-      
 
-                {selectedCommentId === comment._id && (
-                  <form
-                    onSubmit={(e) => handleSubmit(e, comment._id)}
-                    className="reply_form"
-                  >
-                    <div>
-                      <div className="comment_user_profile_img_container">
-                        <img
-                          className="comment_user_profile_img"
-                          src={user.profile_image}
-                          alt="profile"
-                        />
+                  {selectedCommentId === comment._id && (
+                    <form
+                      onSubmit={(e) => handleSubmit(e, comment._id)}
+                      className="reply_form"
+                    >
+                      <div>
+                        <div className="comment_user_profile_img_container">
+                          <img
+                            className="comment_user_profile_img"
+                            src={user.profile_image}
+                            alt="profile"
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div className="reply_form_input">
-                      {" "}
-                      <input
-                      
-                        onChange={handleChange}
-                        type="text"
-                        placeholder={`reply to @${comment.user.nick_name}`}
-                        value={reply}
-                        name="reply"
-                        id="reply"
-                      />
-                      <button className="reply_btn" type="submit">
-                        <FontAwesomeIcon icon={faPaperPlane} />
-                      </button>
-                    </div>
-                  </form>
-                  
-                )}
+                      <div className="reply_form_input">
+                        {" "}
+                        <input
+                          onChange={handleChange}
+                          type="text"
+                          placeholder={`reply to @${comment.user.nick_name}`}
+                          value={reply}
+                          name="reply"
+                          id="reply"
+                        />
+                        <button className="reply_btn" type="submit">
+                          <FontAwesomeIcon icon={faPaperPlane} />
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
                 {viewReplies === comment._id && <Reply comment={comment} />}
               </div>
-              
             ))}
           </div>
         )}

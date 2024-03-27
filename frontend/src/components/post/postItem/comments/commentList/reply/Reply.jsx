@@ -1,9 +1,11 @@
 import { useSelector, useDispatch } from "react-redux";
+import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTrash,
   faUpLong,
   faDownLong,
+  faPaperPlane,
 } from "@fortawesome/free-solid-svg-icons";
 import "./reply.css";
 import { Fragment, useState } from "react";
@@ -18,6 +20,7 @@ const RecursiveReply = ({ reply }) => {
   const [newReply, setNewReply] = useState("");
   const [selectedCommentId, setSelectedCommentId] = useState(null);
   const [viewReplies, setViewReplies] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
 
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
@@ -29,6 +32,10 @@ const RecursiveReply = ({ reply }) => {
   const downvoted = reply.downvote.findIndex(
     (vote) => vote.user && vote.user._id === user.id
   );
+
+  const toggleMinimize = () => {
+    setIsMinimized(!isMinimized);
+  };
 
   //function for toggling the upvote
   const toggle_upvoted = () => {
@@ -79,73 +86,106 @@ const RecursiveReply = ({ reply }) => {
     <div>
       <div className="parent_reply">
         <Fragment key={reply._id}>
-          <div className="replies">
-            <p>{reply.user?.nick_name}</p>
-            <div>
+          <div className="reply_box">
+            <div className="reply_profile">
+              <div className="reply_user_profile_img_container">
+                <img
+                  className="reply_user_profile_img"
+                  src={reply.user?.profile_image}
+                  alt="profile"
+                />
+              </div>
+              <h4>{reply.user?.nick_name}</h4>
+              <h6>{moment(reply.createdAt).fromNow()}</h6>
+            </div>
+            <div
+              className={`reply_text ${isMinimized ? "minimized" : "expanded"}`}
+            >
               <p>{reply.reply}</p>
             </div>
-          </div>
-          <div>
-            <span onClick={toggle_upvoted}>
-              <FontAwesomeIcon
-                icon={faUpLong}
-                cursor={"pointer"}
-                color={upvoted !== -1 ? "blue" : "white"}
-              />
-              {reply.upvoteValue}
-            </span>
-            <span onClick={toggle_downvoted}>
-              <FontAwesomeIcon
-                icon={faDownLong}
-                cursor={"pointer"}
-                color={downvoted !== -1 ? "red" : "white"}
-              />
-              {reply.downvoteValue}
-            </span>
-            <h6
-              onClick={() => toggleVisibility(reply._id)}
-              style={{ cursor: "pointer" }}
-            >
-              Reply
-            </h6>
-            {reply.replies.length > 0 && (
-              <h6 onClick={replyVisibilty} style={{ cursor: "pointer" }}>
-                view replies
-              </h6>
+            {isMinimized && reply.reply.length > 100 ? (
+              <div onClick={toggleMinimize} className="reply_elipsis">
+                <h6>See more...</h6>
+              </div>
+            ) : (
+              " "
             )}
-            <span>
-              <FontAwesomeIcon
-                icon={faTrash}
-                cursor={"pointer"}
-                color="crimson"
-                onClick={() => handleDeleteComment(reply._id)}
-              />
-            </span>
-          </div>
-
-          {selectedCommentId === reply._id && (
-            <>
-              <form onSubmit={(e) => handleSubmit(e, reply._id)}>
-                <input
-                  onChange={handleChange}
-                  type="text"
-                  placeholder={`reply to @${reply.user.nick_name}`}
-                  value={newReply}
-                  name="reply"
-                  id="reply"
+            <div className="replies_feedback-options">
+              <span onClick={toggle_upvoted}>
+                <FontAwesomeIcon
+                  icon={faUpLong}
+                  cursor={"pointer"}
+                  color={upvoted !== -1 ? "blue" : "black"}
                 />
-                <div>
-                  <button type="submit">send</button>
-                </div>
-              </form>
-            </>
-          )}
+                {reply.upvoteValue}
+              </span>
+              <span onClick={toggle_downvoted}>
+                <FontAwesomeIcon
+                  icon={faDownLong}
+                  cursor={"pointer"}
+                  color={downvoted !== -1 ? "red" : "black"}
+                />
+                {reply.downvoteValue}
+              </span>
+              <h6
+                onClick={() => toggleVisibility(reply._id)}
+                style={{ cursor: "pointer" }}
+              >
+                Reply
+              </h6>
+              {reply.replies.length > 0 && (
+                <h6 onClick={replyVisibilty} style={{ cursor: "pointer" }}>
+                  view replies
+                </h6>
+              )}
+              <span>
+                <FontAwesomeIcon
+                  icon={faTrash}
+                  cursor={"pointer"}
+                  color="crimson"
+                  onClick={() => handleDeleteComment(reply._id)}
+                />
+              </span>
+            </div>
+
+            {selectedCommentId === reply._id && (
+              <>
+                <form onSubmit={(e) => handleSubmit(e, reply._id)}>
+                  <div className="nested_reply_form">
+                    {" "}
+                    <div className="reply_user_profile_img_container">
+                      <img
+                        className="reply_user_profile_img"
+                        src={user?.profile_image}
+                        alt="profile"
+                      />
+                    </div>
+                    <div className="nested_reply_input">
+                      <input
+                        onChange={handleChange}
+                        type="text"
+                        placeholder={`reply to @${reply.user.nick_name}`}
+                        value={newReply}
+                        name="reply"
+                        id="reply"
+                      />
+                      <div>
+                        <button className="nested_reply_btn" type="submit">
+                          <FontAwesomeIcon icon={faPaperPlane} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </>
+            )}
+          </div>
         </Fragment>
 
         {/* Recursive rendering of nested replies */}
 
         {reply.replies && (
-          <div className="nested-replies">
+          <div>
             {reply.replies?.length > 0 &&
               reply.replies.map((nestedReply) => (
                 <Fragment key={nestedReply._id}>

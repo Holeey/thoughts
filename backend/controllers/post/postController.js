@@ -21,15 +21,16 @@ exports.myPost = async (req, res) => {
 };
 exports.createPost = async (req, res) => {
   try {
-    const { postTitle, postBody } = req.body;
+    const { postTitle, postImg,  postBody } = req.body;
 
-    if (!postTitle || !postBody) {
+    if (!(postTitle || postBody)) {
       return res.status(401).json("Please add fields");
     }
     const post = await postModel.create({
       user: req.user.id,
       postTitle: postTitle,
       postBody: postBody,
+      postImg: postImg
     });
 
     if (post) {
@@ -42,7 +43,7 @@ exports.createPost = async (req, res) => {
 };
 exports.updatePost = async (req, res) => {
   try {
-    const { postTitle, postBody } = req.body;
+    const { postTitle, postBody, postImg } = req.body;
 
     const post = await postModel.findById(req.params.id);
 
@@ -58,7 +59,7 @@ exports.updatePost = async (req, res) => {
 
     const updatedPost = await postModel.findByIdAndUpdate(
       req.params.id,
-      { postTitle: postTitle, postBody: postBody },
+      { postTitle: postTitle, postBody: postBody, postImg: postImg },
       { new: true }
     );
 

@@ -8,6 +8,7 @@ const postSchema = new mongoose.Schema({
     },
     postTitle: String,
     postBody: String,
+    postImg: String,
     upvote: [],
     upvoteValue: {
         type: Number,

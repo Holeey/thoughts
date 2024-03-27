@@ -8,10 +8,11 @@ import {toast} from "react-toastify"
 const PostForm = ({ isVisible, setIsVisible }) => {
     const [formData, setFormData] = useState({
     postTitle: "",
-    post_img: "",
+    postImg: "",
     postBody: "",
   });
-  const { postTitle, post_img, postBody } = formData;
+  const { postTitle, postImg, postBody } = formData
+  console.log('postImg:', postImg)
 
   const dispatch = useDispatch();
 
@@ -29,7 +30,8 @@ const PostForm = ({ isVisible, setIsVisible }) => {
       if (editingPost) {
         setFormData({
           postTitle: editingPost.postTitle,
-          postBody: editingPost.postBody
+          postBody: editingPost.postBody,
+          postImg: editingPost.postImg
         })
       } 
       document.addEventListener("click", handleOutsideClick, true); 
@@ -57,7 +59,7 @@ const PostForm = ({ isVisible, setIsVisible }) => {
     const base64 = await converToBase64(file)
     setFormData((prevData) => ({
       ...prevData,
-      post_img: base64
+      postImg: base64
     }))
   }
 
@@ -73,7 +75,8 @@ const PostForm = ({ isVisible, setIsVisible }) => {
 
     dispatch(createPost({
       postTitle: postTitle,
-      postBody: postBody
+      postBody: postBody,
+      postImg: postImg
     }))
     handleResetForm()
     setIsVisible(!isVisible)
@@ -86,6 +89,7 @@ const PostForm = ({ isVisible, setIsVisible }) => {
         id: editingPost._id,
         postTitle: postTitle,  
         postBody: postBody,
+        postImg: postImg
       };
       dispatch(updatePost(updatedPost));
       handleResetForm()
@@ -95,7 +99,7 @@ const PostForm = ({ isVisible, setIsVisible }) => {
     setFormData({
       postTitle: "",
       postBody: "",
-      post_img: ""
+      postImg: ""
     })
     setIsVisible(!isVisible)
   }
@@ -110,8 +114,8 @@ const PostForm = ({ isVisible, setIsVisible }) => {
             <input
               onChange={handleFileUpload}
               type="file"
-              name="post_img"
-              id="post_img"
+              name="postImg"
+              id="postImg"
               accept=".jpg, .png, .jpeg"
             />
           </div>
