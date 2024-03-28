@@ -82,26 +82,6 @@ export const downvotes = createAsyncThunk('post/downvote', async (id, thunkAPI) 
         return thunkAPI.rejectWithValue(message)  
     }
 })
-// export const unUpvoted = createAsyncThunk('post/unUpvoted', async (id, thunkAPI) => {
-//     try {
-//         const token = thunkAPI.getState().auth.user.token
-//         return await postService.unUpvoted(id, token)
-//     } catch (error) {
-//         const message = (error.response && error.response.data && error.response.message)
-//         || error.message || error.toString()
-//         return thunkAPI.rejectWithValue(message)  
-//     }
-// })
-// export const unDownvoted = createAsyncThunk('post/unDownvoted', async (id, thunkAPI) => {
-//     try {
-//         const token = thunkAPI.getState().auth.user.token
-//         return await postService.unDownvoted(id, token)
-//     } catch (error) {
-//         const message = (error.response && error.response.data && error.response.message)
-//         || error.message || error.toString()
-//         return thunkAPI.rejectWithValue(message)  
-//     }
-// })
 
 const postSlice = createSlice({
     name: 'post',

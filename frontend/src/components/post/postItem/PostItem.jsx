@@ -10,7 +10,7 @@ import {
 
 import PostForm from "../postForm/PostForm";
 import CommentForm from "../postItem/comments/commentForm/CommentForm";
-import CommentList from "./comments/commentList/CommentList"
+import CommentList from "./comments/commentList/CommentList";
 
 import moment from "moment";
 
@@ -109,8 +109,8 @@ const PostItem = ({ post }) => {
             </div>
             <h4>{post.user?.nick_name}</h4>
             <div className="post_time">
-            <h6>{moment(post.createdAt).fromNow()}</h6>
-          </div>
+              <h6>{moment(post.createdAt).fromNow()}</h6>
+            </div>
           </div>
           <div className="post_options_elipsis">
             <FontAwesomeIcon
@@ -128,12 +128,11 @@ const PostItem = ({ post }) => {
               </ul>
             </>
           )}
-        </div>          <div className="post_title">
-            <h5>{post.postTitle}</h5>
-          </div>
+        </div>{" "}
+        <div className="post_title">
+          <h5>{post.postTitle}</h5>
+        </div>
         <div className={`post_item_content`}>
-
-
           <div
             className={`post_body_container ${
               isMinimized ? "minimized" : "expanded"
@@ -141,18 +140,17 @@ const PostItem = ({ post }) => {
           >
             <p className="post_body">{post.postBody}</p>
           </div>
-
-          <div className="postImg">
-            <img src={post.postImg} alt="postimg"/>
-          </div>
-
           {isMinimized && post.postBody.length > 100 ? (
-            <span className="post_elipsis">
-              Continue reading{" "}
-              <FontAwesomeIcon icon={faEllipsis} onClick={toggleMinimize} />{" "}
-            </span>
+            <div className="post_elipsis">
+                <h6 onClick={toggleMinimize}>See more...</h6>
+            </div>
           ) : (
             ""
+          )}
+          {  post.postImg && (
+          <div className="postImg">
+            <img src={post.postImg} alt="" />
+          </div>
           )}
         </div>
         <div className="post_meta_container">
@@ -166,7 +164,7 @@ const PostItem = ({ post }) => {
             </span>
             <span onClick={toggle_downvoted}>
               <FontAwesomeIcon
-                icon={faDownLong} 
+                icon={faDownLong}
                 color={downvoted !== -1 ? "red" : "black"}
               />
               {post.downvoteValue}
@@ -178,17 +176,13 @@ const PostItem = ({ post }) => {
               <FontAwesomeIcon icon={faShareNodes} />
             </span>{" "}
           </div>
-
-      
         </div>
       </div>
       {isVisible && (
         <PostForm isVisible={isVisible} setIsVisible={setIsVisible} />
       )}
       {openCommentFormId === post._id && <CommentForm post={post} />}
-      <div>
-     {openCommentFormId === post._id &&  <CommentList post={post}/>}
-      </div>
+      <div>{openCommentFormId === post._id && <CommentList post={post} />}</div>
     </>
   );
 };

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux"
 import './postForm.css'
-import { createPost, updatePost } from "../../../features/post/postSlice";
+import { createPost, updatePost, reset } from "../../../features/post/postSlice";
 import {toast} from "react-toastify"
 
 
@@ -11,8 +11,7 @@ const PostForm = ({ isVisible, setIsVisible }) => {
     postImg: "",
     postBody: "",
   });
-  const { postTitle, postImg, postBody } = formData
-  console.log('postImg:', postImg)
+  const { postTitle, postImg, postBody } = formData;
 
   const dispatch = useDispatch();
 
@@ -33,12 +32,14 @@ const PostForm = ({ isVisible, setIsVisible }) => {
           postBody: editingPost.postBody,
           postImg: editingPost.postImg
         })
-      } 
+      }else {
+        dispatch(reset())
+      }
       document.addEventListener("click", handleOutsideClick, true); 
       return () => {
         document.removeEventListener("click", handleOutsideClick, true);
       };
-    }, [editingPost, handleOutsideClick]);
+    }, [editingPost, handleOutsideClick, dispatch]);
  
 
   const converToBase64 = (file) => {
@@ -78,7 +79,13 @@ const PostForm = ({ isVisible, setIsVisible }) => {
       postBody: postBody,
       postImg: postImg
     }))
-    handleResetForm()
+    // handleResetForm()
+    dispatch(reset())
+    setFormData({
+      postTitle: "",
+      postBody: "",
+      postImg: ""
+    })
     setIsVisible(!isVisible)
   }
   const handleUpdatePost = (e) => {
@@ -92,7 +99,13 @@ const PostForm = ({ isVisible, setIsVisible }) => {
         postImg: postImg
       };
       dispatch(updatePost(updatedPost));
-      handleResetForm()
+      dispatch(reset());
+      setFormData({
+        postTitle: "",
+        postBody: "",
+        postImg: ""
+      })
+      setIsVisible(!isVisible)
     }
   };
   const handleResetForm = () => {
@@ -101,7 +114,8 @@ const PostForm = ({ isVisible, setIsVisible }) => {
       postBody: "",
       postImg: ""
     })
-    setIsVisible(!isVisible)
+    dispatch(reset())
+    setIsVisible(false)
   }
   
 
@@ -139,7 +153,7 @@ const PostForm = ({ isVisible, setIsVisible }) => {
               value={postBody}
             />
           </div>
-        <button id="post_cancel_button" onClick={()=> setIsVisible(false)} >close</button>
+        <button id="post_cancel_button" onClick={handleResetForm} >close</button>
           {editingPost? (<button type="submit" id="post_button" >update</button>)
            : (<button type="submit" id="post_button" >post</button>)}
         </form>
