@@ -17,6 +17,9 @@ const Dashboard = () => {
 
     useEffect(() => {
       dispatch(getAllPosts())
+      return () => {
+        dispatch(reset())
+      }
     }, [posts, dispatch])
 
   return (

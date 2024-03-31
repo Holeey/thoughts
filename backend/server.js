@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+
 require('events').EventEmitter.defaultMaxListeners = 15;
 
 const dotenv = require('dotenv')
@@ -18,6 +19,8 @@ app = express();
 app.use(cors());
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
+
+
 
 dotenv.config()
 connectDB()

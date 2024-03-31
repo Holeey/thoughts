@@ -1,9 +1,43 @@
 const mongoose = require("mongoose").default;
 const postModel = require("../../model/postModel.js");
+const path = require("path");
+const fs = require('fs');
+
+exports.createPost = async (req, res) => {
+  try {
+    // Extract data from request body
+    const { postTitle, postBody } = req.body;
+
+    // Check if required fields are provided
+    if (!postTitle || !postBody) {
+      return res.status(400).json("Please provide post title and body");
+    }
+
+    // Extract the filename from the absolute path
+    const filename = path.basename(req.file.path);
+
+    // Save only the filename to the database
+    const postImg = filename;
+
+    // Create post using Mongoose model
+    const post = await postModel.create({
+      user: req.user.id,
+      postTitle: postTitle,
+      postBody: postBody,
+      postImg: postImg, // Assign the file path to postImg field
+    });
+
+    // Respond with the created post
+    return res.status(201).json(post);
+  } catch (error) {
+    console.error("Error creating post:", error);
+    return res.status(500).json("Internal server error");
+  }
+};
 
 exports.getAllPosts = async (req, res) => {
   try {
-    const posts = await postModel.find().populate({ path: 'user' });
+    const posts = await postModel.find().populate({ path: "user" });
 
     if (!posts) {
       return res.status(404).json({ error: "Posts not found" });
@@ -14,36 +48,13 @@ exports.getAllPosts = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 exports.myPost = async (req, res) => {
   const posts = await postModel.find({ user: req.user._id.toString() });
   return res.status(201).json(posts);
 };
-exports.createPost = async (req, res) => {
-  try {
-    const { postTitle, postImg,  postBody } = req.body
-
-    if (!(postTitle || postBody)) {
-      return res.status(401).json("Please add fields");
-    }
-    const post = await postModel.create({
-      user: req.user.id,
-      postTitle: postTitle,
-      postBody: postBody,
-      postImg: postImg
-    });
-
-    if (post) {
-      return res.status(201).json(post);
-    }
-  } catch (error) {
-    console.error("create post error:", error);
-    return res.status(500).json("Internal error");
-  }
-};
 exports.updatePost = async (req, res) => {
   try {
-    const { postTitle, postBody, postImg } = req.body
+    const { postTitle, postBody } = req.body;
 
     const post = await postModel.findById(req.params.id);
 
@@ -57,11 +68,32 @@ exports.updatePost = async (req, res) => {
       return res.status(404).json("Unauthorized user!");
     }
 
-    const updatedPost = await postModel.findByIdAndUpdate(
-      req.params.id,
-      { postTitle: postTitle, postBody: postBody, postImg: postImg },
-      { new: true }
-    ).populate('user');
+    if (post.postImg) {
+      const imagePath = path.resolve(__dirname, '..', '..', '..', 'frontend', 'src', 'images', post.postImg);
+
+      // Use fs.unlink to delete the image file
+      fs.unlink(imagePath, (err) => {
+        if (err) {
+          console.error('Error deleting image file:', err);
+        } else {
+          console.log('Image file deleted successfully');
+        }
+      });
+    }
+
+        // Extract the filename from the absolute path
+    const filename = path.basename(req.file.path);
+
+        // Save only the filename to the database
+    const postImg = filename;
+
+    const updatedPost = await postModel
+      .findByIdAndUpdate(
+        req.params.id,
+        { postTitle: postTitle, postBody: postBody, postImg: postImg },
+        { new: true }
+      )
+      .populate("user");
 
     if (updatedPost) {
       return res.status(201).json(updatedPost);
@@ -83,6 +115,19 @@ exports.deletePost = async (req, res) => {
     }
     if (req.user._id.toString() !== post.user.toString()) {
       return res.status(404).json("Unauthorized user!");
+    }
+    // Check if the post has an associated image
+    if (post.postImg) {
+      const imagePath = path.resolve(__dirname, '..', '..', '..', 'frontend', 'src', 'images', post.postImg);
+
+      // Use fs.unlink to delete the image file
+      fs.unlink(imagePath, (err) => {
+        if (err) {
+          console.error('Error deleting image file:', err);
+        } else {
+          console.log('Image file deleted successfully');
+        }
+      });
     }
 
     await postModel.findByIdAndDelete(req.params.id);
@@ -138,8 +183,8 @@ exports.upvotes = async (req, res) => {
       return res.status(401).json({ error: "Unauthorized user!" });
     }
 
-    const existingUpvoteIndex = post.upvote.findIndex((vote) =>
-      vote.user && vote.user._id.equals(req.user._id)
+    const existingUpvoteIndex = post.upvote.findIndex(
+      (vote) => vote.user && vote.user._id.equals(req.user._id)
     );
 
     if (existingUpvoteIndex === -1) {
@@ -152,11 +197,9 @@ exports.upvotes = async (req, res) => {
       post.upvoteValue -= 1;
     }
 
-    const updatedPost = await postModel.findByIdAndUpdate(
-      req.params.id,
-      post,
-      { new: true }
-    );
+    const updatedPost = await postModel.findByIdAndUpdate(req.params.id, post, {
+      new: true,
+    });
 
     await session.commitTransaction();
     session.endSession();
@@ -188,8 +231,8 @@ exports.downvotes = async (req, res) => {
       return res.status(401).json({ error: "Unauthorized user!" });
     }
 
-    const existingDownvoteIndex = post.downvote.findIndex((vote) =>
-      vote.user && vote.user._id.equals(req.user._id)
+    const existingDownvoteIndex = post.downvote.findIndex(
+      (vote) => vote.user && vote.user._id.equals(req.user._id)
     );
 
     if (existingDownvoteIndex === -1) {
@@ -202,11 +245,9 @@ exports.downvotes = async (req, res) => {
       post.downvoteValue -= 1;
     }
 
-    const updatedPost = await postModel.findByIdAndUpdate(
-      req.params.id,
-      post,
-      { new: true }
-    );
+    const updatedPost = await postModel.findByIdAndUpdate(req.params.id, post, {
+      new: true,
+    });
 
     await session.commitTransaction();
     session.endSession();
@@ -218,4 +259,3 @@ exports.downvotes = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-

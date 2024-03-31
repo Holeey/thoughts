@@ -1,68 +1,62 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux"
-import './postForm.css'
-import { createPost, updatePost, reset } from "../../../features/post/postSlice";
-import {toast} from "react-toastify"
+import { useDispatch, useSelector } from "react-redux";
+import "./postForm.css";
+import {
+  createPost,
+  updatePost,
+  reset,
+  resetEditingPost,
+} from "../../../features/post/postSlice";
+import { toast } from "react-toastify";
 
 
 const PostForm = ({ isVisible, setIsVisible }) => {
-    const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState({
     postTitle: "",
-    postImg: "",
+    postImg: null,
     postBody: "",
   });
   const { postTitle, postImg, postBody } = formData;
 
+  
+
   const dispatch = useDispatch();
 
-  const { editingPost } = useSelector((state) => state.post)
+  const { editingPost } = useSelector((state) => state.post);
 
-    const clickRef = useRef(null);
+  const clickRef = useRef(null);
 
-    const handleOutsideClick = useCallback((e) => {
-     if(clickRef.current && !clickRef.current.contains(e.target)) {
+  const handleOutsideClick = useCallback(
+    (e) => {
+      if (clickRef.current && !clickRef.current.contains(e.target)) {
         setIsVisible(false);
       }
-    }, [setIsVisible])
-  
-    useEffect(() => {  
-      if (editingPost) {
-        setFormData({
-          postTitle: editingPost.postTitle,
-          postBody: editingPost.postBody,
-          postImg: editingPost.postImg
-        })
-      }else {
-        dispatch(reset())
-      }
-      document.addEventListener("click", handleOutsideClick, true); 
-      return () => {
-        document.removeEventListener("click", handleOutsideClick, true);
-      };
-    }, [editingPost, handleOutsideClick, dispatch]);
- 
+    },
+    [setIsVisible]
+  );
 
-  const converToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const filerReader =  new FileReader()
-      filerReader.readAsDataURL(file)
-      filerReader.onload = () => {
-        resolve(filerReader.result)
-      }
-      filerReader.onerror = (error) => {
-        reject(error)
-      }
-    })
-  }
+  useEffect(() => {
+    if (editingPost) {
+      setFormData({
+        postTitle: editingPost.postTitle,
+        postBody: editingPost.postBody,
+        postImg: editingPost.postImg,
+      });
+    } 
+    document.addEventListener("click", handleOutsideClick, true);
+    return () => {
+      document.removeEventListener("click", handleOutsideClick, true);
+    };
+  }, [editingPost, handleOutsideClick, dispatch]);
+
 
   const handleFileUpload = async (e) => {
-    const file = e.target.files[0]
-    const base64 = await converToBase64(file)
+    const file = e.target.files[0];
     setFormData((prevData) => ({
       ...prevData,
-      postImg: base64
-    }))
-  }
+      postImg: file,
+    }));
+  };
 
   const handleChange = (e) => {
     setFormData((prevData) => ({
@@ -72,58 +66,54 @@ const PostForm = ({ isVisible, setIsVisible }) => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    dispatch(createPost({
-      postTitle: postTitle,
-      postBody: postBody,
-      postImg: postImg
-    }))
-    // handleResetForm()
-    dispatch(reset())
-    setFormData({
-      postTitle: "",
-      postBody: "",
-      postImg: ""
-    })
-    setIsVisible(!isVisible)
-  }
+    const formData = new FormData();
+formData.append('postTitle', postTitle);
+formData.append('postBody', postBody);
+formData.append('postImg', postImg);
+
+
+    dispatch(
+      createPost(formData)
+    );
+    handleResetForm()
+    setIsVisible(!isVisible);
+  };
   const handleUpdatePost = (e) => {
     e.preventDefault();
-  
+
     if (editingPost) {
       const updatedPost = {
         id: editingPost._id,
-        postTitle: postTitle,  
+        postTitle: postTitle,
         postBody: postBody,
-        postImg: postImg
+        postImg: postImg,
       };
       dispatch(updatePost(updatedPost));
-      dispatch(reset());
-      setFormData({
-        postTitle: "",
-        postBody: "",
-        postImg: ""
-      })
-      setIsVisible(!isVisible)
+      handleResetForm();
+      setIsVisible(!isVisible);
     }
   };
   const handleResetForm = () => {
     setFormData({
       postTitle: "",
       postBody: "",
-      postImg: ""
-    })
-    dispatch(reset())
-    setIsVisible(false)
-  }
-  
+      postImg: null,
+    });
+    dispatch(reset());
+    dispatch(resetEditingPost());
+    setIsVisible(false);
+  };
 
   return (
     <div className="post_form_container">
-      <div ref={clickRef} > 
-      
-        <form  onSubmit={editingPost ? handleUpdatePost : handleSubmit} className="post_form">
+      <div ref={clickRef}>
+        <form
+          encType="multipart/form-data"
+          onSubmit={editingPost ? handleUpdatePost : handleSubmit}
+          className="post_form"
+        >
           <div>
             <input
               onChange={handleFileUpload}
@@ -134,7 +124,7 @@ const PostForm = ({ isVisible, setIsVisible }) => {
             />
           </div>
           <div>
-          <input
+            <input
               onChange={handleChange}
               type="text"
               placeholder="Title"
@@ -144,25 +134,31 @@ const PostForm = ({ isVisible, setIsVisible }) => {
             />
           </div>
           <div>
-            <input
+            <textarea
               onChange={handleChange}
               type="text"
               placeholder="say something..."
               name="postBody"
-              id= "postBody"
+              id="postBody"
               value={postBody}
             />
           </div>
-        <button id="post_cancel_button" onClick={handleResetForm} >close</button>
-          {editingPost? (<button type="submit" id="post_button" >update</button>)
-           : (<button type="submit" id="post_button" >post</button>)}
+          <button id="post_cancel_button" onClick={handleResetForm}>
+            close
+          </button>
+          {editingPost ? (
+            <button type="submit" id="post_button">
+              update
+            </button>
+          ) : (
+            <button type="submit" id="post_button">
+              post
+            </button>
+          )}
         </form>
-
       </div>
-
     </div>
   );
 };
 
 export default PostForm;
-

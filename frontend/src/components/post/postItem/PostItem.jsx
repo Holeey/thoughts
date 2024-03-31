@@ -31,6 +31,7 @@ const PostItem = ({ post }) => {
   const [isPostOptions, setIsPostOptions] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [openCommentFormId, setOpenCommentFormId] = useState(null);
+  const [imageSrc, setImageSrc] = useState(null);
 
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
@@ -95,6 +96,18 @@ const PostItem = ({ post }) => {
     };
   });
 
+  useEffect(() => {
+    if (post.postImg) {
+      import(`../../../images/${post.postImg}`)
+        .then((module) => {
+          setImageSrc(module.default);
+        })
+        .catch((error) => {
+          console.error("Error loading image:", error);
+        });
+    }
+  }, [post]);
+
   return (
     <>
       <div className="post_item">
@@ -142,15 +155,15 @@ const PostItem = ({ post }) => {
           </div>
           {isMinimized && post.postBody.length > 100 ? (
             <div className="post_elipsis">
-                <h6 onClick={toggleMinimize}>See more...</h6>
+              <h6 onClick={toggleMinimize}>See more...</h6>
             </div>
           ) : (
             ""
           )}
-          {  post.postImg && (
-          <div className="postImg">
-            <img src={post.postImg} alt="" />
-          </div>
+          {imageSrc && (
+            <div className="postImg">
+              <img src={imageSrc} alt="" />
+            </div>
           )}
         </div>
         <div className="post_meta_container">
