@@ -82,19 +82,20 @@ formData.append('postImg', postImg);
   };
   const handleUpdatePost = (e) => {
     e.preventDefault();
-
+  
     if (editingPost) {
-      const updatedPost = {
-        id: editingPost._id,
-        postTitle: postTitle,
-        postBody: postBody,
-        postImg: postImg,
-      };
-      dispatch(updatePost(updatedPost));
+      const formData = new FormData();
+      formData.append('postTitle', postTitle);
+      formData.append('postBody', postBody);
+      formData.append('postImg', postImg);
+      formData.append('id', editingPost._id); // Include the post ID in the form data
+      console.log('formData:', formData)
+      dispatch(updatePost(formData));
       handleResetForm();
       setIsVisible(!isVisible);
     }
   };
+  
   const handleResetForm = () => {
     setFormData({
       postTitle: "",

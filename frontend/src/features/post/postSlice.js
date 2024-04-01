@@ -33,6 +33,7 @@ export const getAllPosts = createAsyncThunk('post/getAll', async (_, thunkAPI) =
 export const updatePost = createAsyncThunk('post/update', async (updatedPost, thunkAPI) => {
     const { id, postTitle, postBody } = updatedPost;
     const updatedPostData = { postTitle, postBody };
+    console.log('redux_id:', id)
     try {
         const token = thunkAPI.getState().auth.user.token
         return await postService.updatePost(id, updatedPostData, token)

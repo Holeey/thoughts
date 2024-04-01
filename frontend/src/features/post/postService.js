@@ -32,6 +32,7 @@ const updatePost = async (id, updatedPost, token) => {
                 Authorization: `Bearer ${token}`
             }
         }
+        console.log('service_id:', id)
         const response =  await axios.put(`${API_URL}/updatePost/${id}`, updatedPost, config)
         return response.data
     } catch (error) {

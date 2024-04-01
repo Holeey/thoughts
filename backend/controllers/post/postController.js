@@ -1,6 +1,6 @@
 const mongoose = require("mongoose").default;
 const postModel = require("../../model/postModel.js");
-const path = require("path");
+const path = require('path');
 const fs = require('fs');
 
 exports.createPost = async (req, res) => {
@@ -66,10 +66,13 @@ exports.updatePost = async (req, res) => {
     }
     if (req.user._id.toString() !== post.user.toString()) {
       return res.status(404).json("Unauthorized user!");
-    }
+    }   
+    
+    // Extract the filename from the absolute path
+    const filename = path.basename(req.file.path);
 
-    if (post.postImg) {
-      const imagePath = path.resolve(__dirname, '..', '..', '..', 'frontend', 'src', 'images', post.postImg);
+    if (post.postImg && filename) {
+      const imagePath = path.resolve('frontend', 'src', 'images', post.postImg);
 
       // Use fs.unlink to delete the image file
       fs.unlink(imagePath, (err) => {
@@ -80,11 +83,7 @@ exports.updatePost = async (req, res) => {
         }
       });
     }
-
-        // Extract the filename from the absolute path
-    const filename = path.basename(req.file.path);
-
-        // Save only the filename to the database
+    // Save only the filename to the database
     const postImg = filename;
 
     const updatedPost = await postModel
