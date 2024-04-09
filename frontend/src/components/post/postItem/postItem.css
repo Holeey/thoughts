@@ -17,6 +17,7 @@
   justify-content: space-between;
   width: 100%;
 }
+
 .post_item_content {
   width: 100%;
   padding: 1rem;
@@ -42,11 +43,12 @@
   padding-left: 1rem;
   font-size: 15px;
 }
-.post_author {
+.post_author-content{
   display: flex;
   justify-content: flex-start;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
   padding-inline: 1rem;
 }
 .post_options_elipsis {

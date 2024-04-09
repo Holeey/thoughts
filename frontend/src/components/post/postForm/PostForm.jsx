@@ -91,7 +91,7 @@ formData.append('postImg', postImg);
       formData.append('id', editingPost._id); // Include the post ID in the form data
       console.log('formData:', formData)
       dispatch(updatePost(formData));
-      handleResetForm();
+      handleResetForm()
       setIsVisible(!isVisible);
     }
   };

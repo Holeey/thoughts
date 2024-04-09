@@ -1,7 +1,7 @@
 const mongoose = require("mongoose").default;
 const postModel = require("../../model/postModel.js");
-const path = require('path');
-const fs = require('fs');
+const path = require("path");
+const fs = require("fs");
 
 exports.createPost = async (req, res) => {
   try {
@@ -54,7 +54,7 @@ exports.myPost = async (req, res) => {
 };
 exports.updatePost = async (req, res) => {
   try {
-    const { postTitle, postBody } = req.body;
+    const { postTitle, postBody, postImg } = req.body;
 
     const post = await postModel.findById(req.params.id);
 
@@ -66,25 +66,42 @@ exports.updatePost = async (req, res) => {
     }
     if (req.user._id.toString() !== post.user.toString()) {
       return res.status(404).json("Unauthorized user!");
-    }   
-    
-    // Extract the filename from the absolute path
-    const filename = path.basename(req.file.path);
-
-    if (post.postImg && filename) {
-      const imagePath = path.resolve('frontend', 'src', 'images', post.postImg);
-
-      // Use fs.unlink to delete the image file
-      fs.unlink(imagePath, (err) => {
-        if (err) {
-          console.error('Error deleting image file:', err);
-        } else {
-          console.log('Image file deleted successfully');
-        }
-      });
     }
-    // Save only the filename to the database
-    const postImg = filename;
+
+    if (req.file) {
+      const filename = req.file.filename;
+      const newImagePath = path.resolve("frontend", "src", "images", filename);
+      const currentImagePath = path.resolve(
+        "frontend",
+        "src",
+        "images",
+        post.postImg
+      );
+      if (fs.existsSync(currentImagePath)) {
+        // Delete the existing image file
+        fs.unlinkSync(currentImagePath);
+        // Replace the existing image file with the new one
+        fs.renameSync(req.file.path, newImagePath);
+      }
+      post.postImg = filename;
+      await post.save();
+    } else {
+      if (!req.file && postImg !== undefined) {
+        const newImagePath = path.resolve("frontend", "src", "images", postImg);
+        const currentImagePath = path.resolve(
+          "frontend",
+          "src",
+          "images",
+          post.postImg
+        );
+        if (fs.existsSync(currentImagePath)) {
+          // Replace the existing image file with the new one
+          fs.renameSync(currentImagePath, newImagePath);
+          post.postImg = postImg;
+          console.log("Image file replaced successfully");
+        }
+      }
+    }
 
     const updatedPost = await postModel
       .findByIdAndUpdate(
@@ -117,14 +134,19 @@ exports.deletePost = async (req, res) => {
     }
     // Check if the post has an associated image
     if (post.postImg) {
-      const imagePath = path.resolve(__dirname, '..', '..', '..', 'frontend', 'src', 'images', post.postImg);
+      const imagePath = path.resolve(
+        "frontend",
+        "src",
+        "images",
+        post.postImg
+      );
 
       // Use fs.unlink to delete the image file
       fs.unlink(imagePath, (err) => {
         if (err) {
-          console.error('Error deleting image file:', err);
+          console.error("Error deleting image file:", err);
         } else {
-          console.log('Image file deleted successfully');
+          console.log("Image file deleted successfully");
         }
       });
     }
@@ -138,7 +160,6 @@ exports.deletePost = async (req, res) => {
   }
 };
 exports.searchPost = async (req, res) => {
-  console.log("searchPost-userId:", req.user);
   try {
     if (!req.user) {
       return res.status(404).json("Login in");

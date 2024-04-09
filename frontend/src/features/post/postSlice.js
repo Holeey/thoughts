@@ -31,12 +31,12 @@ export const getAllPosts = createAsyncThunk('post/getAll', async (_, thunkAPI) =
     }
 })
 export const updatePost = createAsyncThunk('post/update', async (updatedPost, thunkAPI) => {
-    const { id, postTitle, postBody } = updatedPost;
-    const updatedPostData = { postTitle, postBody };
-    console.log('redux_id:', id)
     try {
-        const token = thunkAPI.getState().auth.user.token
-        return await postService.updatePost(id, updatedPostData, token)
+        const token = thunkAPI.getState().auth.user.token;
+        const id = updatedPost.get('id');
+        updatedPost.delete('id');
+        console.log('redux_id:', id)
+        return await postService.updatePost(id, updatedPost, token)
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
         || error.message || error.toString()

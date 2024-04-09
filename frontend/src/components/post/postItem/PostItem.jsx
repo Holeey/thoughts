@@ -97,22 +97,26 @@ const PostItem = ({ post }) => {
   });
 
   useEffect(() => {
-    if (post.postImg) {
-      import(`../../../images/${post.postImg}`)
-        .then((module) => {
+    const loadImage = async () => {
+      if (post.postImg) {
+        try {
+          const module = await import(`../../../images/${post.postImg}`);
           setImageSrc(module.default);
-        })
-        .catch((error) => {
+        } catch (error) {
           console.error("Error loading image:", error);
-        });
-    }
+        }
+      }
+    };
+  
+    loadImage();
   }, [post]);
+  
 
   return (
     <>
       <div className="post_item">
         <div className="post_author_container">
-          <div className="post_author">
+          <div className="post_author-content">
             <div className="user_profile_img_container">
               <img
                 className="user_profile_img"
@@ -120,7 +124,13 @@ const PostItem = ({ post }) => {
                 alt="profile_Img"
               />
             </div>
+            <div>
             <h4>{post.user?.nick_name}</h4>
+            <div>
+              <h6>{post.user.bio}</h6>
+            </div>
+            </div>
+
             <div className="post_time">
               <h6>{moment(post.createdAt).fromNow()}</h6>
             </div>
@@ -142,6 +152,7 @@ const PostItem = ({ post }) => {
             </>
           )}
         </div>{" "}
+        
         <div className="post_title">
           <h5>{post.postTitle}</h5>
         </div>
