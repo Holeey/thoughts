@@ -10,6 +10,7 @@ import {
 import { toast } from "react-toastify";
 
 
+
 const PostForm = ({ isVisible, setIsVisible }) => {
   const [formData, setFormData] = useState({
     postTitle: "",
@@ -89,7 +90,7 @@ formData.append('postImg', postImg);
       formData.append('postBody', postBody);
       formData.append('postImg', postImg);
       formData.append('id', editingPost._id); // Include the post ID in the form data
-      console.log('formData:', formData)
+     
       dispatch(updatePost(formData));
       handleResetForm()
       setIsVisible(!isVisible);

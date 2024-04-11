@@ -41,7 +41,7 @@
     border: none;
     outline: none;
 }
-.user_profile_img_container {
+.user_profile_img_container_nav {
     display: flex;
     align-items: center;
     border: solid 1px;

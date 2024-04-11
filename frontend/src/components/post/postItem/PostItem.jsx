@@ -116,23 +116,28 @@ const PostItem = ({ post }) => {
     <>
       <div className="post_item">
         <div className="post_author_container">
-          <div className="post_author-content">
-            <div className="user_profile_img_container">
+        <div className="user_profile_img_container_post">
               <img
                 className="user_profile_img"
                 src={post.user?.profile_image}
                 alt="profile_Img"
               />
             </div>
-            <div>
+          <div className="post_author-content">
+            <div className="post_author-info">
+            <div className="nick_name">
             <h4>{post.user?.nick_name}</h4>
-            <div>
-              <h6>{post.user.bio}</h6>
+           
             </div>
-            </div>
-
+            <a href="#">Follow</a>
             <div className="post_time">
               <h6>{moment(post.createdAt).fromNow()}</h6>
+            </div>
+              
+            </div>
+           {' '}
+            <div className="bio">
+              <h6>{post.user.bio}</h6>
             </div>
           </div>
           <div className="post_options_elipsis">
@@ -150,23 +155,21 @@ const PostItem = ({ post }) => {
                 <li onClick={toggleMinimize}>Minimize</li>
               </ul>
             </>
-          )}
+          )}     
         </div>{" "}
-        
-        <div className="post_title">
-          <h5>{post.postTitle}</h5>
-        </div>
         <div className={`post_item_content`}>
+          <h5 className="post_title">{post.postTitle}</h5>
           <div
             className={`post_body_container ${
               isMinimized ? "minimized" : "expanded"
             }`}
           >
+            
             <p className="post_body">{post.postBody}</p>
           </div>
           {isMinimized && post.postBody.length > 100 ? (
             <div className="post_elipsis">
-              <h6 onClick={toggleMinimize}>See more...</h6>
+              <h6 onClick={toggleMinimize}>(See more...)</h6>
             </div>
           ) : (
             ""

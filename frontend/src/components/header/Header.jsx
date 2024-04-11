@@ -67,7 +67,7 @@ const Header = () => {
           </form>
         </div>
       <div onClick={()=> setIsVisible(!isVisible)} className="user_profile">
-          <div className="user_profile_img_container">
+          <div className="user_profile_img_container_nav">
               <img
               className="user_profile_img"
               src={user?.profile_image || avatar}
