@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "./postForm.css";
 import {
@@ -8,18 +8,18 @@ import {
   resetEditingPost,
 } from "../../../features/post/postSlice";
 import { toast } from "react-toastify";
+import ImageCropper from "../../imageCropper/ImageCropper";
 
 
 
 const PostForm = ({ isVisible, setIsVisible }) => {
+  const [imageAfterCrop, setImageAfterCrop] = useState(null)
   const [formData, setFormData] = useState({
     postTitle: "",
     postImg: null,
     postBody: "",
   });
   const { postTitle, postImg, postBody } = formData;
-
-  
 
   const dispatch = useDispatch();
 
@@ -108,8 +108,53 @@ formData.append('postImg', postImg);
     setIsVisible(false);
   };
 
+  const onCropDone = (imgCroppedArea) => {
+      const canvas = document.createElement("canvas")
+      const context = canvas.getContext("2d")
+    
+        canvas.width = imgCroppedArea.width
+        canvas.height = imgCroppedArea.height
+        
+        let img = new Image()
+        img.src = postImg
+        img.onload = () => {
+          context.drawImage(
+            img,
+            imgCroppedArea.x,
+            imgCroppedArea.y,
+            imgCroppedArea.width,
+            imgCroppedArea.height,
+            0,
+            0,
+            imgCroppedArea.width,
+            imgCroppedArea.height
+          )
+
+          const dataURL = canvas.toDataURL('image/jpeg');
+
+          setImageAfterCrop(dataURL)
+        }
+    
+  }
+
+  const onCropCancel = () => {
+    setFormData((prevData) => ({
+      ...prevData,
+      postImg: "",
+    }));
+  }
+
   return (
-    <div className="post_form_container">
+    <Fragment>
+
+      <div className="post_form_container">
+              {
+        postImg  ?  (
+          <ImageCropper
+          onCropDone={onCropDone}
+          onCropCancel={onCropCancel}
+          selectedImage={postImg} />
+        ) :  
       <div ref={clickRef}>
         <form
           encType="multipart/form-data"
@@ -117,6 +162,7 @@ formData.append('postImg', postImg);
           className="post_form"
         >
           <div>
+            <img src={imageAfterCrop} alt="" />
             <input
               onChange={handleFileUpload}
               type="file"
@@ -159,8 +205,12 @@ formData.append('postImg', postImg);
           )}
         </form>
       </div>
+      
+}
     </div>
-  );
-};
+        
+    </Fragment>
+  )
+  }
 
 export default PostForm;
