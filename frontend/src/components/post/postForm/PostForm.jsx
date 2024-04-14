@@ -8,18 +8,23 @@ import {
   resetEditingPost,
 } from "../../../features/post/postSlice";
 import { toast } from "react-toastify";
-import ImageCropper from "../../imageCropper/ImageCropper";
+import ImgCropper from "../../imageCropper/ImgCropper";
 
 
 
 const PostForm = ({ isVisible, setIsVisible }) => {
-  const [imageAfterCrop, setImageAfterCrop] = useState(null)
+  const [imageAfterCrop, setImageAfterCrop] = useState(null);
+  const [isCropPage, setIsCropPage] = useState(false);
   const [formData, setFormData] = useState({
     postTitle: "",
     postImg: null,
     postBody: "",
   });
   const { postTitle, postImg, postBody } = formData;
+
+  // console.log('postimg:', postImg);
+  // console.log('imgAfterCrop:', imageAfterCrop)
+
 
   const dispatch = useDispatch();
 
@@ -57,6 +62,7 @@ const PostForm = ({ isVisible, setIsVisible }) => {
       ...prevData,
       postImg: file,
     }));
+    setIsCropPage(true);
   };
 
   const handleChange = (e) => {
@@ -89,7 +95,7 @@ formData.append('postImg', postImg);
       formData.append('postTitle', postTitle);
       formData.append('postBody', postBody);
       formData.append('postImg', postImg);
-      formData.append('id', editingPost._id); // Include the post ID in the form data
+      formData.append('id', editingPost._id); 
      
       dispatch(updatePost(formData));
       handleResetForm()
@@ -108,15 +114,15 @@ formData.append('postImg', postImg);
     setIsVisible(false);
   };
 
-  const onCropDone = (imgCroppedArea) => {
+  const onCropDone = (imgCroppedArea, base64Img, filename) => {
+    console.log('base64_image', base64Img)
       const canvas = document.createElement("canvas")
-      const context = canvas.getContext("2d")
-    
+      const context = canvas.getContext("2d")   
         canvas.width = imgCroppedArea.width
         canvas.height = imgCroppedArea.height
         
         let img = new Image()
-        img.src = postImg
+        img.src = base64Img
         img.onload = () => {
           context.drawImage(
             img,
@@ -127,34 +133,56 @@ formData.append('postImg', postImg);
             0,
             0,
             imgCroppedArea.width,
-            imgCroppedArea.height
+            imgCroppedArea.height,
           )
+          const dataURL = canvas.toDataURL("image/jpeg");
+          setImageAfterCrop(dataURL);
+          setIsCropPage(false);
+          const convertedImg = base64ToFile(dataURL, filename);
+          console.log('convertedImg:', convertedImg)
+          setFormData((prevData) => ({
+            ...prevData,
+            postImg: convertedImg,
+          }));
+          
+        } 
+      }
 
-          const dataURL = canvas.toDataURL('image/jpeg');
-
-          setImageAfterCrop(dataURL)
-        }
     
-  }
+      function base64ToFile(base64String, filename) {
+       // Assume base64String is the Base64-encoded image data
+        const byteString = atob(base64String.split(',')[1]);
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab], { type: 'image/jpeg' }); // Adjust the MIME type as needed
+        return new File([blob], filename, { type: 'image/jpeg' }); // Adjust the file type as needed
+      }
+      
 
   const onCropCancel = () => {
     setFormData((prevData) => ({
       ...prevData,
       postImg: "",
     }));
+    setIsCropPage(false)
   }
 
   return (
     <Fragment>
-
       <div className="post_form_container">
               {
-        postImg  ?  (
-          <ImageCropper
+        isCropPage ?  (
+          
+          <ImgCropper
           onCropDone={onCropDone}
           onCropCancel={onCropCancel}
           selectedImage={postImg} />
-        ) :  
+        ) : 
+        
+       <><img className="imageAfterCrop" src={imageAfterCrop} alt="" />
       <div ref={clickRef}>
         <form
           encType="multipart/form-data"
@@ -162,7 +190,7 @@ formData.append('postImg', postImg);
           className="post_form"
         >
           <div>
-            <img src={imageAfterCrop} alt="" />
+            
             <input
               onChange={handleFileUpload}
               type="file"
@@ -204,7 +232,7 @@ formData.append('postImg', postImg);
             </button>
           )}
         </form>
-      </div>
+      </div></>
       
 }
     </div>

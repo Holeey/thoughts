@@ -1,0 +1,19 @@
+.image_cropper_background {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    position: relative;
+    width: 80vw;
+    height: 90vh;
+    overflow: hidden;
+    background-color: aliceblue;
+    }
+    .crop-action-btn {
+       position: absolute;
+       bottom: 15%;
+    }
+    .aspectRatioChange {
+        position: absolute;
+        bottom: 10%;
+    }
+    

@@ -12,6 +12,11 @@
     opacity: 1;
     z-index: 999;
 }
+.imageAfterCrop {
+    width: 400px;
+    height: 400px;
+    object-fit: contain;
+}
 .post_form {
     display: flex;
     position: relative;

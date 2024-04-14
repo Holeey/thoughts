@@ -1,19 +1,16 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import Cropper from "react-easy-crop";
 
-import "./imageCropper.css";
+import "./imgCropper.css";
 
-const ImageCropper = ({ selectedImage, onCropDone, onCropCancel }) => {
+const ImgCropper = ({ selectedImage, onCropDone, onCropCancel }) => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [imageData, setImageData] = useState('');
   const [croppedArea, setCroppedArea] = useState('');
   const [aspectRatio, setAspectratio] = useState(null);
-  
 
-  const canvasRef = useRef(null);
-
-  const onCropComplete = (croppedAreaPixels) => {
+  const onCropComplete = (croppedAreaPercentages, croppedAreaPixels) => {
     setCroppedArea(croppedAreaPixels)
   };
 
@@ -51,12 +48,9 @@ const ImageCropper = ({ selectedImage, onCropDone, onCropCancel }) => {
     setAspectratio(event.target.value)
   }
 
-  
-
   return (
-    <div className="image_cropper_background">
-      <canvas ref={canvasRef}/>
-      <div>
+    <div >
+      <div className="image_cropper_background">
        <Cropper
         image={imageData}
         crop={crop}
@@ -66,13 +60,13 @@ const ImageCropper = ({ selectedImage, onCropDone, onCropCancel }) => {
         onCropComplete={onCropComplete}
         onZoomChange={setZoom}
         showGrid={true}
+        zoomWithScroll={true}
         style={{
           containerStyle: {
-            width: '50%',
-            height: '50%',
-            marginTop: '3rem',
+            width: '100%',
+            height: '70%',
             backgroundColor: '#fff'
-          }
+          },
         }}
       />  
       <div className="aspectRatioChange" onChange={changeAspectratio}>
@@ -90,19 +84,30 @@ const ImageCropper = ({ selectedImage, onCropDone, onCropCancel }) => {
             <button 
       className="crop-cancel"
       onClick={onCropCancel}
-      type="button">cancel</button>
+      type="button">Cancel</button>
       <button
-      onClick={() => onCropDone(croppedArea)}
-       type="button">apply crop</button>  
+      onClick={() =>  onCropDone(croppedArea, imageData, selectedImage?.name) }
+       type="button">Apply crop</button>  
       </div>
 
       </div>
-      
-
-
     
     </div>
   );
 };
 
-export default ImageCropper;
+export default ImgCropper;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
