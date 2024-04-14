@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import Cropper from "react-easy-crop";
-
+import {convertToBase64} from '../imageCropper/base64Converter'
 import "./imgCropper.css";
+
 
 const ImgCropper = ({ selectedImage, onCropDone, onCropCancel }) => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -14,22 +15,6 @@ const ImgCropper = ({ selectedImage, onCropDone, onCropCancel }) => {
     setCroppedArea(croppedAreaPixels)
   };
 
-  function convertToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const fileReader = new FileReader();
-
-      fileReader.onload = () => {
-        const base64 = fileReader.result;
-        resolve(base64);
-      };
-
-      fileReader.onerror = (error) => {
-        reject(error);
-      };
-
-      fileReader.readAsDataURL(file);
-    });
-  }
 
   useEffect(() =>{
     const loadImage = async () => {

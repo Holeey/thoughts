@@ -8,6 +8,7 @@ import {
   resetEditingPost,
 } from "../../../features/post/postSlice";
 import { toast } from "react-toastify";
+import {base64ToFile} from '../../imageCropper/base64Converter'
 import ImgCropper from "../../imageCropper/ImgCropper";
 
 
@@ -21,10 +22,6 @@ const PostForm = ({ isVisible, setIsVisible }) => {
     postBody: "",
   });
   const { postTitle, postImg, postBody } = formData;
-
-  // console.log('postimg:', postImg);
-  // console.log('imgAfterCrop:', imageAfterCrop)
-
 
   const dispatch = useDispatch();
 
@@ -115,7 +112,6 @@ formData.append('postImg', postImg);
   };
 
   const onCropDone = (imgCroppedArea, base64Img, filename) => {
-    console.log('base64_image', base64Img)
       const canvas = document.createElement("canvas")
       const context = canvas.getContext("2d")   
         canvas.width = imgCroppedArea.width
@@ -139,7 +135,6 @@ formData.append('postImg', postImg);
           setImageAfterCrop(dataURL);
           setIsCropPage(false);
           const convertedImg = base64ToFile(dataURL, filename);
-          console.log('convertedImg:', convertedImg)
           setFormData((prevData) => ({
             ...prevData,
             postImg: convertedImg,
@@ -149,17 +144,7 @@ formData.append('postImg', postImg);
       }
 
     
-      function base64ToFile(base64String, filename) {
-       // Assume base64String is the Base64-encoded image data
-        const byteString = atob(base64String.split(',')[1]);
-        const ab = new ArrayBuffer(byteString.length);
-        const ia = new Uint8Array(ab);
-        for (let i = 0; i < byteString.length; i++) {
-          ia[i] = byteString.charCodeAt(i);
-        }
-        const blob = new Blob([ab], { type: 'image/jpeg' }); // Adjust the MIME type as needed
-        return new File([blob], filename, { type: 'image/jpeg' }); // Adjust the file type as needed
-      }
+
       
 
   const onCropCancel = () => {

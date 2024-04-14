@@ -219,7 +219,7 @@ exports.upvotes = async (req, res) => {
 
     const updatedPost = await postModel.findByIdAndUpdate(req.params.id, post, {
       new: true,
-    });
+    }).populate("user");;
 
     await session.commitTransaction();
     session.endSession();
@@ -267,7 +267,7 @@ exports.downvotes = async (req, res) => {
 
     const updatedPost = await postModel.findByIdAndUpdate(req.params.id, post, {
       new: true,
-    });
+    }).populate("user");;
 
     await session.commitTransaction();
     session.endSession();

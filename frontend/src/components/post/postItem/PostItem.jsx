@@ -182,20 +182,27 @@ const PostItem = ({ post }) => {
         </div>
         <div className="post_meta_container">
           <div className="post_feedback_actions">
-            <span onClick={toggle_upvoted}>
+          <div className="upvote_downvote_container">
+            <div 
+            className="upvote"
+             onClick={toggle_upvoted}>
               <FontAwesomeIcon
                 icon={faUpLong}
                 color={upvoted !== -1 ? "blue" : "black"}
               />
               {post.upvoteValue}
-            </span>
-            <span onClick={toggle_downvoted}>
+            </div>
+            <div 
+            className="downvote"
+            onClick={toggle_downvoted}>
               <FontAwesomeIcon
                 icon={faDownLong}
                 color={downvoted !== -1 ? "red" : "black"}
               />
               {post.downvoteValue}
-            </span>
+            </div> 
+            </div>
+           
             <span onClick={() => toggleCommentForm(post._id)}>
               <FontAwesomeIcon icon={faComment} />
             </span>

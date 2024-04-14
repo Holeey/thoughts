@@ -55,7 +55,6 @@
 .postImg {
   max-width: 100%;
   display: flex;
-  border: solid 1px;
   background: #ffffff68;
   object-fit: cover;
   overflow: hidden;
@@ -148,6 +147,17 @@ li {
   align-items: center;
   justify-content: space-evenly;
 }
+.upvote_downvote_container {
+  display: flex;
+  align-items: center;
+  width: 200px;
+  border: solid 1px;
+  border-radius: 8px;
+}
+.upvote, .downvote {
+  border: solid 1px;
+}
+
 .post_time {
   width: 200px;
   padding: 1rem;
