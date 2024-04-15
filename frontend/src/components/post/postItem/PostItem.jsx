@@ -36,9 +36,6 @@ const PostItem = ({ post }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
 
-  const toggleMinimize = () => {
-    setIsMinimized(!isMinimized);
-  };
   const togglePostOptions = () => {
     setIsPostOptions(!isPostOptions);
   };
@@ -107,35 +104,56 @@ const PostItem = ({ post }) => {
         }
       }
     };
-  
+
     loadImage();
   }, [post]);
+
+  function generateDeepLink(contentId) {
+    // Replace 'myreactapp' with your custom URL scheme
+    return `myreactapp://content?id=${contentId}`;
+
+  }
+  const sharePost = async ({ contentId }) => {
+    const deepLink = generateDeepLink(contentId);
+
+    // Check if the platform supports the Web Share API
+    if (navigator.share) {
+      await navigator.share({
+        title: 'Share Content',
+        text: 'Check out this content!',
+        url: deepLink,
+      })
+      .then(() => console.log('Shared successfully'))
+      .catch((error) => console.error('Error sharing:', error));
+    } else {
+      // Fallback for platforms that don't support Web Share API
+      // You can implement your own custom share UI here
+      alert(`Share this link: ${deepLink}`);
+    }
+  }
   
 
   return (
     <>
       <div className="post_item">
         <div className="post_author_container">
-        <div className="user_profile_img_container_post">
-              <img
-                className="user_profile_img"
-                src={post.user?.profile_image}
-                alt="profile_Img"
-              />
-            </div>
+          <div className="user_profile_img_container_post">
+            <img
+              className="user_profile_img"
+              src={post.user?.profile_image}
+              alt="profile_Img"
+            />
+          </div>
           <div className="post_author-content">
             <div className="post_author-info">
-            <div className="nick_name">
-            <h4>{post.user?.nick_name}</h4>
-           
-            </div>
-            <a href="#">Follow</a>
-            <div className="post_time">
-              <h6>{moment(post.createdAt).fromNow()}</h6>
-            </div>
-              
-            </div>
-           {' '}
+              <div className="nick_name">
+                <h4>{post.user?.nick_name}</h4>
+              </div>
+              <a href="#">Follow</a>
+              <div className="post_time">
+                <h6>{moment(post.createdAt).fromNow()}</h6>
+              </div>
+            </div>{" "}
             <div className="bio">
               <h6>{post.user.bio}</h6>
             </div>
@@ -152,62 +170,60 @@ const PostItem = ({ post }) => {
               <ul ref={clickRef}>
                 <li onClick={toggleVisibility}>Edit</li>
                 <li onClick={handleDeletePost}>Delete</li>
-                <li onClick={toggleMinimize}>Minimize</li>
+                <li onClick={() => setIsMinimized(true)}>Minimize</li>
               </ul>
             </>
-          )}     
+          )}
         </div>{" "}
         <div className={`post_item_content`}>
           <h5 className="post_title">{post.postTitle}</h5>
-          <div
-            className={`post_body_container ${
-              isMinimized ? "minimized" : "expanded"
-            }`}
-          >
-            
-            <p className="post_body">{post.postBody}</p>
+          <div className={`${!isMinimized && "reverse_post"}`}>
+            <div
+              className={`post_body_container ${
+                isMinimized ? "minimized" : "expanded"
+              }`}
+            >
+              <div className="post_body">
+                <p>{post.postBody}</p>
+              </div>
+            </div>
+            {isMinimized && post.postBody.length > 100 ? (
+              <div className="post_elipsis">
+                <h6 onClick={() => setIsMinimized(false)}>(See more...)</h6>
+              </div>
+            ) : (
+              ""
+            )}
+            {imageSrc && (
+              <div className="postImg">
+                <img src={imageSrc} alt="" />
+              </div>
+            )}
           </div>
-          {isMinimized && post.postBody.length > 100 ? (
-            <div className="post_elipsis">
-              <h6 onClick={toggleMinimize}>(See more...)</h6>
-            </div>
-          ) : (
-            ""
-          )}
-          {imageSrc && (
-            <div className="postImg">
-              <img src={imageSrc} alt="" />
-            </div>
-          )}
         </div>
         <div className="post_meta_container">
           <div className="post_feedback_actions">
-          <div className="upvote_downvote_container">
-            <div 
-            className="upvote"
-             onClick={toggle_upvoted}>
-              <FontAwesomeIcon
-                icon={faUpLong}
-                color={upvoted !== -1 ? "blue" : "black"}
-              />
-              {post.upvoteValue}
+            <div className="upvote_downvote_container">
+              <div className="upvote" onClick={toggle_upvoted}>
+                <FontAwesomeIcon
+                  icon={faUpLong}
+                  color={upvoted !== -1 ? "blue" : "black"}
+                />
+                {post.upvoteValue}
+              </div>
+              <div className="downvote" onClick={toggle_downvoted}>
+                <FontAwesomeIcon
+                  icon={faDownLong}
+                  color={downvoted !== -1 ? "red" : "black"}
+                />
+                {post.downvoteValue}
+              </div>
             </div>
-            <div 
-            className="downvote"
-            onClick={toggle_downvoted}>
-              <FontAwesomeIcon
-                icon={faDownLong}
-                color={downvoted !== -1 ? "red" : "black"}
-              />
-              {post.downvoteValue}
-            </div> 
-            </div>
-           
             <span onClick={() => toggleCommentForm(post._id)}>
               <FontAwesomeIcon icon={faComment} />
             </span>
             <span>
-              <FontAwesomeIcon icon={faShareNodes} />
+              <FontAwesomeIcon onClick={() => sharePost(post._id)} icon={faShareNodes} />
             </span>{" "}
           </div>
         </div>

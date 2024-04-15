@@ -2,13 +2,11 @@
   display: flex;
   align-items: center;
   flex-direction: column;
-  border: solid 1px;
-  border: #fff;
   width: 600px;
   margin-top: 5rem;
   background-color: #fff;
   border-radius: 10px;
-  padding-bottom: 2rem;
+  padding-bottom: 0.5rem;
 }
 .post_author_container {
   position: relative;
@@ -58,7 +56,7 @@
   background: #ffffff68;
   object-fit: cover;
   overflow: hidden;
-  margin-top: -0.5rem;
+  /* margin-top: -0.3rem; */
 }
 .postImg > img {
   max-width:  100%;
@@ -114,6 +112,10 @@ li {
 .post_elipsis {
   margin-top: -1rem;
   padding-left: 0.3rem;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  width: 100px;
 }
 .post_elipsis > h6 {
   color: rgb(53, 53, 224);
@@ -122,6 +124,7 @@ li {
 }
 .post_body {
   padding-inline: 0.3rem;
+  margin-top: -0.5rem;  
 }
 .post_body_container {
   overflow: hidden;
@@ -134,30 +137,59 @@ li {
 .post_body_container.expanded {
   max-height: none;
 }
+.reverse_post {
+  display: flex;
+  flex-direction: column-reverse;
+}
 .post_meta_container {
   display: flex;
-  align-items: center;
-  justify-content: space-around;
+  position: relative;
+  align-items: flex-start;
+  justify-content: center;
   width: 100%;
+  height: 30px;
   margin-inline: 2rem;
+  padding: 0.2rem;
 }
 .post_feedback_actions {
   display: flex;
-  width: 350px;
-  align-items: center;
-  justify-content: space-evenly;
+  position: absolute;
+  width: 200px;
+  align-items: flex-start;
+  justify-content: space-between;
+  left: 5%;
 }
 .upvote_downvote_container {
   display: flex;
   align-items: center;
-  width: 200px;
-  border: solid 1px;
+  justify-content: space-between;
+  width: 120px;
+  border: solid 0.5px;
+  border-color: rgba(109, 113, 114, 0.278);
   border-radius: 8px;
 }
 .upvote, .downvote {
-  border: solid 1px;
+  width: 100%;
+  background-color: rgba(109, 113, 114, 0.278);
 }
-
+.downvote {
+  border-left: solid 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+.upvote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: solid 1px;
+  cursor: pointer;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
 .post_time {
   width: 200px;
   padding: 1rem;

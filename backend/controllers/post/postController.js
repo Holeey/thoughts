@@ -184,12 +184,13 @@ exports.searchPost = async (req, res) => {
   }
 };
 ////// votes routes handler ///////////
+
 exports.upvotes = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const post = await postModel.findById(req.params.id);
+    const post = await postModel.findById(req.params.id).lean().session(session);;
 
     if (!post) {
       await session.abortTransaction();
@@ -219,7 +220,7 @@ exports.upvotes = async (req, res) => {
 
     const updatedPost = await postModel.findByIdAndUpdate(req.params.id, post, {
       new: true,
-    }).populate("user");;
+    }).populate("user").lean().session(session);
 
     await session.commitTransaction();
     session.endSession();
@@ -237,7 +238,7 @@ exports.downvotes = async (req, res) => {
   session.startTransaction();
 
   try {
-    const post = await postModel.findById(req.params.id);
+    const post = await postModel.findById(req.params.id).lean().session(session);;
 
     if (!post) {
       await session.abortTransaction();
@@ -267,7 +268,7 @@ exports.downvotes = async (req, res) => {
 
     const updatedPost = await postModel.findByIdAndUpdate(req.params.id, post, {
       new: true,
-    }).populate("user");;
+    }).populate("user").lean().session(session);
 
     await session.commitTransaction();
     session.endSession();
@@ -279,3 +280,4 @@ exports.downvotes = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
