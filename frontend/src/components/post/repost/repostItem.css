@@ -3,18 +3,19 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    border: #b33a3a solid 1px;
     max-width: 100%;
-
+    background-color: #fff;
+    box-shadow: 1px 1px 4px rgb(20, 17, 17);
+    pointer-events: none;
 }
 .repost-author_profile {
-    border: #3ab346 solid 1px;
     display: flex;
     align-items: center;
     justify-content: flex-start;
     width: 100%;
     gap: 5px;
     height: 50px;
+    padding: 0.5rem;
 }
 .repost_profile_image_container {
     overflow: hidden;
@@ -34,31 +35,23 @@
 }
 .repost_text_content {
     display: flex;
-    position: relative;
     flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
     width: 100%;
-    height: 200px;
-    border: solid 2px gold;
-
+    padding: 0;
+    max-height: 200px;
+    padding-inline: 0.5rem;
 }
 .repost_title {
-    position: absolute;
-    top: -10%;
     max-height: 100px;
     width: 100%;
-    border: solid 2px rgb(85, 0, 255);
+    margin-top: -0.3rem;
 }
 .repost_body_container {
-    position: absolute;
-    bottom: 0;
     width: 100%;
     align-items: center;
-    border: #3ab346 solid 2px;
+    margin-top: -1.5rem;
 }
 .repost_minimized_body {
-    
     width: 100%;
     height: 80px;
     font-size: 15px;
@@ -73,7 +66,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: #3ab346 solid 1px;
 }
 .repost_img {
     max-width: 100%;

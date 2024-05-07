@@ -15,7 +15,7 @@ const RepostItem = ({ post, imageSrc }) => {
             <p className='repost-author_name'>{post.user?.nick_name}</p>
             <h6 className='repost-post_date'>{moment(post.createdAt).fromNow()}</h6>       
           </div>
-          <div className='repost_text_content'>
+          <div className={`repost_text_content ${post.postBody.length < 100 && ''}`}>
           <h4 className='repost_title '>{post?.postTitle}</h4>
 
         <div className='repost_body_container'>
