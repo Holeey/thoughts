@@ -11,11 +11,12 @@ import {
 import PostForm from "../postForm/PostForm";
 import CommentForm from "../postItem/comments/commentForm/CommentForm";
 import CommentList from "./comments/commentList/CommentList";
+import "./postItem.css";
 
 import moment from "moment";
 
+import { useDispatch, useSelector } from "react-redux";
 import { useState, useRef, useEffect } from "react";
-import "./postItem.css";
 
 import {
   deletePost,
@@ -23,8 +24,11 @@ import {
   upvotes,
   downvotes,
 } from "../../../features/post/postSlice";
+import RepostForm from "../repost/RepostForm";
 
-import { useDispatch, useSelector } from "react-redux";
+
+
+
 
 const PostItem = ({ post }) => {
   const [isMinimized, setIsMinimized] = useState(true);
@@ -32,6 +36,7 @@ const PostItem = ({ post }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [openCommentFormId, setOpenCommentFormId] = useState(null);
   const [imageSrc, setImageSrc] = useState(null);
+  const [sharePost, setSharePost] = useState(false);
 
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
@@ -107,31 +112,6 @@ const PostItem = ({ post }) => {
 
     loadImage();
   }, [post]);
-
-  function generateDeepLink(contentId) {
-    // Replace 'myreactapp' with your custom URL scheme
-    return `myreactapp://content?id=${contentId}`;
-
-  }
-  const sharePost = async ({ contentId }) => {
-    const deepLink = generateDeepLink(contentId);
-
-    // Check if the platform supports the Web Share API
-    if (navigator.share) {
-      await navigator.share({
-        title: 'Share Content',
-        text: 'Check out this content!',
-        url: deepLink,
-      })
-      .then(() => console.log('Shared successfully'))
-      .catch((error) => console.error('Error sharing:', error));
-    } else {
-      // Fallback for platforms that don't support Web Share API
-      // You can implement your own custom share UI here
-      alert(`Share this link: ${deepLink}`);
-    }
-  }
-  
 
   return (
     <>
@@ -219,11 +199,15 @@ const PostItem = ({ post }) => {
                 {post.downvoteValue}
               </div>
             </div>
-            <span onClick={() => toggleCommentForm(post._id)}>
+            <span 
+            style={{cursor: 'pointer'}}
+            onClick={() => toggleCommentForm(post._id)}>
               <FontAwesomeIcon icon={faComment} />
             </span>
             <span>
-              <FontAwesomeIcon onClick={() => sharePost(post._id)} icon={faShareNodes} />
+              <FontAwesomeIcon 
+              style={{cursor: 'pointer'}}
+              onClick={() => setSharePost(!sharePost)} icon={faShareNodes} />
             </span>{" "}
           </div>
         </div>
@@ -233,6 +217,7 @@ const PostItem = ({ post }) => {
       )}
       {openCommentFormId === post._id && <CommentForm post={post} />}
       <div>{openCommentFormId === post._id && <CommentList post={post} />}</div>
+      {sharePost && <RepostForm post={post} setSharePost={setSharePost} imageSrc={imageSrc} />}
     </>
   );
 };
