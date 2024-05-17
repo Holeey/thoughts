@@ -12,15 +12,15 @@ const postSchema = new mongoose.Schema({
     upvote: [],
     upvoteValue: {
         type: Number,
-        default: 0  // Set a default value for upvote value
+        default: 0
     },
     downvote: [],
     downvoteValue: {
         type: Number,
-        default: 0  // Set a default value for downvote value
+        default: 0
     },
-
+    reposts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Repost' }], 
 }, { timestamps: true });
 
-const postData = mongoose.model('Post', postSchema);
-module.exports = postData;
+const Post = mongoose.model('Post', postSchema);
+module.exports = Post;

@@ -32,7 +32,6 @@ const updatePost = async (id, updatedPost, token) => {
                 Authorization: `Bearer ${token}`
             }
         }
-        console.log('service_id:', id)
         const response =  await axios.put(`${API_URL}/updatePost/${id}`, updatedPost, config)
         return response.data
     } catch (error) {
@@ -96,6 +95,30 @@ const downvotes = async (id, token) => {
         throw error
     }
 }
+const createRepost = async (id, repostComment, token) => {
+    try {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    }
+    const response =  await axios.post(`${API_URL}/createRepost/${id}`, repostComment, config)
+    console.log('repost_service:', id, repostComment)
+    return response.data
+    } catch (error) {
+        console.error('create repost error:', error.response.data)
+        throw error; 
+        }
+    }
+const getAllReposts = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/repost`)
+        return response.data
+    } catch (error) {
+        console.error('get all reposts:', error.response.data)
+        throw error
+    }
+}
 
 
 
@@ -107,6 +130,8 @@ const postService = {
     searchPost,
     upvotes,
     downvotes,
+    createRepost,
+    getAllReposts
 }
 
 export default postService

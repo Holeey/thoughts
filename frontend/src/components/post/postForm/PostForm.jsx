@@ -8,10 +8,8 @@ import {
   resetEditingPost,
 } from "../../../features/post/postSlice";
 import { toast } from "react-toastify";
-import {base64ToFile} from '../../imageCropper/base64Converter'
+import { base64ToFile } from "../../imageCropper/base64Converter";
 import ImgCropper from "../../imageCropper/ImgCropper";
-
-
 
 const PostForm = ({ isVisible, setIsVisible }) => {
   const [imageAfterCrop, setImageAfterCrop] = useState(null);
@@ -45,13 +43,12 @@ const PostForm = ({ isVisible, setIsVisible }) => {
         postBody: editingPost.postBody,
         postImg: editingPost.postImg,
       });
-    } 
+    }
     document.addEventListener("click", handleOutsideClick, true);
     return () => {
       document.removeEventListener("click", handleOutsideClick, true);
     };
   }, [editingPost, handleOutsideClick, dispatch]);
-
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -73,33 +70,30 @@ const PostForm = ({ isVisible, setIsVisible }) => {
     e.preventDefault();
 
     const formData = new FormData();
-formData.append('postTitle', postTitle);
-formData.append('postBody', postBody);
-formData.append('postImg', postImg);
+    formData.append("postTitle", postTitle);
+    formData.append("postBody", postBody);
+    formData.append("postImg", postImg);
 
-
-    dispatch(
-      createPost(formData)
-    );
-    handleResetForm()
+    dispatch(createPost(formData));
+    handleResetForm();
     setIsVisible(!isVisible);
   };
   const handleUpdatePost = (e) => {
     e.preventDefault();
-  
+
     if (editingPost) {
       const formData = new FormData();
-      formData.append('postTitle', postTitle);
-      formData.append('postBody', postBody);
-      formData.append('postImg', postImg);
-      formData.append('id', editingPost._id); 
-     
+      formData.append("postTitle", postTitle);
+      formData.append("postBody", postBody);
+      formData.append("postImg", postImg);
+      formData.append("id", editingPost._id);
+
       dispatch(updatePost(formData));
-      handleResetForm()
+      handleResetForm();
       setIsVisible(!isVisible);
     }
   };
-  
+
   const handleResetForm = () => {
     setFormData({
       postTitle: "",
@@ -112,118 +106,110 @@ formData.append('postImg', postImg);
   };
 
   const onCropDone = (imgCroppedArea, base64Img, filename) => {
-      const canvas = document.createElement("canvas")
-      const context = canvas.getContext("2d")   
-        canvas.width = imgCroppedArea.width
-        canvas.height = imgCroppedArea.height
-        
-        let img = new Image()
-        img.src = base64Img
-        img.onload = () => {
-          context.drawImage(
-            img,
-            imgCroppedArea.x,
-            imgCroppedArea.y,
-            imgCroppedArea.width,
-            imgCroppedArea.height,
-            0,
-            0,
-            imgCroppedArea.width,
-            imgCroppedArea.height,
-          )
-          const dataURL = canvas.toDataURL("image/jpeg");
-          setImageAfterCrop(dataURL);
-          setIsCropPage(false);
-          const convertedImg = base64ToFile(dataURL, filename);
-          setFormData((prevData) => ({
-            ...prevData,
-            postImg: convertedImg,
-          }));
-          
-        } 
-      }
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    canvas.width = imgCroppedArea.width;
+    canvas.height = imgCroppedArea.height;
 
-    
-
-      
+    let img = new Image();
+    img.src = base64Img;
+    img.onload = () => {
+      context.drawImage(
+        img,
+        imgCroppedArea.x,
+        imgCroppedArea.y,
+        imgCroppedArea.width,
+        imgCroppedArea.height,
+        0,
+        0,
+        imgCroppedArea.width,
+        imgCroppedArea.height
+      );
+      const dataURL = canvas.toDataURL("image/jpeg");
+      setImageAfterCrop(dataURL);
+      setIsCropPage(false);
+      const convertedImg = base64ToFile(dataURL, filename);
+      setFormData((prevData) => ({
+        ...prevData,
+        postImg: convertedImg,
+      }));
+    };
+  };
 
   const onCropCancel = () => {
     setFormData((prevData) => ({
       ...prevData,
       postImg: "",
     }));
-    setIsCropPage(false)
-  }
+    setIsCropPage(false);
+  };
 
   return (
     <Fragment>
       <div className="post_form_container">
-              {
-        isCropPage ?  (
-          
+        {isCropPage ? (
           <ImgCropper
-          onCropDone={onCropDone}
-          onCropCancel={onCropCancel}
-          selectedImage={postImg} />
-        ) : 
-        
-       <><img className="imageAfterCrop" src={imageAfterCrop} alt="" />
-      <div ref={clickRef}>
-        <form
-          encType="multipart/form-data"
-          onSubmit={editingPost ? handleUpdatePost : handleSubmit}
-          className="post_form"
-        >
-          <div>
-            
-            <input
-              onChange={handleFileUpload}
-              type="file"
-              name="postImg"
-              id="postImg"
-              accept=".jpg, .png, .jpeg"
-            />
-          </div>
-          <div>
-            <input
-              onChange={handleChange}
-              type="text"
-              placeholder="Title"
-              name="postTitle"
-              id="postTitle"
-              value={postTitle}
-            />
-          </div>
-          <div>
-            <textarea
-              onChange={handleChange}
-              type="text"
-              placeholder="say something..."
-              name="postBody"
-              id="postBody"
-              value={postBody}
-            />
-          </div>
-          <button id="post_cancel_button" onClick={handleResetForm}>
-            close
-          </button>
-          {editingPost ? (
-            <button type="submit" id="post_button">
-              update
-            </button>
-          ) : (
-            <button type="submit" id="post_button">
-              post
-            </button>
-          )}
-        </form>
-      </div></>
-      
-}
-    </div>
-        
+            onCropDone={onCropDone}
+            onCropCancel={onCropCancel}
+            selectedImage={postImg}
+          />
+        ) : (
+          <>
+            <img className="imageAfterCrop" src={imageAfterCrop} alt="" />
+            <div ref={clickRef}>
+              <form
+                encType="multipart/form-data"
+                onSubmit={editingPost ? handleUpdatePost : handleSubmit}
+                className="post_form"
+              >
+                <div>
+                  <input
+                    onChange={handleFileUpload}
+                    type="file"
+                    name="postImg"
+                    id="postImg"
+                    accept=".jpg, .png, .jpeg"
+                  />
+                </div>
+                <div>
+                  <input
+                    onChange={handleChange}
+                    type="text"
+                    placeholder="Title"
+                    name="postTitle"
+                    id="postTitle"
+                    value={postTitle}
+                  />
+                </div>
+                <div>
+                  <textarea
+                    onChange={handleChange}
+                    type="text"
+                    placeholder="say something..."
+                    name="postBody"
+                    id="postBody"
+                    value={postBody}
+                  />
+                </div>
+                <button id="post_cancel_button" onClick={handleResetForm}>
+                  close
+                </button>
+                {editingPost ? (
+                  <button type="submit" id="post_button">
+                    update
+                  </button>
+                ) : (
+                  <button type="submit" id="post_button">
+                    post
+                  </button>
+                )}
+              </form>
+            </div>
+          </>
+        )}
+      </div>
     </Fragment>
-  )
-  }
+  );
+};
 
 export default PostForm;
