@@ -6,21 +6,26 @@ import  { getAllPosts, reset } from "../../features/post/postSlice";
 import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { getAllReposts } from "../../features/repost/repostSlice";
 
 
 const Dashboard = () => {
   const [isVisible, setIsVisible] = useState(false)
   const {user} = useSelector((state) => state.auth)
   const posts  = useSelector((state) => state.post.posts)  
+  const reposts = useSelector((state) => state.repost.reposts)
+
+  console.log('repost_dashboard:', reposts)
 
   const dispatch = useDispatch();
 
     useEffect(() => {
       dispatch(getAllPosts())
+      dispatch(getAllReposts())
       // return () => {
       //   dispatch(reset())
       // }
-    }, [posts, dispatch])
+    }, [posts,  dispatch])
 
   return (
     <>

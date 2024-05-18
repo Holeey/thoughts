@@ -2,93 +2,79 @@ import axios from "axios";
 
 const API_URL = 'post'
 
-const createPost = async (payload, token) => {
+const createRepost = async (id, repostComment, token) => {
     try {
     const config = {
         headers: {
             Authorization: `Bearer ${token}`
         }
     }
-    const response =  await axios.post(`${API_URL}/createPost`, payload, config)
+    const response =  await axios.post(`${API_URL}/createRepost/${id}`, { repostComment }, config)
     return response.data
     } catch (error) {
-        console.error('create post error:', error.response.data)
+        console.error('create repost error:', error.response.data)
         throw error; 
         }
     }
-const getAllPosts = async () => {
+const getAllReposts = async () => {
     try {
-        const response = await axios.get(`${API_URL}/`)
+        const response = await axios.get(`${API_URL}/repost`)
         return response.data
     } catch (error) {
-        console.error('get all posts:', error.response.data)
+        console.error('get all reposts:', error.response.data)
         throw error
     }
 }
-const updatePost = async (id, updatedPost, token) => {
+const updateRepost = async (id, updatedPost, token) => {
     try {
         const config = {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         }
-        const response =  await axios.put(`${API_URL}/updatePost/${id}`, updatedPost, config)
+        const response =  await axios.put(`${API_URL}/updateRepost/${id}`, updatedPost, config)
         return response.data
     } catch (error) {
         console.error('update error:', error.response.data)
         throw error
     }
 }
-const deletePost = async (id, token) => {
+const deleteRepost = async (id, token) => {
     try {
         const config = {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         }
-        const response = await axios.delete(`${API_URL}/deletePost/${id}`, config)
+        const response = await axios.delete(`${API_URL}/deleteRepost/${id}`, config)
         return response.data
     } catch (error) {
         console.error('delete error:', error.response.data)
         throw error
     }
 }
-const searchPost = async (payload, token) => {
+const upvotes_repost = async (id, token) => {
     try {
         const config = {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         }
-        const response = await axios.get(`${API_URL}/searchPost?q=${payload}`, config)
-        return response.data
-    } catch (error) {
-        console.error('search error:', error.response.data)
-        throw error
-    }
-}
-const upvotes = async (id, token) => {
-    try {
-        const config = {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        }
-        const response = await axios.post(`${API_URL}/upvotes/${id}`, null, config)
+        const response = await axios.post(`${API_URL}/upvotes_repost/${id}`, null, config)
         return response.data
     } catch (error) {
         console.error('upvote error:', error.response.data)
         throw error
     }
 }
-const downvotes = async (id, token) => {
+const downvotes_repost = async (id, token) => {
     try {
         const config = {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         }
-        const response = await axios.post(`${API_URL}/downvotes/${id}`, null, config)
+        const response = await axios.post(`${API_URL}/downvotes_repost/${id}`, null, config)
         return response.data
     } catch (error) {
         console.error('downvote error:', error.response.data)
@@ -96,15 +82,14 @@ const downvotes = async (id, token) => {
     }
 }
 
-
 const postService = {
-    getAllPosts,
-    createPost,
-    updatePost,
-    deletePost,
-    searchPost,
-    upvotes,
-    downvotes,
+    createRepost,
+    getAllReposts,
+    updateRepost,
+    deleteRepost,
+    upvotes_repost,
+    downvotes_repost,
+
 }
 
 export default postService

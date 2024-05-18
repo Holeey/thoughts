@@ -4,14 +4,11 @@ import RepostItem from './RepostItem';
 import { useDispatch, useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
-import { createRepost } from '../../../features/post/postSlice';
+import { createRepost } from '../../../features/repost/repostSlice';
 
 const RepostForm = ({ post, setSharePost, imageSrc }) => {
-  const [formData, setFormData] = useState({
-    repostComment: ''
-  });
 
-  const { repostComment } = formData;
+  const [repostComment, setRepostComment] = useState(" ");
 
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
@@ -19,18 +16,15 @@ const RepostForm = ({ post, setSharePost, imageSrc }) => {
   const repost = (e) => {
     e.preventDefault();
 
-    const data = new FormData();
-    data.append('repostComment', repostComment);
-    data.append('id', post._id);
+    const data = {
+      id: post._id,
+      repostComment
+    }
     dispatch(createRepost(data));
-    console.log("repost sent:",data, "id:", post._id)
   };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setRepostComment(e.target.value);
   };
 
   return (

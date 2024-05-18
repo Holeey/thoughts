@@ -37,7 +37,7 @@ exports.createPost = async (req, res) => {
 
 exports.getAllPosts = async (req, res) => {
   try {
-    const posts = await postModel.find().populate({ path: "user",  select: '_id nick_name bio profile_image' });// Specify the fields you want to populate 
+    const posts = await postModel.find().populate({ path: "user",  select: '_id nick_name bio profile_image' });
 
     if (!posts) {
       return res.status(404).json({ error: "Posts not found" });
@@ -98,7 +98,7 @@ exports.updatePost = async (req, res) => {
           // Replace the existing image file with the new one
           fs.renameSync(currentImagePath, newImagePath);
           post.postImg = postImg;
-D        }
+        }
       }
     }
 

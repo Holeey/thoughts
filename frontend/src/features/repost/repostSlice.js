@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import postService  from "./postService";
+import repostService  from "./repostService";
 
 
 const initialState = {
-    posts: [],
+    reposts: [],
     isError: false,
     isLoading: false,
     isSuccess: false,
@@ -12,31 +12,32 @@ const initialState = {
     searchPosts: []
 };
 
-export const createPost = createAsyncThunk('post/create', async(payload, thunkAPI) => {
+export const createRepost = createAsyncThunk('repost/create', async (payload, thunkAPI) => {
+    const {id, repostComment} = payload;
     try {
-        const token = thunkAPI.getState().auth.user.token
-        return await postService.createPost(payload, token)
+        const token = thunkAPI.getState().auth.user.token;
+        return await repostService.createRepost(id, repostComment, token);
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
-        || error.message || error.toString()
-        return thunkAPI.rejectWithValue(message)
+            || error.message || error.toString();
+        return thunkAPI.rejectWithValue(message);
     }
-})
-export const getAllPosts = createAsyncThunk('post/getAll', async (_, thunkAPI) => {
+});
+export const getAllReposts = createAsyncThunk('repost/getAll', async (_, thunkAPI) => {
     try {
-        return await postService.getAllPosts()
+        return await repostService.getAllReposts();
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
-        || error.message || error.toString()
-        return thunkAPI.rejectWithValue(message)
+            || error.message || error.toString();
+        return thunkAPI.rejectWithValue(message);
     }
-})
+});
 export const updatePost = createAsyncThunk('post/update', async (updatedPost, thunkAPI) => {
     try {
         const token = thunkAPI.getState().auth.user.token;
         const id = updatedPost.get('id');
         updatedPost.delete('id');       
-        return await postService.updatePost(id, updatedPost, token)
+        return await repostService.updatePost(id, updatedPost, token)
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
         || error.message || error.toString()
@@ -46,17 +47,7 @@ export const updatePost = createAsyncThunk('post/update', async (updatedPost, th
 export const deletePost = createAsyncThunk('post/delete', async (id, thunkAPI) => {
     try {
         const token = thunkAPI.getState().auth.user.token
-        return await postService.deletePost(id, token)
-    } catch (error) {
-        const message = (error.response && error.response.data && error.response.message)
-        || error.message || error.toString()
-        return thunkAPI.rejectWithValue(message) 
-    }
-})
-export const searchPost = createAsyncThunk('post/search', async (payload, thunkAPI) => {
-    try {
-        const token = thunkAPI.getState().auth.user.token
-        return await postService.searchPost(payload, token)
+        return await repostService.deletePost(id, token)
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
         || error.message || error.toString()
@@ -66,7 +57,7 @@ export const searchPost = createAsyncThunk('post/search', async (payload, thunkA
 export const upvotes = createAsyncThunk('post/upvote', async (id, thunkAPI) => {
     try {
         const token = thunkAPI.getState().auth.user.token
-        return await postService.upvotes(id, token)
+        return await repostService.upvotes(id, token)
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
         || error.message || error.toString()
@@ -76,7 +67,7 @@ export const upvotes = createAsyncThunk('post/upvote', async (id, thunkAPI) => {
 export const downvotes = createAsyncThunk('post/downvote', async (id, thunkAPI) => {
     try {
         const token = thunkAPI.getState().auth.user.token
-        return await postService.downvotes(id, token)
+        return await repostService.downvotes(id, token)
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
         || error.message || error.toString()
@@ -84,8 +75,8 @@ export const downvotes = createAsyncThunk('post/downvote', async (id, thunkAPI) 
     }
 })
 
-const postSlice = createSlice({
-    name: 'post',
+const repostSlice = createSlice({
+    name: 'repost',
     initialState,
     reducers: {
         reset: () => initialState,
@@ -94,42 +85,46 @@ const postSlice = createSlice({
         },
         resetEditingPost: state => {
             state.editingPost = null;
-        },
-        resetSearchPosts: state => {
-            state.searchPosts = [];
         }
     },
     extraReducers: (builder) => {
-        builder.addCase(createPost.pending, (state) => {
+        builder
+        .addCase(createRepost.pending, (state) => {
+            state.isLoading = true;
+        })
+        .addCase(createRepost.fulfilled, (state, action) => {
+            state.isLoading = false;
+            state.isSuccess = true;
+            state.reposts.push(action.payload);
+        })
+        .addCase(createRepost.rejected, (state, action) => {
+            state.isLoading = false;
+            state.isError = true;
+            state.message = action.payload;
+        })
+        .addCase(getAllReposts.pending, (state) => {
+            state.isLoading = true;
+        })
+        .addCase(getAllReposts.fulfilled, (state, action) => {
+            state.isLoading = false;
+            state.isSuccess = true;
+            state.reposts = action.payload;
+        })
+        .addCase(getAllReposts.rejected, (state, action) => {
+            state.isLoading = false;
+            state.isError = true;
+            state.message = action.payload;
+        })
+        .addCase(updatePost.pending, (state) => {
                 state.isLoading = true;
-            }).addCase(createPost.fulfilled, (state, action) => {
+        }).addCase(updatePost.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.isSuccess = true;
-                state.posts.push(action.payload);
-            }).addCase(createPost.rejected, (state, action) => {
-                state.isLoading = false;
-                state.isError = true;
-                state.message = action.payload;
-            }).addCase(getAllPosts.pending, (state) => {
-                state.isLoading = true;
-            }).addCase(getAllPosts.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.isSuccess = true;
-                state.posts = action.payload;
-            }).addCase(getAllPosts.rejected, (state, action) => {
-                state.isLoading = false;
-                state.isError = true;
-                state.message = action.payload;
-            }).addCase(updatePost.pending, (state) => {
-                state.isLoading = true;
-            }).addCase(updatePost.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.isSuccess = true;
-                const index = state.posts.findIndex(post => post._id === action.payload._id);
+                const index = state.reposts.findIndex(post => post._id === action.payload._id);
                 if (index !== -1) {
-                    state.posts[index] = action.payload;
+                    state.reposts[index] = action.payload;
                 }
-            }).addCase(updatePost.rejected, (state, action) => {
+        }).addCase(updatePost.rejected, (state, action) => {
                 state.isLoading = false;
                 state.isError = true;
                 state.message = action.payload;
@@ -138,18 +133,8 @@ const postSlice = createSlice({
             }).addCase(deletePost.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.isSuccess = true;
-                state.posts = state.posts.filter(post => post._id !== action.payload.id);
+                state.reposts = state.reposts.filter(post => post._id !== action.payload.id);
             }).addCase(deletePost.rejected, (state, action) => {
-                state.isLoading = false;
-                state.isError = true;
-                state.message = action.payload;
-            }).addCase(searchPost.pending, (state) => {
-                state.isLoading = true;
-            }).addCase(searchPost.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.isSuccess = true;
-                state.searchPosts = action.payload;
-            }).addCase(searchPost.rejected, (state, action) => {
                 state.isLoading = false;
                 state.isError = true;
                 state.message = action.payload;
@@ -158,9 +143,9 @@ const postSlice = createSlice({
             }).addCase(upvotes.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.isSuccess = true;
-                const index = state.posts.findIndex(post => post._id === action.payload._id);
+                const index = state.reposts.findIndex(post => post._id === action.payload._id);
                 if (index !== -1) {
-                    state.posts[index] = action.payload;
+                    state.reposts[index] = action.payload;
                 }
             }).addCase(upvotes.rejected, (state, action) => {
                 state.isLoading = false;
@@ -171,17 +156,18 @@ const postSlice = createSlice({
             }).addCase(downvotes.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.isSuccess = true;
-                const index = state.posts.findIndex(post => post._id === action.payload._id);
+                const index = state.reposts.findIndex(post => post._id === action.payload._id);
                 if (index !== -1) {
-                    state.posts[index] = action.payload;
+                    state.reposts[index] = action.payload;
                 }
             }).addCase(downvotes.rejected, (state, action) => {
                 state.isLoading = false;
                 state.isError = true;
                 state.message = action.payload;
             })
+            
     }
 });
 
-export const { reset, resetEditingPost, editPost, resetSearchPosts } = postSlice.actions
-export default postSlice.reducer 
+export const { reset, resetEditingPost, editPost, resetSearchPosts } = repostSlice.actions
+export default repostSlice.reducer 
