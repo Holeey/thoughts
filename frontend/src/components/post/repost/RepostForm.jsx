@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import './repostForm.css';
-import RepostItem from './RepostItem';
+import RepostPreview from './RepostPreview';
 import { useDispatch, useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
@@ -42,7 +42,7 @@ const RepostForm = ({ post, setSharePost, imageSrc }) => {
             className='repost_text-area'
             placeholder='Say something... '
           />
-          <RepostItem imageSrc={imageSrc} post={post} />
+          <RepostPreview imageSrc={imageSrc} post={post} />
           <button type='submit' className='repost_share_btn'>Share</button>
           <FontAwesomeIcon
             cursor={'pointer'}

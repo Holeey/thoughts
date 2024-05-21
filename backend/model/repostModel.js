@@ -12,6 +12,11 @@ const repostSchema = new mongoose.Schema({
         ref: 'User' // Reference the User model
     },
     repostComment: String,
+    type: {
+        type: String,
+        enum: ['Repost'],
+        default: 'Repost'
+    }
 }, { timestamps: true });
 
 const Repost = mongoose.model('Repost', repostSchema);

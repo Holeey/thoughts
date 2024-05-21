@@ -26,11 +26,8 @@ import {
 } from "../../../features/post/postSlice";
 import RepostForm from "../repost/RepostForm";
 
-
-
-
-
-const PostItem = ({ post }) => {
+const PostItem = ( item ) => {
+  const{ post } = item
   const [isMinimized, setIsMinimized] = useState(true);
   const [isPostOptions, setIsPostOptions] = useState(false);
   const [isVisible, setIsVisible] = useState(false);

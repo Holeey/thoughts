@@ -1,7 +1,7 @@
-import './repostItem.css';
+import './repostPreview.css';
 import moment from 'moment';
 
-const RepostItem = ({ post, imageSrc }) => {
+const RepostPreview = ({ post, imageSrc }) => {
   return (
     <div>
  
@@ -39,4 +39,4 @@ const RepostItem = ({ post, imageSrc }) => {
   )
 }
 
-export default RepostItem
+export default RepostPreview

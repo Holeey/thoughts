@@ -20,6 +20,11 @@ const postSchema = new mongoose.Schema({
         default: 0
     },
     reposts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Repost' }], 
+    type: {
+        type: String,
+        enum: ['Post'],
+        default: 'Post'
+    }
 }, { timestamps: true });
 
 const Post = mongoose.model('Post', postSchema);

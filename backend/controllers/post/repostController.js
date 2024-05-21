@@ -35,16 +35,13 @@ exports.createRepost = async (req, res) => {
     return res.status(500).json("Internal server error");
   }
 };
-
 exports.getAllReposts = async (req, res) => {
-  const { repostId } = req.params;
-
   try {
-    const repost = await repostModel.findById(repostId).populate({
+    const repost = await repostModel.find().populate({
       path: "originalPost",
       populate: {
         path: "user",
-        select: "_id nick_name profile_image", // Specify the fields you want to populate
+        select: "_id nick_name bio profile_image", // Specify the fields you want to populate
       },
     });
 
