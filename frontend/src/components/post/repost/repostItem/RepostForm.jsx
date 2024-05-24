@@ -1,10 +1,10 @@
 import { Fragment, useState } from 'react';
 import './repostForm.css';
-import RepostPreview from './RepostPreview';
+import RepostPreview from '../repostPreview/RepostPreview';
 import { useDispatch, useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
-import { createRepost } from '../../../features/repost/repostSlice';
+import { createRepost } from '../../../../features/repost/repostSlice';
 
 const RepostForm = ({ post, setSharePost, imageSrc }) => {
 
@@ -21,6 +21,7 @@ const RepostForm = ({ post, setSharePost, imageSrc }) => {
       repostComment
     }
     dispatch(createRepost(data));
+    setSharePost(false);
   };
 
   const handleChange = (e) => {
@@ -40,7 +41,7 @@ const RepostForm = ({ post, setSharePost, imageSrc }) => {
             id='repostComment'
             name='repostComment'
             className='repost_text-area'
-            placeholder='Say something... '
+            placeholder='Say something about this... '
           />
           <RepostPreview imageSrc={imageSrc} post={post} />
           <button type='submit' className='repost_share_btn'>Share</button>

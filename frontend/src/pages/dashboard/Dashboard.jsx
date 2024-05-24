@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAllReposts } from "../../features/repost/repostSlice";
-import RepostItem from "../../components/post/repost/repostItem/RepostItem";
+import Repost from "../../components/post/repost/Repost";
 
 
 
@@ -47,7 +47,7 @@ const Dashboard = () => {
                     {item.type === 'Post' ? (
                      <PostItem key={item._id} post={item} />
                     ) : (
-                     <RepostItem key={item._id} post={item} />
+                     <Repost key={item._id} post={item} />
                     )}
                 </div>
             ))}

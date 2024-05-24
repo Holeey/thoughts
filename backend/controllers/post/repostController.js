@@ -5,9 +5,6 @@ exports.createRepost = async (req, res) => {
   const  { repostComment }  = req.body;
   const { id } = req.params;
 
-  console.log("RepostId:", id, "repostComment:", repostComment);
-
-
   if (!req.user) {
     return res.status(400).json("Unauthorized user");
   }
@@ -37,19 +34,22 @@ exports.createRepost = async (req, res) => {
 };
 exports.getAllReposts = async (req, res) => {
   try {
-    const repost = await repostModel.find().populate({
+    const reposts = await repostModel.find().populate({
       path: "originalPost",
       populate: {
         path: "user",
-        select: "_id nick_name bio profile_image", // Specify the fields you want to populate
-      },
+        select: "_id nick_name bio profile_image"
+      }
+    }).populate({
+      path: "user",
+      select: "_id nick_name bio profile_image"
     });
 
-    if (!repost) {
+    if (!reposts) {
       return res.status(404).json("Repost not found");
     }
 
-    return res.status(200).json(repost);
+    return res.status(200).json(reposts);
   } catch (error) {
     console.error("Error fetching repost:", error);
     return res.status(500).json("Internal server error");

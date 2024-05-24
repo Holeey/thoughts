@@ -73,6 +73,16 @@ export const upvotes = createAsyncThunk('post/upvote', async (id, thunkAPI) => {
         return thunkAPI.rejectWithValue(message)  
     }
 })
+export const un_upvotes = createAsyncThunk('post/un_upvote', async (id, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().auth.user.token
+        return await postService.un_upvotes(id, token)
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.message)
+        || error.message || error.toString()
+        return thunkAPI.rejectWithValue(message)  
+    }
+})
 export const downvotes = createAsyncThunk('post/downvote', async (id, thunkAPI) => {
     try {
         const token = thunkAPI.getState().auth.user.token
@@ -163,6 +173,20 @@ const postSlice = createSlice({
                     state.posts[index] = action.payload;
                 }
             }).addCase(upvotes.rejected, (state, action) => {
+                state.isLoading = false;
+                state.isError = true;
+                state.message = action.payload;
+            })
+            .addCase(un_upvotes.pending, (state) => {
+                state.isLoading = true;
+            }).addCase(un_upvotes.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.isSuccess = true;
+                const index = state.posts.findIndex(post => post._id === action.payload._id);
+                if (index !== -1) {
+                    state.posts[index] = action.payload;
+                }
+            }).addCase(un_upvotes.rejected, (state, action) => {
                 state.isLoading = false;
                 state.isError = true;
                 state.message = action.payload;

@@ -81,6 +81,20 @@ const upvotes = async (id, token) => {
         throw error
     }
 }
+const un_upvotes = async (id, token) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+        const response = await axios.post(`${API_URL}/un_upvotes/${id}`, null, config)
+        return response.data
+    } catch (error) {
+        console.error('upvote error:', error.response.data)
+        throw error
+    }
+}
 const downvotes = async (id, token) => {
     try {
         const config = {
@@ -105,6 +119,7 @@ const postService = {
     searchPost,
     upvotes,
     downvotes,
+    un_upvotes
 }
 
 export default postService

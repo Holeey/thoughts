@@ -38,6 +38,10 @@
     border: none;
     resize: none;
     font-size: 14px;
+    color: #000;
+}
+.repost_text-area::placeholder {
+    color: #000; 
 }
 .repost_close_btn {
     position: absolute;

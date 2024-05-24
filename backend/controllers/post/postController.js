@@ -13,19 +13,24 @@ exports.createPost = async (req, res) => {
       return res.status(400).json("Please provide post title and body");
     }
 
-    // Extract the filename from the absolute path
-    const filename = path.basename(req.file.path);
-
-    // Save only the filename to the database
-    const postImg = filename;
-
-    // Create post using Mongoose model
-    const post = await postModel.create({
+    // Initialize the post data object
+    let postData = {
       user: req.user.id,
       postTitle: postTitle,
       postBody: postBody,
-      postImg: postImg, // Assign the file path to postImg field
-    });
+    };
+
+    // Check if a file was uploaded and add the postImg field to the postData
+    if (req.file) {
+      // Extract the filename from the absolute path
+      const filename = path.basename(req.file.path);
+
+      // Add the postImg field to postData
+      postData.postImg = filename;
+    }
+
+    // Create post using Mongoose model
+    const post = await postModel.create(postData);
 
     // Respond with the created post
     return res.status(201).json(post);
@@ -34,7 +39,6 @@ exports.createPost = async (req, res) => {
     return res.status(500).json("Internal server error");
   }
 };
-
 exports.getAllPosts = async (req, res) => {
   try {
     const posts = await postModel.find().populate({ path: "user",  select: '_id nick_name bio profile_image' });
@@ -185,98 +189,89 @@ exports.searchPost = async (req, res) => {
 ////// votes routes handler ///////////
 
 exports.upvotes = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
-  try {
-    const post = await postModel.findById(req.params.id).lean().session(session);;
-
-    if (!post) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(404).json({ error: "Post not found!" });
+    try {
+      const postId = req.params.id;
+      const userId = req.user._id;
+  
+      // Ensure the post exists and the user is authenticated
+      const post = await postModel.findById(postId)
+  
+      if (!post) {
+        return res.status(404).json({ error: "Post not found!" });
+      }
+  
+      if (!req.user) {
+        return res.status(401).json({ error: "Unauthorized user!" });
+      }
+  
+      // Determine if the user has already downvoted
+      const existingUpvoteIndex = post.upvote.findIndex((vote) => vote.user && vote.user._id.equals(userId));
+  
+      let update;
+      if (existingUpvoteIndex === -1) {
+        // User has not upvoted, add the upvote
+        update = {
+          $push: { upvote: { user: userId } },
+          $inc: { upvoteValue: 1 },
+        };
+      } else {
+        // User has already upvoted, remove the upvote
+        update = {
+          $pull: { upvote: { user: userId } },
+          $inc: { upvoteValue: +1 },
+        };
+      }
+  
+      // Perform the update
+      const updatedPost = await postModel.findOneAndUpdate({ _id: postId }, update, { new: true }).populate({ path: "user", select: '_id nick_name bio profile_image' });
+  
+      return res.status(200).json(updatedPost);
+    } catch (error) {
+      console.error("upvote error:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
-
-    if (!req.user) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(401).json({ error: "Unauthorized user!" });
-    }
-
-    const existingUpvoteIndex = post.upvote.findIndex(
-      (vote) => vote.user && vote.user._id.equals(req.user._id)
-    );
-
-    if (existingUpvoteIndex === -1) {
-      // User has not upvoted, add the upvote
-      post.upvote.push({ user: req.user });
-      post.upvoteValue += 1;
-    } else {
-      // User has already upvoted, remove the upvote
-      post.upvote.splice(existingUpvoteIndex, 1);
-      post.upvoteValue -= 1;
-    }
-
-    const updatedPost = await postModel.findByIdAndUpdate(req.params.id, post, {
-      new: true,
-    }).populate("user").lean().session(session);
-
-    await session.commitTransaction();
-    session.endSession();
-    return res.status(200).json(updatedPost);
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    console.error("upvote error:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
+  };
+  
 exports.downvotes = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
-    const post = await postModel.findById(req.params.id).lean().session(session);;
+    const postId = req.params.id;
+    const userId = req.user._id;
+
+    // Ensure the post exists and the user is authenticated
+    const post = await postModel.findById(postId)
 
     if (!post) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(404).json({ error: "Post not found!" });
     }
 
     if (!req.user) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(401).json({ error: "Unauthorized user!" });
     }
 
-    const existingDownvoteIndex = post.downvote.findIndex(
-      (vote) => vote.user && vote.user._id.equals(req.user._id)
-    );
+    // Determine if the user has already downvoted
+    const existingDownvoteIndex = post.downvote.findIndex((vote) => vote.user && vote.user._id.equals(userId));
 
+    let update;
     if (existingDownvoteIndex === -1) {
       // User has not downvoted, add the downvote
-      post.downvote.push({ user: req.user });
-      post.downvoteValue += 1;
+      update = {
+        $push: { downvote: { user: userId } },
+        $inc: { downvoteValue: 1 },
+      };
     } else {
       // User has already downvoted, remove the downvote
-      post.downvote.splice(existingDownvoteIndex, 1);
-      post.downvoteValue -= 1;
+      update = {
+        $pull: { downvote: { user: userId } },
+        $inc: { downvoteValue: -1 },
+      };
     }
 
-    const updatedPost = await postModel.findByIdAndUpdate(req.params.id, post, {
-      new: true,
-    }).populate("user").lean().session(session);
+    // Perform the update
+    const updatedPost = await postModel.findOneAndUpdate({ _id: postId }, update, { new: true }).populate({ path: "user", select: '_id nick_name bio profile_image' });
 
-    await session.commitTransaction();
-    session.endSession();
     return res.status(200).json(updatedPost);
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     console.error("downvote error:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-

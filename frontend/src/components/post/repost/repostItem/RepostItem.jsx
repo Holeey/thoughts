@@ -2,13 +2,12 @@ import "./repostItem.css";
 import moment from "moment";
 import { useState, useEffect } from "react";
 
-const RepostItem = (item) => {
-  const { post } = item;
+const RepostItem = ({ post }) => {
   const [imageSrc, setImageSrc] = useState(null);
 
   useEffect(() => {
     const loadImage = async () => {
-      if (post.originalPost.postImg) {
+      if (post?.originalPost?.postImg) {
         try {
           const module = await import(
             `../../../../images/${post.originalPost.postImg}`
@@ -20,8 +19,16 @@ const RepostItem = (item) => {
       }
     };
 
-    loadImage();
-  }, [post.originalPost]);
+    if (post?.originalPost) {
+      loadImage();
+    }
+  }, [post?.originalPost]);
+
+  
+  if (!post?.originalPost || !post?.originalPost?.user) {
+    return <div>Loading...</div>; // Or any other fallback UI
+  }
+
   return (
     <div>
       <div className="repost_item_wrapper">
@@ -30,14 +37,14 @@ const RepostItem = (item) => {
             <div className="user_profile_img_container_repost">
               <img
                 className="user_profile_img"
-                src={post.originalPost.user?.profile_image}
+                src={post.originalPost.user.profile_image}
                 alt="profile_Img"
               />
             </div>
             <div className="repost_author-content">
               <div className="repost_author-info">
                 <div className="nick_name">
-                  <h4>{post.originalPost.user?.nick_name}</h4>
+                  <h4>{post.originalPost.user.nick_name}</h4>
                 </div>
 
                 <div className="repost_time">
@@ -50,7 +57,7 @@ const RepostItem = (item) => {
             </div>
           </div>
           <div className={`repost_item_content`}>
-            <h5 className="repost_title">{post.originalPost?.postTitle}</h5>
+            <h5 className="repost_title">{post.originalPost.postTitle}</h5>
             <div className="reverse_repost">
               <div className="repost_body_container">
                 <div className="repost_body">

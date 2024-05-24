@@ -6,9 +6,9 @@
     align-items: center;
     flex-direction: column;
     width: 600px;
-    margin-top: 5rem;
-    background-color: #fff;
-    /* border-radius: 10px; */
+     background-color: #fff;
+     border-top: solid 0.5px grey;
+    border-bottom: solid 0.5px grey;
     padding-bottom: 0.5rem
 }
 .repost_author_container {

@@ -1,11 +1,16 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEllipsis,
+  faTrash,
+  faPencil,
   faEllipsisVertical,
   faUpLong,
   faDownLong,
   faComment,
   faShareNodes,
+  faClose,
+  faCopy,
+  faFlag,
 } from "@fortawesome/free-solid-svg-icons";
 
 import PostForm from "../postForm/PostForm";
@@ -23,11 +28,12 @@ import {
   editPost,
   upvotes,
   downvotes,
+  un_upvotes,
 } from "../../../features/post/postSlice";
-import RepostForm from "../repost/RepostForm";
+import RepostForm from "../repost/repostItem/RepostForm";
 
-const PostItem = ( item ) => {
-  const{ post } = item
+const PostItem = ({ post }) => {
+
   const [isMinimized, setIsMinimized] = useState(true);
   const [isPostOptions, setIsPostOptions] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -65,10 +71,11 @@ const PostItem = ( item ) => {
   //function for toggling the upvote
   const toggle_upvoted = () => {
     if (downvoted !== -1) {
-      return;
+      return
     } else {
       dispatch(upvotes(post._id));
     }
+    
   };
 
   //function for toggling downvote
@@ -145,9 +152,11 @@ const PostItem = ( item ) => {
           {isPostOptions && (
             <>
               <ul ref={clickRef}>
-                <li onClick={toggleVisibility}>Edit</li>
-                <li onClick={handleDeletePost}>Delete</li>
-                <li onClick={() => setIsMinimized(true)}>Minimize</li>
+              <li onClick={toggleVisibility}><FontAwesomeIcon icon={faPencil}/> Edit</li>
+                <li onClick={handleDeletePost}><FontAwesomeIcon icon={faTrash}/> Delete</li>
+                <li onClick={() => setIsMinimized(true)}><FontAwesomeIcon icon={faClose}/> Minimize</li>
+                <li ><FontAwesomeIcon icon={faCopy}/> Copy link</li>
+                <li ><FontAwesomeIcon icon={faFlag}/> Report</li>
               </ul>
             </>
           )}
