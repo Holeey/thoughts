@@ -36,7 +36,8 @@ const Dashboard = () => {
     <>
       {user && (
         <div className="dashboard">
-          <div className="topic_section">
+          <div className="post_feed">
+         <div className="topic_section">
             <h2>Topics</h2>
           </div>
           <div className="topic_section">
@@ -56,7 +57,9 @@ const Dashboard = () => {
           </div>
           <div className="topic_section">
             <h2>Extras</h2>
+          </div>   
           </div>
+          
         </div>
       )}
       {isVisible && <PostForm isVisible={isVisible} setIsVisible={setIsVisible} /> }

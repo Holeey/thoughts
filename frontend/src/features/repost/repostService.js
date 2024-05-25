@@ -53,28 +53,28 @@ const deleteRepost = async (id, token) => {
         throw error
     }
 }
-const upvotes_repost = async (id, token) => {
+const upvote_repost = async (id, token) => {
     try {
         const config = {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         }
-        const response = await axios.post(`${API_URL}/upvotes_repost/${id}`, null, config)
+        const response = await axios.post(`${API_URL}/upvote_repost/${id}`, null, config)
         return response.data
     } catch (error) {
         console.error('upvote error:', error.response.data)
         throw error
     }
 }
-const downvotes_repost = async (id, token) => {
+const downvote_repost = async (id, token) => {
     try {
         const config = {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         }
-        const response = await axios.post(`${API_URL}/downvotes_repost/${id}`, null, config)
+        const response = await axios.post(`${API_URL}/downvote_repost/${id}`, null, config)
         return response.data
     } catch (error) {
         console.error('downvote error:', error.response.data)
@@ -87,8 +87,8 @@ const postService = {
     getAllReposts,
     updateRepost,
     deleteRepost,
-    upvotes_repost,
-    downvotes_repost,
+    upvote_repost,
+    downvote_repost,
 
 }
 

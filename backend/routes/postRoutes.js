@@ -1,6 +1,6 @@
 const express = require('express')
-const { createPost, myPost, updatePost, getAllPosts, deletePost, searchPost, upvotes, downvotes, un_upvotes } = require('../controllers/post/postController.js')
-const { getAllReposts, createRepost, updateRepost, deleteRepost, upvotes_repost, downvotes_repost } = require('../controllers/post/repostController.js')
+const { createPost, myPost, updatePost, getAllPosts, deletePost, searchPost, upvotes, downvotes } = require('../controllers/post/postController.js')
+const { getAllReposts, createRepost, updateRepost, deleteRepost, upvote_repost, downvote_repost } = require('../controllers/post/repostController.js')
 const { protect } = require('../middleware/authMiddleware.js')
 const { upload } = require('../middleware/ImageMiddleware.js')
 
@@ -22,7 +22,7 @@ router.get('/repost', getAllReposts)
 router.post('/createRepost/:id', protect, createRepost)
 router.put('/updateRepost/:id', protect, updateRepost)
 router.delete('/deleteRepost/:id', protect, deleteRepost)
-router.post('/upvotes_repost/:id', protect, upvotes_repost)
-router.post('/downvotes_repost/:id', protect, downvotes_repost)
+router.post('/upvote_repost/:id', protect, upvote_repost)
+router.post('/downvote_repost/:id', protect, downvote_repost)
 
 module.exports = router

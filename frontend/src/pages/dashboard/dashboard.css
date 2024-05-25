@@ -1,10 +1,20 @@
 .dashboard {
     display: flex;
-    justify-content: space-between;
-    padding: 5rem;
+    align-items: flex-start;
+    padding: 70px;
     position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
     width: 100%;
-    background-color: #e2e0e0;
+    background-color: #eef1f2fb;
+}
+.post_feed {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
 }
 .searchResult {
     position: absolute;

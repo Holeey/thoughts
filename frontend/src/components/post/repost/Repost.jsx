@@ -22,12 +22,12 @@ import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useRef, useEffect } from "react";
 
-// import {
-//   deletePost,
-//   editPost,
-//   upvotes,
-//   downvotes,
-// } from "../../../features/post/postSlice";
+import {
+  deleteRepost,
+  editRepost,
+  upvote_repost,
+  downvote_repost,
+} from "../../../features/repost/repostSlice"
 import RepostForm from "../repost/repostItem/RepostForm"
 
 import RepostItem from "./repostItem/RepostItem";
@@ -48,10 +48,10 @@ const Repost = ({ post }) => {
       setIsPostOptions(!isPostOptions);
     };
     const handleDeletePost = () => {
-    //   dispatch(deletePost(post._id));
+      dispatch(deleteRepost(post._id));
     };
     const handleEditPost = () => {
-    //   dispatch(editPost(post));
+       dispatch(editRepost(post));
     };
     const toggleVisibility = () => {
       setIsVisible(!isVisible);
@@ -62,28 +62,28 @@ const Repost = ({ post }) => {
       setOpenCommentFormId(openCommentFormId === postId ? null : postId);
     };
   
-    // Get user vote status from the database state
-    // const upvoted = post.upvote.findIndex((vote) => vote.user._id === user.id);
-    // const downvoted = post.downvote.findIndex(
-    //   (vote) => vote.user._id === user.id
-    // );
+  //  Get user vote status from the database state
+    const upvoted = post.upvote.findIndex((vote) => vote.user._id === user.id);
+    const downvoted = post.downvote.findIndex(
+      (vote) => vote.user._id === user.id
+    );
   
     //function for toggling the upvote
      const toggle_upvoted = () => {
-    //   if (downvoted !== -1) {
-    //     return;
-    //   } else {
-    //     dispatch(upvotes(post._id));
-    //   }
+      if (downvoted !== -1) {
+        return;
+      } else {
+        dispatch(upvote_repost(post._id));
+      }
     };
   
     //function for toggling downvote
     const toggle_downvoted = () => {
-    //   if (upvoted !== -1) {
-    //     return;
-    //   } else {
-    //     dispatch(downvotes(post._id));
-    //  }
+      if (upvoted !== -1) {
+        return;
+      } else {
+        dispatch(downvote_repost(post._id));
+     }
     };
   
     const clickRef = useRef(null);
@@ -155,16 +155,16 @@ const Repost = ({ post }) => {
               <div className="re-post_upvote" onClick={toggle_upvoted}>
                 <FontAwesomeIcon
                   icon={faUpLong}
-                //   color={upvoted !== -1 ? "blue" : "black"}
+                  color={upvoted !== -1 ? "blue" : "black"}
                 />
-                {/* {post.upvoteValue} */}
+                {post.upvoteValue}
               </div>
               <div className="re-post_downvote" onClick={toggle_downvoted}>
                 <FontAwesomeIcon
                   icon={faDownLong}
-                //   color={downvoted !== -1 ? "red" : "black"}
+                  color={downvoted !== -1 ? "red" : "black"}
                 />
-                {/* {post.downvoteValue} */}
+                {post.downvoteValue}
               </div>
             </div>
             <span 
@@ -182,7 +182,7 @@ const Repost = ({ post }) => {
      
       </div>
       </div> {isVisible && (
-        <PostForm isVisible={isVisible} setIsVisible={setIsVisible} />
+        <RepostForm post={post} setSharePost={setSharePost} imageSrc={imageSrc} isVisible={isVisible} setIsVisible={setIsVisible} />
       )}
       {openCommentFormId === post._id && <CommentForm post={post} />}
       <div>{openCommentFormId === post._id && <CommentList post={post} />}</div>

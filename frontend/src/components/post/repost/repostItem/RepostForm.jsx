@@ -1,12 +1,12 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useRef, useCallback, useEffect } from 'react';
 import './repostForm.css';
 import RepostPreview from '../repostPreview/RepostPreview';
 import { useDispatch, useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
-import { createRepost } from '../../../../features/repost/repostSlice';
+import { createRepost, resetEditingRepost, updateRepost } from '../../../../features/repost/repostSlice';
 
-const RepostForm = ({ post, setSharePost, imageSrc }) => {
+const RepostForm = ({ post, setSharePost, imageSrc, isVisible, setIsVisible }) => {
 
   const [repostComment, setRepostComment] = useState(" ");
 
@@ -24,6 +24,53 @@ const RepostForm = ({ post, setSharePost, imageSrc }) => {
     setSharePost(false);
   };
 
+  const { editingRepost } = useSelector((state) => state.post);
+
+  const clickRef = useRef(null);
+
+  const handleOutsideClick = useCallback(
+    (e) => {
+      if (clickRef.current && !clickRef.current.contains(e.target)) {
+        setIsVisible(false);
+      }
+    },
+    [setIsVisible]
+  );
+
+
+  useEffect(() => {
+    if (editingRepost) {
+      setRepostComment({
+        repostComment: editingRepost.repostComment,
+      });
+    }
+    document.addEventListener("click", handleOutsideClick, true);
+    return () => {
+      document.removeEventListener("click", handleOutsideClick, true);
+    };
+  }, [editingRepost, handleOutsideClick, dispatch]);
+
+  const handleUpdateRepost = (e) => {
+    e.preventDefault();
+
+    if (editingRepost) {
+      const data = {
+      id: editingRepost._id,
+      repostComment
+      }
+      dispatch(updateRepost(data));
+      handleResetForm();
+      setIsVisible(!isVisible);
+    }
+  };
+
+  const handleResetForm = () => {
+    setRepostComment(" ");
+    // dispatch(reset());
+    dispatch(resetEditingRepost());
+    setIsVisible(false);
+  };
+
   const handleChange = (e) => {
     setRepostComment(e.target.value);
   };
@@ -31,7 +78,7 @@ const RepostForm = ({ post, setSharePost, imageSrc }) => {
   return (
     <Fragment>
       <div className='backdrop'>
-        <form onSubmit={repost} className='repost_form'>
+        <form onSubmit={ editingRepost ? handleUpdateRepost : repost} className='repost_form'>
           <div className='user_profile_image_container'>
             <img className='user_profile-image' src={user?.profile_image} alt='' />
           </div>
@@ -43,7 +90,7 @@ const RepostForm = ({ post, setSharePost, imageSrc }) => {
             className='repost_text-area'
             placeholder='Say something about this... '
           />
-          <RepostPreview imageSrc={imageSrc} post={post} />
+          <RepostPreview imageSrc={imageSrc} post={post}  />
           <button type='submit' className='repost_share_btn'>Share</button>
           <FontAwesomeIcon
             cursor={'pointer'}

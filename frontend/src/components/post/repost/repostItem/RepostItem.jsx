@@ -26,7 +26,7 @@ const RepostItem = ({ post }) => {
 
   
   if (!post?.originalPost || !post?.originalPost?.user) {
-    return <div>Loading...</div>; // Or any other fallback UI
+    return <div>Content unavailable! </div>; // Or any other fallback UI
   }
 
   return (

@@ -41,7 +41,9 @@ exports.createPost = async (req, res) => {
 };
 exports.getAllPosts = async (req, res) => {
   try {
-    const posts = await postModel.find().populate({ path: "user",  select: '_id nick_name bio profile_image' });
+    const posts = await postModel
+      .find()
+      .populate({ path: "user", select: "_id nick_name bio profile_image" });
 
     if (!posts) {
       return res.status(404).json({ error: "Posts not found" });
@@ -137,12 +139,7 @@ exports.deletePost = async (req, res) => {
     }
     // Check if the post has an associated image
     if (post.postImg) {
-      const imagePath = path.resolve(
-        "frontend",
-        "src",
-        "images",
-        post.postImg
-      );
+      const imagePath = path.resolve("frontend", "src", "images", post.postImg);
 
       // Use fs.unlink to delete the image file
       fs.unlink(imagePath, (err) => {
@@ -189,56 +186,68 @@ exports.searchPost = async (req, res) => {
 ////// votes routes handler ///////////
 
 exports.upvotes = async (req, res) => {
-    try {
-      const postId = req.params.id;
-      const userId = req.user._id;
-  
-      // Ensure the post exists and the user is authenticated
-      const post = await postModel.findById(postId)
-  
-      if (!post) {
-        return res.status(404).json({ error: "Post not found!" });
-      }
-  
-      if (!req.user) {
-        return res.status(401).json({ error: "Unauthorized user!" });
-      }
-  
-      // Determine if the user has already downvoted
-      const existingUpvoteIndex = post.upvote.findIndex((vote) => vote.user && vote.user._id.equals(userId));
-  
-      let update;
-      if (existingUpvoteIndex === -1) {
-        // User has not upvoted, add the upvote
-        update = {
-          $push: { upvote: { user: userId } },
-          $inc: { upvoteValue: 1 },
-        };
-      } else {
-        // User has already upvoted, remove the upvote
-        update = {
-          $pull: { upvote: { user: userId } },
-          $inc: { upvoteValue: +1 },
-        };
-      }
-  
-      // Perform the update
-      const updatedPost = await postModel.findOneAndUpdate({ _id: postId }, update, { new: true }).populate({ path: "user", select: '_id nick_name bio profile_image' });
-  
-      return res.status(200).json(updatedPost);
-    } catch (error) {
-      console.error("upvote error:", error);
-      return res.status(500).json({ error: "Internal Server Error" });
+  try {
+    const postId = req.params.id;
+    const userId = req.user._id;
+
+    // Ensure the post exists and the user is authenticated
+    const post = await postModel.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found!" });
     }
-  };
-  
+
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized user!" });
+    }
+
+    // Determine if the user has already upvoted
+    const existingUpvoteIndex = post.upvote.findIndex(
+      (vote) => vote.user && vote.user._id.equals(userId)
+    );
+    const existingDownvoteIndex = post.downvote.findIndex(
+      (vote) => vote.user && vote.user._id.equals(userId)
+    );
+
+    let update;
+    if (existingUpvoteIndex === -1) {
+      // User has not upvoted, add the upvote and remove any existing downvote
+      update = {
+        $push: { upvote: { user: userId } },
+        $inc: { upvoteValue: 1 },
+      };
+
+      if (existingDownvoteIndex !== -1) {
+        update.$pull = { downvote: { user: userId } };
+        update.$inc.downvoteValue = -1;
+      }
+    } else {
+      // User has already upvoted, remove the upvote
+      update = {
+        $pull: { upvote: { user: userId } },
+        $inc: { upvoteValue: -1 },
+      };
+    }
+
+    // Perform the update
+    const updatedPost = await postModel
+      .findOneAndUpdate({ _id: postId }, update, { new: true })
+      .populate({ path: "user", select: "_id nick_name bio profile_image" });
+
+    return res.status(200).json(updatedPost);
+  } catch (error) {
+    console.error("upvote error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 exports.downvotes = async (req, res) => {
   try {
     const postId = req.params.id;
     const userId = req.user._id;
 
     // Ensure the post exists and the user is authenticated
-    const post = await postModel.findById(postId)
+    const post = await postModel.findById(postId);
 
     if (!post) {
       return res.status(404).json({ error: "Post not found!" });
@@ -249,15 +258,25 @@ exports.downvotes = async (req, res) => {
     }
 
     // Determine if the user has already downvoted
-    const existingDownvoteIndex = post.downvote.findIndex((vote) => vote.user && vote.user._id.equals(userId));
+    const existingDownvoteIndex = post.downvote.findIndex(
+      (vote) => vote.user && vote.user._id.equals(userId)
+    );
+    const existingUpvoteIndex = post.upvote.findIndex(
+      (vote) => vote.user && vote.user._id.equals(userId)
+    );
 
     let update;
     if (existingDownvoteIndex === -1) {
-      // User has not downvoted, add the downvote
+      // User has not downvoted, add the downvote and remove any existing upvote
       update = {
         $push: { downvote: { user: userId } },
         $inc: { downvoteValue: 1 },
       };
+
+      if (existingUpvoteIndex !== -1) {
+        update.$pull = { upvote: { user: userId } };
+        update.$inc.upvoteValue = -1;
+      }
     } else {
       // User has already downvoted, remove the downvote
       update = {
@@ -267,7 +286,9 @@ exports.downvotes = async (req, res) => {
     }
 
     // Perform the update
-    const updatedPost = await postModel.findOneAndUpdate({ _id: postId }, update, { new: true }).populate({ path: "user", select: '_id nick_name bio profile_image' });
+    const updatedPost = await postModel
+      .findOneAndUpdate({ _id: postId }, update, { new: true })
+      .populate({ path: "user", select: "_id nick_name bio profile_image" });
 
     return res.status(200).json(updatedPost);
   } catch (error) {

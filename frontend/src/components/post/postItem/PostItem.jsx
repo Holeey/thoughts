@@ -28,12 +28,12 @@ import {
   editPost,
   upvotes,
   downvotes,
-  un_upvotes,
+  removeUpvote,
+  removeDownvote
 } from "../../../features/post/postSlice";
 import RepostForm from "../repost/repostItem/RepostForm";
 
 const PostItem = ({ post }) => {
-
   const [isMinimized, setIsMinimized] = useState(true);
   const [isPostOptions, setIsPostOptions] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -63,26 +63,33 @@ const PostItem = ({ post }) => {
   };
 
   // Get user vote status from the database state
-  const upvoted = post.upvote.findIndex((vote) => vote.user._id === user.id);
-  const downvoted = post.downvote.findIndex(
-    (vote) => vote.user._id === user.id
-  );
+  const upvoted = post.upvote.findIndex((vote) => vote?.user._id === user.id) !== -1;
+  const downvoted = post.downvote.findIndex((vote) => vote?.user._id === user.id) !== -1;
 
-  //function for toggling the upvote
+  // function for toggling the upvote
   const toggle_upvoted = () => {
-    if (downvoted !== -1) {
-      return
+    if (upvoted) {
+      // If the post is already upvoted, remove the upvote
+      dispatch(removeUpvote(post._id));
     } else {
+      // If the post is not upvoted but is downvoted, remove the downvote first
+      if (downvoted) {
+        dispatch(removeDownvote(post._id));
+      }
       dispatch(upvotes(post._id));
     }
-    
   };
 
-  //function for toggling downvote
+  // function for toggling downvote
   const toggle_downvoted = () => {
-    if (upvoted !== -1) {
-      return;
+    if (downvoted) {
+      // If the post is already downvoted, remove the downvote
+      dispatch(removeDownvote(post._id));
     } else {
+      // If the post is not downvoted but is upvoted, remove the upvote first
+      if (upvoted) {
+        dispatch(removeUpvote(post._id));
+      }
       dispatch(downvotes(post._id));
     }
   };
@@ -193,14 +200,14 @@ const PostItem = ({ post }) => {
               <div className="upvote" onClick={toggle_upvoted}>
                 <FontAwesomeIcon
                   icon={faUpLong}
-                  color={upvoted !== -1 ? "blue" : "black"}
+                  color={upvoted  ? "blue": "black"}
                 />
                 {post.upvoteValue}
               </div>
               <div className="downvote" onClick={toggle_downvoted}>
                 <FontAwesomeIcon
                   icon={faDownLong}
-                  color={downvoted !== -1 ? "red" : "black"}
+                  color={downvoted ? "red" : "black" }
                 />
                 {post.downvoteValue}
               </div>

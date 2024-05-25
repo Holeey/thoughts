@@ -12,6 +12,16 @@ const repostSchema = new mongoose.Schema({
         ref: 'User' // Reference the User model
     },
     repostComment: String,
+    upvote: [],
+    upvoteValue: {
+        type: Number,
+        default: ""
+    },
+    downvote: [],
+    downvoteValue: {
+        type: Number,
+        default: ""
+    },
     type: {
         type: String,
         enum: ['Repost'],
