@@ -1,5 +1,7 @@
 import { useSelector } from "react-redux";
 import "./dashboard.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPen } from "@fortawesome/free-solid-svg-icons";
 import PostForm from "../../components/post/postForm/PostForm";
 import PostItem from "../../components/post/postItem/PostItem";
 import  { getAllPosts, reset } from "../../features/post/postSlice";
@@ -36,15 +38,36 @@ const Dashboard = () => {
     <>
       {user && (
         <div className="dashboard">
-          <div className="post_feed">
+          <div className="feed_section">
          <div className="topic_section">
-            <h2>Topics</h2>
+            <div className="header">Rooms</div>
+            <section className="topic_list">
+            <div>Sports</div>
+            <div>Entertainment</div>
+            <div>Technology</div>
+            <div>Politics</div>
+            <div>Health/Lifestyle</div>
+            </section>
           </div>
-          <div className="topic_section">
-        <input onClick={()=> setIsVisible(true)} placeholder="Share your thoughts"/> 
-          <div> 
+          <div className="post_extra-container">
+        <div className="post_feed">
+          <div className="post_feed_item">
+        <div
+          style={{
+            cursor: 'pointer',
+          }} 
+          className="share_thought_btn" 
+          onClick={()=> setIsVisible(true)} 
+          >
+           Share your thoughts 
+          <FontAwesomeIcon
+            cursor={'pointer'}
+            icon={faPen}
+          /> 
+        </div>
+        
           {combinedFeed.map(item => (
-                <div key={item._id} className="feed-item">
+                <div key={item._id} className="content">
                     {item.type === 'Post' ? (
                      <PostItem key={item._id} post={item} />
                     ) : (
@@ -54,10 +77,14 @@ const Dashboard = () => {
             ))}
 
             </div>
-          </div>
-          <div className="topic_section">
-            <h2>Extras</h2>
+
+           </div> 
+          <div className="extra_section">
+            <h3 className="header">Adverts</h3>
+            <div className="content"></div>
           </div>   
+        </div>
+
           </div>
           
         </div>

@@ -5,7 +5,6 @@
     width: 600px;
     margin-top: 25px;
     background-color: #fff;
-    border-radius: 10px;
     padding-bottom: 0.5rem
   }
   .re-post_author_container {
@@ -36,7 +35,7 @@
     border-radius: 50%;
     object-fit: cover;
     overflow: hidden;
-   position: absolute;
+    position: absolute;
     top: 5%;
     left: 1%;
   }
@@ -71,16 +70,17 @@
   ul {
     position: absolute;
     right: 4%;
-    top: -11%;
+    top: 0;
     background-color: black;
     color: #fff;
     border-radius: 8px;
-    padding: 0.5rem;
+    padding: 7px;
     opacity: 0.8;
     z-index: 1;
   }
   li {
     font-size: 13px;
+    padding: 5px;
     list-style: none;
     cursor: pointer;
   }
@@ -101,21 +101,9 @@
     padding-inline: 0.3rem;
     margin-top: -0.1rem;  
   }
-  /* .re-post_body_container {
-    overflow: hidden;
-    max-height: 100px;
-    transition: max-height 0.3s ease-in-out;
-  }
-  .re-post_body_container.minimized {
-    max-height: 80px; 
-  } */
   .re-post_body_container.expanded {
     max-height: none;
   }
-  /* .reverse_post {
-    display: flex;
-    flex-direction: column-reverse;
-  } */
   .re-post_meta_container {
     display: flex;
     position: relative;

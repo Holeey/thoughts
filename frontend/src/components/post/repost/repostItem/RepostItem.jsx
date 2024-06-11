@@ -56,9 +56,9 @@ const RepostItem = ({ post }) => {
               </div>
             </div>
           </div>
-          <div className={`repost_item_content`}>
-            <h5 className="repost_title">{post.originalPost.postTitle}</h5>
-            <div className="reverse_repost">
+          <div className='repost_item_content'>
+            <h6 className="repost_title">{post.originalPost.postTitle}</h6>
+            <div className="">
               <div className="repost_body_container">
                 <div className="repost_body">
                   <p>{post.originalPost.postBody}</p>

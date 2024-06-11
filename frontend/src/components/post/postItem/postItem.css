@@ -5,7 +5,6 @@
   width: 600px;
   margin-top: 25px;
   background-color: #fff;
-  border-radius: 10px;
   padding-bottom: 0.5rem
 }
 .post_author_container {
@@ -65,7 +64,6 @@
   width: 100%;
   margin: 0;
   padding: 0.3rem;
-  margin: 0;
   font-size: 15px;
 }
 .post_title:hover {
@@ -123,12 +121,16 @@ li {
   font-size: 12px;
 }
 .post_body {
+  line-height: normal;
+  padding: 10px;
   padding-inline: 0.3rem;
-  margin-top: -0.5rem;  
 }
 .post_body_container {
+  line-height: 1;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
-  max-height: 100px;
+  max-height: 120px;
   transition: max-height 0.3s ease-in-out;
 }
 .post_body_container.minimized {
