@@ -29,7 +29,7 @@ import {
   upvotes,
   downvotes,
   removeUpvote,
-  removeDownvote
+  removeDownvote,
 } from "../../../features/post/postSlice";
 import RepostForm from "../repost/repostItem/RepostForm";
 
@@ -63,8 +63,10 @@ const PostItem = ({ post }) => {
   };
 
   // Get user vote status from the database state
-  const upvoted = post.upvote.findIndex((vote) => vote?.user._id === user.id) !== -1;
-  const downvoted = post.downvote.findIndex((vote) => vote?.user._id === user.id) !== -1;
+  const upvoted =
+    post.upvote.findIndex((vote) => vote?.user._id === user.id) !== -1;
+  const downvoted =
+    post.downvote.findIndex((vote) => vote?.user._id === user.id) !== -1;
 
   // function for toggling the upvote
   const toggle_upvoted = () => {
@@ -159,11 +161,21 @@ const PostItem = ({ post }) => {
           {isPostOptions && (
             <>
               <ul ref={clickRef}>
-              <li onClick={toggleVisibility}><FontAwesomeIcon icon={faPencil}/> Edit</li>
-                <li onClick={handleDeletePost}><FontAwesomeIcon icon={faTrash}/> Delete</li>
-                <li onClick={() => setIsMinimized(true)}><FontAwesomeIcon icon={faClose}/> Minimize</li>
-                <li ><FontAwesomeIcon icon={faCopy}/> Copy link</li>
-                <li ><FontAwesomeIcon icon={faFlag}/> Report</li>
+                <li onClick={toggleVisibility}>
+                  <FontAwesomeIcon icon={faPencil} /> Edit
+                </li>
+                <li onClick={handleDeletePost}>
+                  <FontAwesomeIcon icon={faTrash} /> Delete
+                </li>
+                <li onClick={() => setIsMinimized(true)}>
+                  <FontAwesomeIcon icon={faClose} /> Minimize
+                </li>
+                <li>
+                  <FontAwesomeIcon icon={faCopy} /> Copy link
+                </li>
+                <li>
+                  <FontAwesomeIcon icon={faFlag} /> Report
+                </li>
               </ul>
             </>
           )}
@@ -200,27 +212,30 @@ const PostItem = ({ post }) => {
               <div className="upvote" onClick={toggle_upvoted}>
                 <FontAwesomeIcon
                   icon={faUpLong}
-                  color={upvoted  ? "blue": "black"}
+                  color={upvoted ? "blue" : "black"}
                 />
                 {post.upvoteValue}
               </div>
               <div className="downvote" onClick={toggle_downvoted}>
                 <FontAwesomeIcon
                   icon={faDownLong}
-                  color={downvoted ? "red" : "black" }
+                  color={downvoted ? "red" : "black"}
                 />
                 {post.downvoteValue}
               </div>
             </div>
-            <span 
-            style={{cursor: 'pointer'}}
-            onClick={() => toggleCommentForm(post._id)}>
+            <span
+              style={{ cursor: "pointer" }}
+              onClick={() => toggleCommentForm(post._id)}
+            >
               <FontAwesomeIcon icon={faComment} />
             </span>
             <span>
-              <FontAwesomeIcon 
-              style={{cursor: 'pointer'}}
-              onClick={() => setSharePost(!sharePost)} icon={faShareNodes} />
+              <FontAwesomeIcon
+                style={{ cursor: "pointer" }}
+                onClick={() => setSharePost(!sharePost)}
+                icon={faShareNodes}
+              />
             </span>{" "}
           </div>
         </div>
@@ -230,7 +245,13 @@ const PostItem = ({ post }) => {
       )}
       {openCommentFormId === post._id && <CommentForm post={post} />}
       <div>{openCommentFormId === post._id && <CommentList post={post} />}</div>
-      {sharePost && <RepostForm post={post} setSharePost={setSharePost} imageSrc={imageSrc} />}
+      {sharePost && (
+        <RepostForm
+          post={post}
+          setSharePost={setSharePost}
+          imageSrc={imageSrc}
+        />
+      )}
     </>
   );
 };

@@ -14,8 +14,6 @@ router.delete('/deletePost/:id', protect, deletePost)
 router.get('/searchPost', protect, searchPost)
 router.post('/upvotes/:id', protect, upvotes)
 router.post('/downvotes/:id', protect, downvotes)
-// router.post('/un-upvotes/:id', protect, un_upvotes)
-// router.post('/un-downvotes/:id', protect, un_downvotes)
 
 //Repost Routes
 router.get('/repost', getAllReposts)

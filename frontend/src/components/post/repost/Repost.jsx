@@ -192,10 +192,11 @@ const Repost = ({ post }) => {
           </div>
         </div>
       </div>{" "}
-      {isVisible && (
+      {(isVisible || sharePost) && (
         <RepostForm
           post={post}
           setSharePost={setSharePost}
+          sharePost={sharePost}
           imageSrc={imageSrc}
           isVisible={isVisible}
           setIsVisible={setIsVisible}
@@ -203,13 +204,13 @@ const Repost = ({ post }) => {
       )}
       {openCommentFormId === post._id && <CommentForm post={post} />}
       <div>{openCommentFormId === post._id && <CommentList post={post} />}</div>
-      {sharePost && (
+      {/* {sharePost && (
         <RepostForm
           post={post}
           setSharePost={setSharePost}
           imageSrc={imageSrc}
         />
-      )}
+      )} */}
     </div>
   );
 };

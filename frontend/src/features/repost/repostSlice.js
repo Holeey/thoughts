@@ -34,8 +34,11 @@ export const getAllReposts = createAsyncThunk('repost/getAll', async (_, thunkAP
 export const updateRepost = createAsyncThunk('repost/update', async (updatedPost, thunkAPI) => {
     try {
         const token = thunkAPI.getState().auth.user.token;
+        
         const id = updatedPost.get('id');
-        updatedPost.delete('id');       
+        updatedPost.delete('id');  
+console.log("updatedPost:", updatedPost)
+console.log("id:", id)
         return await repostService.updateRepost(id, updatedPost, token)
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
@@ -82,7 +85,7 @@ const repostSlice = createSlice({
         editRepost: (state, action) => {
             state.editingRepost = action.payload;
         },
-        resetEditingPost: state => {
+        resetEditingRepost: state => {
             state.editingRepost = null;
         }
     },

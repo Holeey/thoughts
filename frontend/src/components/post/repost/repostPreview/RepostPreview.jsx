@@ -1,5 +1,5 @@
 import './repostPreview.css';
-import moment from 'moment';
+import moment from 'moment'
 
 const RepostPreview = ({ post, imageSrc }) => {
   return (
