@@ -15,12 +15,12 @@ const repostSchema = new mongoose.Schema({
     upvote: [],
     upvoteValue: {
         type: Number,
-        default: ""
+        default: 0
     },
     downvote: [],
     downvoteValue: {
         type: Number,
-        default: ""
+        default: 0
     },
     type: {
         type: String,

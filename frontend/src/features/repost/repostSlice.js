@@ -31,15 +31,11 @@ export const getAllReposts = createAsyncThunk('repost/getAll', async (_, thunkAP
         return thunkAPI.rejectWithValue(message);
     }
 });
-export const updateRepost = createAsyncThunk('repost/update', async (updatedPost, thunkAPI) => {
+export const updateRepost = createAsyncThunk('repost/update', async (payload, thunkAPI) => {
+    const {id, repostComment} = payload;
     try {
         const token = thunkAPI.getState().auth.user.token;
-        
-        const id = updatedPost.get('id');
-        updatedPost.delete('id');  
-console.log("updatedPost:", updatedPost)
-console.log("id:", id)
-        return await repostService.updateRepost(id, updatedPost, token)
+        return await repostService.updateRepost(id, repostComment, token)
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
         || error.message || error.toString()

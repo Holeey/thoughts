@@ -70,31 +70,13 @@ const PostItem = ({ post }) => {
 
   // function for toggling the upvote
   const toggle_upvoted = () => {
-    if (upvoted) {
-      // If the post is already upvoted, remove the upvote
-      dispatch(removeUpvote(post._id));
-    } else {
-      // If the post is not upvoted but is downvoted, remove the downvote first
-      if (downvoted) {
-        dispatch(removeDownvote(post._id));
-      }
       dispatch(upvotes(post._id));
-    }
-  };
-
+  }
+  
   // function for toggling downvote
   const toggle_downvoted = () => {
-    if (downvoted) {
-      // If the post is already downvoted, remove the downvote
-      dispatch(removeDownvote(post._id));
-    } else {
-      // If the post is not downvoted but is upvoted, remove the upvote first
-      if (upvoted) {
-        dispatch(removeUpvote(post._id));
-      }
       dispatch(downvotes(post._id));
-    }
-  };
+  }
 
   const clickRef = useRef(null);
 

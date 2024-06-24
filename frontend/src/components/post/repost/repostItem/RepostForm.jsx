@@ -35,9 +35,7 @@ const RepostForm = ({
     setSharePost(false);
   };
 
-
-
-  const clickRef = useRef(null);
+  // const clickRef = useRef(null);
 
   // const handleOutsideClick = useCallback(
   //   (e) => {
@@ -59,13 +57,14 @@ const RepostForm = ({
   }, [editingRepost, dispatch]);
 
   const handleUpdateRepost = (e) => {
-    e.preventDefault();
+    if (editingRepost) { 
+      e.preventDefault();
 
-    if (editingRepost) {
       const data = {
         id: editingRepost._id,
-        repostComment
+        repostComment: repostComment,
       };
+
       dispatch(updateRepost(data));
       handleResetForm();
       setIsVisible(!isVisible);
@@ -74,13 +73,13 @@ const RepostForm = ({
 
   const handleResetForm = () => {
     setRepostComment(" ");
-    // dispatch(reset());
+    
     dispatch(resetEditingRepost());
     setIsVisible(false);
   };
 
   const handleChange = (e) => {
-    setRepostComment(e.target.value);
+    setRepostComment(e.target.value)
   };
 
   return (

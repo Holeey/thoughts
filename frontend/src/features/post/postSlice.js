@@ -228,22 +228,22 @@ const postSlice = createSlice({
                 state.isError = true;
                 state.message = action.payload;
             })
-            .addCase(removeUpvote.pending, (state) => {
-                state.isLoading = true;
-            })
-            .addCase(removeUpvote.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.isSuccess = true;
-                const index = state.posts.findIndex(post => post._id === action.payload._id);
-                if (index !== -1) {
-                    state.posts[index] = action.payload;
-                }
-            })
-            .addCase(removeUpvote.rejected, (state, action) => {
-                state.isLoading = false;
-                state.isError = true;
-                state.message = action.payload;
-            })
+            // .addCase(removeUpvote.pending, (state) => {
+            //     state.isLoading = true;
+            // })
+            // .addCase(removeUpvote.fulfilled, (state, action) => {
+            //     state.isLoading = false;
+            //     state.isSuccess = true;
+            //     const index = state.posts.findIndex(post => post._id === action.payload._id);
+            //     if (index !== -1) {
+            //         state.posts[index] = action.payload;
+            //     }
+            // })
+            // .addCase(removeUpvote.rejected, (state, action) => {
+            //     state.isLoading = false;
+            //     state.isError = true;
+            //     state.message = action.payload;
+            // })
     }
 });
 

@@ -63,27 +63,19 @@ const Repost = ({ post }) => {
   };
 
   //  Get user vote status from the database state
-  const upvoted = post.upvote.findIndex((vote) => vote.user._id === user.id);
+  const upvoted = post.upvote.findIndex((vote) => vote?.user._id === user.id);
   const downvoted = post.downvote.findIndex(
-    (vote) => vote.user._id === user.id
+    (vote) => vote?.user._id === user.id
   );
 
   //function for toggling the upvote
   const toggle_upvoted = () => {
-    if (downvoted !== -1) {
-      return;
-    } else {
       dispatch(upvote_repost(post._id));
-    }
   };
 
   //function for toggling downvote
   const toggle_downvoted = () => {
-    if (upvoted !== -1) {
-      return;
-    } else {
       dispatch(downvote_repost(post._id));
-    }
   };
 
   const clickRef = useRef(null);
@@ -164,14 +156,14 @@ const Repost = ({ post }) => {
               <div className="re-post_upvote" onClick={toggle_upvoted}>
                 <FontAwesomeIcon
                   icon={faUpLong}
-                  color={upvoted !== -1 ? "blue" : "black"}
+                  color={upvoted ? "blue" : "black"}
                 />
                 {post.upvoteValue}
               </div>
               <div className="re-post_downvote" onClick={toggle_downvoted}>
                 <FontAwesomeIcon
                   icon={faDownLong}
-                  color={downvoted !== -1 ? "red" : "black"}
+                  color={downvoted  ? "red" : "black"}
                 />
                 {post.downvoteValue}
               </div>
@@ -204,13 +196,6 @@ const Repost = ({ post }) => {
       )}
       {openCommentFormId === post._id && <CommentForm post={post} />}
       <div>{openCommentFormId === post._id && <CommentList post={post} />}</div>
-      {/* {sharePost && (
-        <RepostForm
-          post={post}
-          setSharePost={setSharePost}
-          imageSrc={imageSrc}
-        />
-      )} */}
     </div>
   );
 };
