@@ -23,8 +23,7 @@ const Dashboard = () => {
 
 
  // Combine posts and reposts into a single array and sort by createdAt (or updatedAt) timestamps.
- const combinedFeed = [...posts, ...reposts].sort((a, b) => b.createdAt - a.createdAt);
-//  console.log('combinedFeed:', combinedFeed)
+ const combinedFeed = [...posts, ...reposts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     useEffect(() => {
       dispatch(getAllPosts())

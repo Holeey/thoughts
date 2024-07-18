@@ -1,3 +1,4 @@
+import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEllipsis,
@@ -20,7 +21,7 @@ import CommentList from "../../post/postItem/comments/commentList/CommentList";
 import moment from "moment";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback  } from "react";
 
 import {
   deleteRepost,
@@ -33,7 +34,7 @@ import RepostForm from "../repost/repostItem/RepostForm";
 import RepostItem from "./repostItem/RepostItem";
 import "./repost.css";
 
-const Repost = ({ post }) => {
+const Repost = React.memo(({ post }) => {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isPostOptions, setIsPostOptions] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -44,47 +45,42 @@ const Repost = ({ post }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
 
-  const togglePostOptions = () => {
+  const togglePostOptions = useCallback(() => {
     setIsPostOptions(!isPostOptions);
-  };
-  const handleDeletePost = () => {
+  }, [isPostOptions]);
+  const handleDeletePost = useCallback(() => {
     dispatch(deleteRepost(post._id));
-  };
-  const handleEditPost = () => {
+  }, [dispatch, post._id]);
+  const handleEditPost = useCallback(() => {
     dispatch(editRepost(post));
-  };
-  const toggleVisibility = () => {
+  }, [dispatch, post]);
+  const toggleVisibility = useCallback(() => {
     setIsVisible(!isVisible);
     handleEditPost();
-  };
-  const toggleCommentForm = (postId) => {
+  }, [handleEditPost, isVisible]);
+  const toggleCommentForm = useCallback((postId) => {
     // Close any open comment form if it's not the one being clicked
     setOpenCommentFormId(openCommentFormId === postId ? null : postId);
-  };
+  }, [openCommentFormId]);
 
-  //  Get user vote status from the database state
-  const upvoted = post.upvote.findIndex((vote) => vote?.user._id === user.id);
-  const downvoted = post.downvote.findIndex(
-    (vote) => vote?.user._id === user.id
-  );
 
   //function for toggling the upvote
-  const toggle_upvoted = () => {
+  const toggle_upvoted = useCallback(() => {
       dispatch(upvote_repost(post._id));
-  };
+  }, [dispatch, post._id]);
 
   //function for toggling downvote
-  const toggle_downvoted = () => {
+  const toggle_downvoted = useCallback(() => {
       dispatch(downvote_repost(post._id));
-  };
+  }, [dispatch, post._id]);
 
   const clickRef = useRef(null);
 
-  const handleOutsideClick = (e) => {
+  const handleOutsideClick = useCallback((e) => {
     if (clickRef.current && !clickRef.current.contains(e.target)) {
       setIsPostOptions(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     document.addEventListener("click", handleOutsideClick, true);
@@ -156,14 +152,14 @@ const Repost = ({ post }) => {
               <div className="re-post_upvote" onClick={toggle_upvoted}>
                 <FontAwesomeIcon
                   icon={faUpLong}
-                  color={upvoted ? "blue" : "black"}
+                  color={post.upvoteValue > 0 ? "blue" : "black"}
                 />
                 {post.upvoteValue}
               </div>
               <div className="re-post_downvote" onClick={toggle_downvoted}>
                 <FontAwesomeIcon
                   icon={faDownLong}
-                  color={downvoted  ? "red" : "black"}
+                  color={post.downvoteValue > 0 ? "red" : "black"}
                 />
                 {post.downvoteValue}
               </div>
@@ -198,6 +194,6 @@ const Repost = ({ post }) => {
       <div>{openCommentFormId === post._id && <CommentList post={post} />}</div>
     </div>
   );
-};
+});
 
 export default Repost;

@@ -1,3 +1,4 @@
+import React from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEllipsis,
@@ -21,7 +22,7 @@ import "./postItem.css";
 import moment from "moment";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 
 import {
   deletePost,
@@ -33,7 +34,7 @@ import {
 } from "../../../features/post/postSlice";
 import RepostForm from "../repost/repostItem/RepostForm";
 
-const PostItem = ({ post }) => {
+const PostItem = React.memo(({ post }) => {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isPostOptions, setIsPostOptions] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -44,47 +45,43 @@ const PostItem = ({ post }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
 
-  const togglePostOptions = () => {
+  const togglePostOptions = useCallback(() => {
     setIsPostOptions(!isPostOptions);
-  };
-  const handleDeletePost = () => {
+  }, [isPostOptions]);
+
+  const handleDeletePost = useCallback(() => {
     dispatch(deletePost(post._id));
-  };
-  const handleEditPost = () => {
+  }, [dispatch, post._id]);
+
+  const handleEditPost = useCallback(() => {
     dispatch(editPost(post));
-  };
-  const toggleVisibility = () => {
+  }, [dispatch, post]);
+
+  const toggleVisibility = useCallback(() => {
     setIsVisible(!isVisible);
     handleEditPost();
-  };
-  const toggleCommentForm = (postId) => {
-    // Close any open comment form if it's not the one being clicked
+  }, [handleEditPost, isVisible]);
+
+  const toggleCommentForm = useCallback((postId) => {
     setOpenCommentFormId(openCommentFormId === postId ? null : postId);
-  };
+  }, [openCommentFormId]);
 
-  // Get user vote status from the database state
-  const upvoted =
-    post.upvote.findIndex((vote) => vote?.user._id === user.id) !== -1;
-  const downvoted =
-    post.downvote.findIndex((vote) => vote?.user._id === user.id) !== -1;
+  const toggle_upvoted = useCallback(() => {
+    dispatch(upvotes(post._id));
+  }, [dispatch, post._id]);
 
-  // function for toggling the upvote
-  const toggle_upvoted = () => {
-      dispatch(upvotes(post._id));
-  }
-  
-  // function for toggling downvote
-  const toggle_downvoted = () => {
-      dispatch(downvotes(post._id));
-  }
+  const toggle_downvoted = useCallback(() => {
+    dispatch(downvotes(post._id));
+  }, [dispatch, post._id]);
 
   const clickRef = useRef(null);
 
-  const handleOutsideClick = (e) => {
+  const handleOutsideClick = useCallback((e) => {
     if (clickRef.current && !clickRef.current.contains(e.target)) {
       setIsPostOptions(false);
     }
-  };
+  }, []);
+
 
   useEffect(() => {
     document.addEventListener("click", handleOutsideClick, true);
@@ -100,7 +97,7 @@ const PostItem = ({ post }) => {
           const module = await import(`../../../images/${post.postImg}`);
           setImageSrc(module.default);
         } catch (error) {
-          console.error("Error loading image:", error);
+          console.error("Error loading image:", error)
         }
       }
     };
@@ -194,14 +191,14 @@ const PostItem = ({ post }) => {
               <div className="upvote" onClick={toggle_upvoted}>
                 <FontAwesomeIcon
                   icon={faUpLong}
-                  color={upvoted ? "blue" : "black"}
+                  color={post.upvoteValue > 0 ? "blue" : "black"}
                 />
                 {post.upvoteValue}
               </div>
               <div className="downvote" onClick={toggle_downvoted}>
                 <FontAwesomeIcon
                   icon={faDownLong}
-                  color={downvoted ? "red" : "black"}
+                  color={post.downvoteValue > 0 ? "red" : "black"}
                 />
                 {post.downvoteValue}
               </div>
@@ -221,7 +218,8 @@ const PostItem = ({ post }) => {
             </span>{" "}
           </div>
         </div>
-      </div>
+      </div> 
+
       {isVisible && (
         <PostForm isVisible={isVisible} setIsVisible={setIsVisible} />
       )}
@@ -234,8 +232,9 @@ const PostItem = ({ post }) => {
           imageSrc={imageSrc}
         />
       )}
+    
     </>
   );
-};
+});
 
 export default PostItem;
