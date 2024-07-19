@@ -43,7 +43,7 @@ const PostItem = React.memo(({ post }) => {
   const [sharePost, setSharePost] = useState(false);
 
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  // const { user } = useSelector((state) => state.auth);
 
   const togglePostOptions = useCallback(() => {
     setIsPostOptions(!isPostOptions);
