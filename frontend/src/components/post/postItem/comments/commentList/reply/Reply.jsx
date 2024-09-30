@@ -8,7 +8,7 @@ import {
   faPaperPlane,
 } from "@fortawesome/free-solid-svg-icons";
 import "./reply.css";
-import { Fragment, useState } from "react";
+import React, { Fragment, useState, useCallback } from "react";
 import {
   replyReplies,
   deleteReply,
@@ -16,7 +16,7 @@ import {
   replyUpvotes,
 } from "../../../../../../features/comments/commentSlice";
 
-const RecursiveReply = ({ reply }) => {
+const RecursiveReply = React.memo(({ reply }) => {
   const [newReply, setNewReply] = useState("");
   const [selectedCommentId, setSelectedCommentId] = useState(null);
   const [viewReplies, setViewReplies] = useState(false);
@@ -25,13 +25,6 @@ const RecursiveReply = ({ reply }) => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
 
-  // Get user vote status from the database state
-  const upvoted = reply.upvote.findIndex(
-    (vote) => vote.user && vote.user._id === user.id
-  );
-  const downvoted = reply.downvote.findIndex(
-    (vote) => vote.user && vote.user._id === user.id
-  );
 
   const toggleMinimize = () => {
     setIsMinimized(!isMinimized);
@@ -39,20 +32,12 @@ const RecursiveReply = ({ reply }) => {
 
   //function for toggling the upvote
   const toggle_upvoted = () => {
-    if (downvoted !== -1) {
-      return;
-    } else {
       dispatch(replyUpvotes(reply._id));
-    }
   };
 
   //function for toggling downvote
   const toggle_downvoted = () => {
-    if (upvoted !== -1) {
-      return;
-    } else {
       dispatch(replyDownvotes(reply._id));
-    }
   };
 
   const replyVisibilty = () => {
@@ -63,8 +48,8 @@ const RecursiveReply = ({ reply }) => {
     setSelectedCommentId(commentId === selectedCommentId ? null : commentId);
   };
 
-  const handleChange = (e) => {
-    setNewReply(e.target.value);
+  const handleChange = (event) => {
+    setNewReply((prevValue) => event.target.value);
   };
 
   const handleSubmit = (e, replyId) => {
@@ -115,7 +100,7 @@ const RecursiveReply = ({ reply }) => {
                 <FontAwesomeIcon
                   icon={faUpLong}
                   cursor={"pointer"}
-                  color={upvoted !== -1 ? "blue" : "black"}
+                  color={reply.upvoteValue === 1 ? "blue" : "black"}
                 />
                 {reply.upvoteValue}
               </span>
@@ -123,7 +108,7 @@ const RecursiveReply = ({ reply }) => {
                 <FontAwesomeIcon
                   icon={faDownLong}
                   cursor={"pointer"}
-                  color={downvoted !== -1 ? "red" : "black"}
+                  color={reply.downvoteValue === 1 ? "red" : "black"}
                 />
                 {reply.downvoteValue}
               </span>
@@ -199,7 +184,7 @@ const RecursiveReply = ({ reply }) => {
       </div>
     </div>
   );
-};
+});
 
 const Reply = ({ comment }) => {
   return (

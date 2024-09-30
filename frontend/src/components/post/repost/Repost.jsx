@@ -21,7 +21,7 @@ import CommentList from "../../post/postItem/comments/commentList/CommentList";
 import moment from "moment";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useState, useRef, useEffect, useMemo, useCallback  } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 
 import {
   deleteRepost,
@@ -58,20 +58,22 @@ const Repost = React.memo(({ post }) => {
     setIsVisible(!isVisible);
     handleEditPost();
   }, [handleEditPost, isVisible]);
-  const toggleCommentForm = useCallback((postId) => {
-    // Close any open comment form if it's not the one being clicked
-    setOpenCommentFormId(openCommentFormId === postId ? null : postId);
-  }, [openCommentFormId]);
-
+  const toggleCommentForm = useCallback(
+    (postId) => {
+      // Close any open comment form if it's not the one being clicked
+      setOpenCommentFormId(openCommentFormId === postId ? null : postId);
+    },
+    [openCommentFormId]
+  );
 
   //function for toggling the upvote
   const toggle_upvoted = useCallback(() => {
-      dispatch(upvote_repost(post._id));
+    dispatch(upvote_repost(post._id));
   }, [dispatch, post._id]);
 
   //function for toggling downvote
   const toggle_downvoted = useCallback(() => {
-      dispatch(downvote_repost(post._id));
+    dispatch(downvote_repost(post._id));
   }, [dispatch, post._id]);
 
   const clickRef = useRef(null);
@@ -179,6 +181,10 @@ const Repost = React.memo(({ post }) => {
             </span>{" "}
           </div>
         </div>
+        {openCommentFormId === post._id && <CommentForm post={post} />}
+        <div>
+          {openCommentFormId === post._id && <CommentList post={post} />}
+        </div>
       </div>{" "}
       {(isVisible || sharePost) && (
         <RepostForm
@@ -190,8 +196,6 @@ const Repost = React.memo(({ post }) => {
           setIsVisible={setIsVisible}
         />
       )}
-      {openCommentFormId === post._id && <CommentForm post={post} />}
-      <div>{openCommentFormId === post._id && <CommentList post={post} />}</div>
     </div>
   );
 });

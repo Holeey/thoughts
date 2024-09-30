@@ -7,7 +7,7 @@ import {
   faPaperPlane,
   faDownLong,
 } from "@fortawesome/free-solid-svg-icons";
-import { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   commentUpvotes,
   commentDownvotes,
@@ -19,7 +19,7 @@ import {
 import "./commentList.css";
 import Reply from "./reply/Reply.jsx";
 
-const CommentList = ({ post }) => {
+const CommentList = React.memo(({ post }) => {
   const [reply, setReply] = useState("");
   const [selectedCommentId, setSelectedCommentId] = useState(null);
   const [viewReplies, setViewReplies] = useState(null);
@@ -33,16 +33,16 @@ const CommentList = ({ post }) => {
     setIsMinimized(!isMinimized);
   };
 
-  const replyVisibilty = (commentId) => {
-    setViewReplies(commentId === viewReplies ? null : commentId);
-  };
+  const replyVisibilty = useCallback((replyCommentId) => {
+    setViewReplies((prevViewReplies) => replyCommentId === prevViewReplies ? null : replyCommentId);
+  }, [viewReplies]); 
 
-  const toggleVisibility = (commentId) => {
-    setSelectedCommentId(commentId === selectedCommentId ? null : commentId);
-  };
-
-  const handleChange = (e) => {
-    setReply(e.target.value);
+  const toggleVisibility = useCallback((commentId) => {
+    setSelectedCommentId((prevSelectedCommentId) => commentId === prevSelectedCommentId ? null : commentId);
+  }, [selectedCommentId]); 
+  
+  const handleChange = (event) => {
+    setReply((prevValue) => event.target.value);
   };
 
   const handleSubmit = (e, commentId) => {
@@ -117,9 +117,7 @@ const CommentList = ({ post }) => {
                       <FontAwesomeIcon
                         icon={faUpLong}
                         color={
-                          comment.upvote.findIndex(
-                            (vote) => vote.user && vote.user._id === user.id
-                          ) !== -1
+                          comment.upvoteValue === 1
                             ? "blue"
                             : "black"
                         }
@@ -144,9 +142,7 @@ const CommentList = ({ post }) => {
                       <FontAwesomeIcon
                         icon={faDownLong}
                         color={
-                          comment.downvote.findIndex(
-                            (vote) => vote.user && vote.user._id === user.id
-                          ) !== -1
+                          comment.downvoteValue === 1
                             ? "red"
                             : "black"
                         }
@@ -204,7 +200,7 @@ const CommentList = ({ post }) => {
                         <input
                           onChange={handleChange}
                           type="text"
-                          placeholder={`reply to @${comment.user.nick_name}`}
+                          placeholder={`reply @${comment.user.nick_name}`}
                           value={reply}
                           name="reply"
                           id="reply"
@@ -224,6 +220,6 @@ const CommentList = ({ post }) => {
       </div>
     </div>
   );
-};
+});
 
 export default CommentList;

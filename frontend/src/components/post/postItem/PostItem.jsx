@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEllipsis,
@@ -62,9 +62,12 @@ const PostItem = React.memo(({ post }) => {
     handleEditPost();
   }, [handleEditPost, isVisible]);
 
-  const toggleCommentForm = useCallback((postId) => {
-    setOpenCommentFormId(openCommentFormId === postId ? null : postId);
-  }, [openCommentFormId]);
+  const toggleCommentForm = useCallback(
+    (postId) => {
+      setOpenCommentFormId(openCommentFormId === postId ? null : postId);
+    },
+    [openCommentFormId]
+  );
 
   const toggle_upvoted = useCallback(() => {
     dispatch(upvotes(post._id));
@@ -82,7 +85,6 @@ const PostItem = React.memo(({ post }) => {
     }
   }, []);
 
-
   useEffect(() => {
     document.addEventListener("click", handleOutsideClick, true);
     return () => {
@@ -97,7 +99,7 @@ const PostItem = React.memo(({ post }) => {
           const module = await import(`../../../images/${post.postImg}`);
           setImageSrc(module.default);
         } catch (error) {
-          console.error("Error loading image:", error)
+          console.error("Error loading image:", error);
         }
       }
     };
@@ -218,21 +220,21 @@ const PostItem = React.memo(({ post }) => {
             </span>{" "}
           </div>
         </div>
-      </div> 
-
+        {openCommentFormId === post._id && <CommentForm post={post} />}
+        <div>
+          {openCommentFormId === post._id && <CommentList post={post} />}
+        </div>
+        {sharePost && (
+          <RepostForm
+            post={post}
+            setSharePost={setSharePost}
+            imageSrc={imageSrc}
+          />
+        )}
+      </div>
       {isVisible && (
         <PostForm isVisible={isVisible} setIsVisible={setIsVisible} />
       )}
-      {openCommentFormId === post._id && <CommentForm post={post} />}
-      <div>{openCommentFormId === post._id && <CommentList post={post} />}</div>
-      {sharePost && (
-        <RepostForm
-          post={post}
-          setSharePost={setSharePost}
-          imageSrc={imageSrc}
-        />
-      )}
-    
     </>
   );
 });
