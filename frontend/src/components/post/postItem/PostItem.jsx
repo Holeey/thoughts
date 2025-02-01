@@ -1,5 +1,6 @@
 import React, { Fragment } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { flushSync } from 'react-dom';
 import {
   faEllipsis,
   faTrash,
@@ -29,10 +30,8 @@ import {
   editPost,
   upvotes,
   downvotes,
-  removeUpvote,
-  removeDownvote,
 } from "../../../features/post/postSlice";
-import RepostForm from "../repost/repostItem/RepostForm";
+
 
 const PostItem = React.memo(({ post }) => {
   const [isMinimized, setIsMinimized] = useState(true);
@@ -43,7 +42,7 @@ const PostItem = React.memo(({ post }) => {
   const [sharePost, setSharePost] = useState(false);
 
   const dispatch = useDispatch();
-  // const { user } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
 
   const togglePostOptions = useCallback(() => {
     setIsPostOptions(!isPostOptions);
@@ -70,11 +69,15 @@ const PostItem = React.memo(({ post }) => {
   );
 
   const toggle_upvoted = useCallback(() => {
-    dispatch(upvotes(post._id));
+    flushSync(() => {
+      dispatch(upvotes(post._id));  
+    })
   }, [dispatch, post._id]);
 
   const toggle_downvoted = useCallback(() => {
-    dispatch(downvotes(post._id));
+    flushSync(() => {
+       dispatch(downvotes(post._id));  
+    })
   }, [dispatch, post._id]);
 
   const clickRef = useRef(null);
@@ -193,14 +196,14 @@ const PostItem = React.memo(({ post }) => {
               <div className="upvote" onClick={toggle_upvoted}>
                 <FontAwesomeIcon
                   icon={faUpLong}
-                  color={post.upvoteValue > 0 ? "blue" : "black"}
+                  color={post.upvote.indexOf(user._id) !== -1 ? "blue" : "black"}
                 />
                 {post.upvoteValue}
               </div>
               <div className="downvote" onClick={toggle_downvoted}>
                 <FontAwesomeIcon
                   icon={faDownLong}
-                  color={post.downvoteValue > 0 ? "red" : "black"}
+                  color={post.downvote.indexOf(user._id) !== -1 ? "red" : "black"}
                 />
                 {post.downvoteValue}
               </div>
@@ -214,7 +217,7 @@ const PostItem = React.memo(({ post }) => {
             <span>
               <FontAwesomeIcon
                 style={{ cursor: "pointer" }}
-                onClick={() => setSharePost(!sharePost)}
+                onClick={() => {}}
                 icon={faShareNodes}
               />
             </span>{" "}
@@ -224,13 +227,6 @@ const PostItem = React.memo(({ post }) => {
         <div>
           {openCommentFormId === post._id && <CommentList post={post} />}
         </div>
-        {sharePost && (
-          <RepostForm
-            post={post}
-            setSharePost={setSharePost}
-            imageSrc={imageSrc}
-          />
-        )}
       </div>
       {isVisible && (
         <PostForm isVisible={isVisible} setIsVisible={setIsVisible} />

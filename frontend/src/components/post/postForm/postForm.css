@@ -32,10 +32,12 @@
 #postTitle {
     width: 100%;
     padding: 10px;
+    font-size: 20px;
 }
 #postBody {
     width: 100%;
     height: 40vh;
+    font-size: 18px;
     margin-top: 1rem;
     resize: none;
 }
@@ -44,16 +46,10 @@
     bottom: 0;
 }
 #post {
-    /* position: absolute;
-    top: 10%; */
     width: 590px;
     height: 40vh;
 }
 #post_button {
-    /* position: absolute;
-    bottom: 10px;
-    right: 20px; */
-
     margin-top: 15px;
     padding: 10px;
     width: 100px;
@@ -61,11 +57,7 @@
 .form_close_btn {
     text-align: right;
 }
-#post_cancel_button {
-    /* position: absolute;
-    top: 10px;
-    right: 20px; */
-   
+#post_cancel_button {  
     max-width: 100px;
 }
 
@@ -76,8 +68,6 @@
 }
 .custom-file-upload {
     display: inline-block;
-    /* position: absolute;
-    bottom: 0px; */
     margin-top: 15px;
     padding: 5px;
     background-color: #744caf;

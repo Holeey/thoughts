@@ -8,7 +8,7 @@ const initialState = {
     isSuccess: false,
     message: '',
     editingPost: null,
-    searchPosts: []
+    searchPosts: [],
 };
 
 export const createPost = createAsyncThunk('post/create', async (payload, thunkAPI) => {
@@ -89,27 +89,27 @@ export const downvotes = createAsyncThunk('post/downvote', async (id, thunkAPI) 
     }
 });
 
-export const removeUpvote = createAsyncThunk('post/removeUpvote', async (id, thunkAPI) => {
-    try {
-        const token = thunkAPI.getState().auth.user.token;
-        return await postService.removeUpvote(id, token);
-    } catch (error) {
-        const message = (error.response && error.response.data && error.response.message)
-            || error.message || error.toString();
-        return thunkAPI.rejectWithValue(message);
-    }
-});
+// export const removeUpvote = createAsyncThunk('post/removeUpvote', async (id, thunkAPI) => {
+//     try {
+//         const token = thunkAPI.getState().auth.user.token;
+//         return await postService.removeUpvote(id, token);
+//     } catch (error) {
+//         const message = (error.response && error.response.data && error.response.message)
+//             || error.message || error.toString();
+//         return thunkAPI.rejectWithValue(message);
+//     }
+// });
 
-export const removeDownvote = createAsyncThunk('post/removeDownvote', async (id, thunkAPI) => {
-    try {
-        const token = thunkAPI.getState().auth.user.token;
-        return await postService.removeDownvote(id, token);
-    } catch (error) {
-        const message = (error.response && error.response.data && error.response.message)
-            || error.message || error.toString();
-        return thunkAPI.rejectWithValue(message);
-    }
-});
+// export const removeDownvote = createAsyncThunk('post/removeDownvote', async (id, thunkAPI) => {
+//     try {
+//         const token = thunkAPI.getState().auth.user.token;
+//         return await postService.removeDownvote(id, token);
+//     } catch (error) {
+//         const message = (error.response && error.response.data && error.response.message)
+//             || error.message || error.toString();
+//         return thunkAPI.rejectWithValue(message);
+//     }
+// });
 
 const postSlice = createSlice({
     name: 'post',

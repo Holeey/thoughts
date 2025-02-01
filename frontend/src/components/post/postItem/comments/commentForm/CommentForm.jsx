@@ -28,9 +28,8 @@ const Comment = ({ post }) => {
   return (
     <>
       <form className="comment_form" onSubmit={handleSubmit}>
-        <Link to={"/commentList"}>view 1234k comments...</Link>
         <div className="comment_input-container">
-          <textarea
+          <input
             onChange={handleChange}
             className="comment_input"
             type="text"
@@ -38,7 +37,6 @@ const Comment = ({ post }) => {
             value={reply}
             name="reply"
             id="reply"
-            resize="none"
           />
           <button type="submit" className="comment_button">
             <FontAwesomeIcon icon={faPaperPlane} />

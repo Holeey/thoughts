@@ -3,7 +3,7 @@ import commentService from "./commentService.js"
 
 
 const initialState = {
-    comments: [],
+    comment: [],
     isloading: false,
     isError: false,
     isSuccess: false,

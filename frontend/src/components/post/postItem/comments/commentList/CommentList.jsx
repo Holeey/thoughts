@@ -27,6 +27,7 @@ const CommentList = React.memo(({ post }) => {
 
   const dispatch = useDispatch();
   const { comments } = useSelector((state) => state.comment);
+ 
   const { user } = useSelector((state) => state.auth);
 
   const toggleMinimize = () => {
@@ -61,9 +62,9 @@ const CommentList = React.memo(({ post }) => {
 
   useEffect(() => {
     dispatch(getComments(post._id));
-    return () => {
-      dispatch(resetComment());
-    };
+    // return () => {
+    //   dispatch(resetComment());
+    // };
   }, [dispatch, post._id]);
 
   return (
@@ -93,13 +94,13 @@ const CommentList = React.memo(({ post }) => {
                   >
                     <p>{comment.comment}</p>{" "}
                   </div>
-                  {isMinimized && comment.comment.length > 100 ? (
+                  {/* {isMinimized && comment.comment.length > 100 ? (
                     <div onClick={toggleMinimize} className="comment_elipsis">
                       <h6>See more...</h6>
                     </div>
                   ) : (
                     " "
-                  )}
+                  )} */}
 
                   <div className="comment_feedback-options">
                     <div

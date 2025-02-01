@@ -88,13 +88,13 @@ const RecursiveReply = React.memo(({ reply }) => {
             >
               <p>{reply.reply}</p>
             </div>
-            {isMinimized && reply.reply.length > 100 ? (
+            {/* {isMinimized && reply.reply.length > 100 ? (
               <div onClick={toggleMinimize} className="reply_elipsis">
                 <h6>See more...</h6>
               </div>
             ) : (
               " "
-            )}
+            )} */}
             <div className="replies_feedback-options">
               <span onClick={toggle_upvoted}>
                 <FontAwesomeIcon

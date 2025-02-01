@@ -9,7 +9,7 @@ import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAllReposts } from "../../features/repost/repostSlice";
-import Repost from "../../components/post/repost/Repost";
+
 
 
 
@@ -17,21 +17,16 @@ const Dashboard = () => {
   const [isVisible, setIsVisible] = useState(false)
   const {user} = useSelector((state) => state.auth)
   const posts  = useSelector((state) => state.post.posts)  
-  const reposts = useSelector((state) => state.repost.reposts)
+
 
   const dispatch = useDispatch();
 
-
- // Combine posts and reposts into a single array and sort by createdAt (or updatedAt) timestamps.
- const combinedFeed = [...posts, ...reposts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+//  const postdFeed = posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     useEffect(() => {
       dispatch(getAllPosts())
       dispatch(getAllReposts())
-      // return () => {
-      //   dispatch(reset())
-      // }
-    }, [posts,  dispatch])
+    }, [ dispatch ])
 
   return (
     <>
@@ -65,15 +60,8 @@ const Dashboard = () => {
           /> 
         </div>
         
-          {combinedFeed.map(item => (
-                <div key={item._id} className="content">
-                    {item.type === 'Post' ? (
-                     <PostItem key={item._id} post={item} />
-                    ) : (
-                     <Repost key={item._id} post={item} />
-                    )}
-                </div>
-            ))}
+          {posts.map(item => (
+          <PostItem key={item._id} post={item} /> ))}
 
             </div>
 

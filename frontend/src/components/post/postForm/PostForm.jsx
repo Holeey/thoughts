@@ -102,7 +102,7 @@ const PostForm = ({ isVisible, setIsVisible }) => {
       postBody: "",
       postImg: null,
     });
-    dispatch(reset());
+    // dispatch(reset());
     dispatch(resetEditingPost());
     setIsVisible(false);
   };
@@ -157,73 +157,77 @@ const PostForm = ({ isVisible, setIsVisible }) => {
           />
         ) : (
           <>
-            {/* <img className="imageAfterCrop" src={imageAfterCrop} alt="" /> */}
+            
             <div ref={clickRef}>
               <form
                 encType="multipart/form-data"
                 onSubmit={editingPost ? handleUpdatePost : handleSubmit}
                 className="post_form"
               >
-                               <div className="form_close_btn">   <FontAwesomeIcon
-                id="post_cancel_button" onClick={handleResetForm}
-                style={{ cursor: "pointer" }}
-                size={"2x"}
-                icon={faClose}
-              /></div>
-<div className="middle_eelements"><div>
-                  <input
-                    onChange={handleChange}
-                    type="text"
-                    placeholder="Title"
-                    name="postTitle"
-                    id="postTitle"
-                    value={postTitle}
+                <div className="form_close_btn">
+                  {" "}
+                  <FontAwesomeIcon
+                    id="post_cancel_button"
+                    onClick={handleResetForm}
+                    style={{ cursor: "pointer" }}
+                    size={"2x"}
+                    icon={faClose}
                   />
                 </div>
-                <div>
-                  <textarea
-                    onChange={handleChange}
-                    type="text"
-                    placeholder="say something..."
-                    name="postBody"
-                    id="postBody"
-                    value={postBody}
-                    
-                  />
-                </div></div>
- 
-             
+                <div className="middle_eelements">
+                  <div>
+                    <input
+                      onChange={handleChange}
+                      type="text"
+                      placeholder="Title"
+                      name="postTitle"
+                      id="postTitle"
+                      value={postTitle}
+                    />
+                  </div>
+                  <div>
+                    <textarea
+                      onChange={handleChange}
+                      type="text"
+                      placeholder="say something..."
+                      name="postBody"
+                      id="postBody"
+                      value={postBody}
+                    />
+                  </div>
+                </div>
 
-<div className="selectImg_and_post-button_container">
-  <div>
-    <input
-                    onChange={handleFileUpload}
-                    type="file"
-                    name="postImg"
-                    id="postImg"
-                    accept=".jpg, .png, .jpeg"
-                    style={{ display: 'none' }} // Hide the default input
-                  />
-                  <label htmlFor="postImg" className="custom-file-upload">
-                  <FontAwesomeIcon
-                   style={{ cursor: "pointer" }}
-                  size={"2x"}
-                  icon={faImage}
-              />
-                   </label>
-                  <span className="file-name">{postImg?.name}</span>
-               </div>
-                  
-                <div>
-                {editingPost ? (
-                  <button type="submit" id="post_button">
-                    update
-                  </button>
-                ) : (
-                  <button type="submit" id="post_button">
-                    post
-                  </button>
-                )} </div>
+                <div className="selectImg_and_post-button_container">
+                  <div>
+                    <input
+                      onChange={handleFileUpload}
+                      type="file"
+                      name="postImg"
+                      id="postImg"
+                      accept=".jpg, .png, .jpeg"
+                      style={{ display: "none" }} // Hide the default input
+                    />
+                    <label htmlFor="postImg" className="custom-file-upload">
+                      <FontAwesomeIcon
+                        style={{ cursor: "pointer" }}
+                        size={"2x"}
+                        icon={faImage}
+                      />
+                    </label>
+                    <span className="file-name">{postImg?.name}</span>
+                  </div>
+
+                  <div>
+                    {editingPost ? (
+                      <button type="submit" id="post_button">
+                        Update
+                      </button>
+                    ) : (
+                      <button type="submit" id="post_button">
+                        Share
+                      </button>
+                    )}{" "}
+                  </div>
                 </div>
               </form>
             </div>

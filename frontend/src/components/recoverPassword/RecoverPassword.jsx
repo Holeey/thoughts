@@ -55,7 +55,7 @@ export const RecoverPassword = () => {
   const seconds = timer % 60;
 
   return (
-    <div>
+    <div style={{ padding: '10rem'}}>
       <form onSubmit={handleSubmit}>
         <div><p>Check your inbox/spam/junk for email </p></div>
         <label htmlFor="email">Email</label>
