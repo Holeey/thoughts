@@ -19,14 +19,16 @@ import {
 import "./commentList.css";
 import Reply from "./reply/Reply.jsx";
 
-const CommentList = React.memo(({ post }) => {
+const CommentList = React.memo(({comments}) => {
   const [reply, setReply] = useState("");
   const [selectedCommentId, setSelectedCommentId] = useState(null);
   const [viewReplies, setViewReplies] = useState(null);
   const [isMinimized, setIsMinimized] = useState(true);
 
   const dispatch = useDispatch();
-  const { comments } = useSelector((state) => state.comment);
+  // const { comments } = useSelector((state) => state.comment);
+  // console.log('commentJsx:', comments)
+  // console.log('postProp:', post._id)
  
   const { user } = useSelector((state) => state.auth);
 
@@ -60,12 +62,12 @@ const CommentList = React.memo(({ post }) => {
     dispatch(deleteComment(commentId));
   };
 
-  useEffect(() => {
-    dispatch(getComments(post._id));
-    // return () => {
-    //   dispatch(resetComment());
-    // };
-  }, [dispatch, post._id]);
+  // useEffect(() => {
+  //   dispatch(getComments(post._id));
+  //   // return () => {
+  //   //   dispatch(resetComment());
+  //   // };
+  // }, [dispatch, post._id]);
 
   return (
     <div>
@@ -92,7 +94,7 @@ const CommentList = React.memo(({ post }) => {
                       isMinimized ? "minimized" : "expanded"
                     }`}
                   >
-                    <p>{comment.comment}</p>{" "}
+                    <p>{ comment.comment}</p>{" "}
                   </div>
                   {/* {isMinimized && comment.comment.length > 100 ? (
                     <div onClick={toggleMinimize} className="comment_elipsis">

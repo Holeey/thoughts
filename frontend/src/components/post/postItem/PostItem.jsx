@@ -1,6 +1,6 @@
 import React, { Fragment } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { flushSync } from 'react-dom';
+import { flushSync } from "react-dom";
 import {
   faEllipsis,
   faTrash,
@@ -18,6 +18,7 @@ import {
 import PostForm from "../postForm/PostForm";
 import CommentForm from "../postItem/comments/commentForm/CommentForm";
 import CommentList from "./comments/commentList/CommentList";
+import { getComments } from "../../../features/comments/commentSlice";
 import "./postItem.css";
 
 import moment from "moment";
@@ -32,17 +33,18 @@ import {
   downvotes,
 } from "../../../features/post/postSlice";
 
-
 const PostItem = React.memo(({ post }) => {
   const [isMinimized, setIsMinimized] = useState(true);
   const [isPostOptions, setIsPostOptions] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [openCommentFormId, setOpenCommentFormId] = useState(null);
   const [imageSrc, setImageSrc] = useState(null);
-  const [sharePost, setSharePost] = useState(false);
+
 
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+
+  const { comments } = useSelector((state) => state.comment);
 
   const togglePostOptions = useCallback(() => {
     setIsPostOptions(!isPostOptions);
@@ -63,21 +65,25 @@ const PostItem = React.memo(({ post }) => {
 
   const toggleCommentForm = useCallback(
     (postId) => {
-      setOpenCommentFormId(openCommentFormId === postId ? null : postId);
+      setOpenCommentFormId((prevId) => (prevId === postId ? null : postId));
+      if (openCommentFormId !== postId) {
+        // Fetch comments only if a new post is clicked
+        dispatch(getComments(postId));
+      }
     },
-    [openCommentFormId]
+    [openCommentFormId, dispatch]
   );
 
   const toggle_upvoted = useCallback(() => {
     flushSync(() => {
-      dispatch(upvotes(post._id));  
-    })
+      dispatch(upvotes(post._id));
+    });
   }, [dispatch, post._id]);
 
   const toggle_downvoted = useCallback(() => {
     flushSync(() => {
-       dispatch(downvotes(post._id));  
-    })
+      dispatch(downvotes(post._id));
+    });
   }, [dispatch, post._id]);
 
   const clickRef = useRef(null);
@@ -196,14 +202,18 @@ const PostItem = React.memo(({ post }) => {
               <div className="upvote" onClick={toggle_upvoted}>
                 <FontAwesomeIcon
                   icon={faUpLong}
-                  color={post.upvote.indexOf(user._id) !== -1 ? "blue" : "black"}
+                  color={
+                    post.upvote.indexOf(user._id) !== -1 ? "blue" : "black"
+                  }
                 />
                 {post.upvoteValue}
               </div>
               <div className="downvote" onClick={toggle_downvoted}>
                 <FontAwesomeIcon
                   icon={faDownLong}
-                  color={post.downvote.indexOf(user._id) !== -1 ? "red" : "black"}
+                  color={
+                    post.downvote.indexOf(user._id) !== -1 ? "red" : "black"
+                  }
                 />
                 {post.downvoteValue}
               </div>
@@ -223,10 +233,16 @@ const PostItem = React.memo(({ post }) => {
             </span>{" "}
           </div>
         </div>
-        {openCommentFormId === post._id && <CommentForm post={post} />}
-        <div>
-          {openCommentFormId === post._id && <CommentList post={post} />}
-        </div>
+
+        
+        {openCommentFormId === post._id && (
+          <>
+            <CommentForm post={post} />
+            <CommentList
+              comments={comments.filter((comment) => comment.post === post._id)}
+            />
+          </>
+        )}
       </div>
       {isVisible && (
         <PostForm isVisible={isVisible} setIsVisible={setIsVisible} />
