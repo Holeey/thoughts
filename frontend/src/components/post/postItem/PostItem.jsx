@@ -17,7 +17,7 @@ import {
 
 import PostForm from "../postForm/PostForm";
 import CommentForm from "../postItem/comments/commentForm/CommentForm";
-import CommentList from "./comments/commentList/CommentList";
+// import CommentList from "./comments/commentList/CommentList";
 import { getComments } from "../../../features/comments/commentSlice";
 import "./postItem.css";
 
@@ -46,6 +46,10 @@ const PostItem = React.memo(({ post }) => {
 
   const { comments } = useSelector((state) => state.comment);
 
+  const filteredComments = comments.filter(
+    (comment) => comment.post === post._id
+  );
+
   const togglePostOptions = useCallback(() => {
     setIsPostOptions(!isPostOptions);
   }, [isPostOptions]);
@@ -66,14 +70,17 @@ const PostItem = React.memo(({ post }) => {
   const toggleCommentForm = useCallback(
     (postId) => {
       setOpenCommentFormId((prevId) => (prevId === postId ? null : postId));
-      if (openCommentFormId !== postId) {
-        // Fetch comments only if a new post is clicked
-        dispatch(getComments(postId));
-      }
+      
+      // Fetch comments only if opening a new form
+      // if (openCommentFormId !== postId) {
+      //   dispatch(getComments(postId));
+      // }
     },
-    [openCommentFormId, dispatch]
+    [ openCommentFormId] // Dependency array to track latest state
   );
 
+
+  
   const toggle_upvoted = useCallback(() => {
     flushSync(() => {
       dispatch(upvotes(post._id));
@@ -223,6 +230,7 @@ const PostItem = React.memo(({ post }) => {
               onClick={() => toggleCommentForm(post._id)}
             >
               <FontAwesomeIcon icon={faComment} />
+            
             </span>
             <span>
               <FontAwesomeIcon
@@ -232,17 +240,16 @@ const PostItem = React.memo(({ post }) => {
               />
             </span>{" "}
           </div>
-        </div>
+        </div> 
+       
 
-        
         {openCommentFormId === post._id && (
-          <>
-            <CommentForm post={post} />
-            <CommentList
-              comments={comments.filter((comment) => comment.post === post._id)}
-            />
-          </>
-        )}
+        <>
+        <CommentForm post={post} />
+       </>
+        
+        )}      
+
       </div>
       {isVisible && (
         <PostForm isVisible={isVisible} setIsVisible={setIsVisible} />

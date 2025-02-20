@@ -1,3 +1,8 @@
+.comment_container {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+}
 .comment_form {
     display: flex;
     flex-direction: column;
