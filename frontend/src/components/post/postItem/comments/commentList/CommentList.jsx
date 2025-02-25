@@ -19,18 +19,20 @@ import {
 import "./commentList.css";
 import Reply from "./reply/Reply.jsx";
 
-const CommentList = React.memo(({comments}) => {
+const CommentList = React.memo(({ post }) => {
   const [reply, setReply] = useState("");
   const [selectedCommentId, setSelectedCommentId] = useState(null);
   const [viewReplies, setViewReplies] = useState(null);
   const [isMinimized, setIsMinimized] = useState(true);
 
   const dispatch = useDispatch();
-  // const { comments } = useSelector((state) => state.comment);
-  // console.log('commentJsx:', comments)
-  // console.log('postProp:', post._id)
- 
+   
   const { user } = useSelector((state) => state.auth);
+
+    const postId = post?._id;
+    const comments = useSelector(state => state.comments.comments || {}); // Ensures comments is never undefined
+    const postComments = postId ? comments[postId] || [] : []; // Ensures safe access
+    console.log('Post Comments:', postComments);
 
   const toggleMinimize = () => {
     setIsMinimized(!isMinimized);
@@ -58,23 +60,19 @@ const CommentList = React.memo(({comments}) => {
     setReply("");
     setSelectedCommentId(null); // Close the reply form after submitting
   };
-  const handleDeleteComment = (commentId) => {
-    dispatch(deleteComment(commentId));
-  };
+  const handleDeleteComment = (comment) => {
 
-  // useEffect(() => {
-  //   dispatch(getComments(post._id));
-  //   // return () => {
-  //   //   dispatch(resetComment());
-  //   // };
-  // }, [dispatch, post._id]);
+    if (comment.post && comment._id) {
+        dispatch(deleteComment(comment));
+    }
+};
 
   return (
     <div>
       <div>
-        {comments && comments.length > 0 && (
+        {postComments && postComments.length > 0 && (
           <div className="comment_list">
-            {comments.map((comment) => (
+            {postComments.map((comment) => (
               <div key={comment._id} className="comment_item_container">
                 <div className="comment_item">
                   <div className="comment_user">
@@ -113,7 +111,7 @@ const CommentList = React.memo(({comments}) => {
                         if (downvoted !== -1) {
                           return;
                         } else {
-                          dispatch(commentUpvotes(comment._id));
+                          dispatch(commentUpvotes(comment));
                         }
                       }}
                     >
@@ -138,7 +136,7 @@ const CommentList = React.memo(({comments}) => {
                         if (upvoted !== -1) {
                           return;
                         } else {
-                          dispatch(commentDownvotes(comment._id));
+                          dispatch(commentDownvotes(comment));
                         }
                       }}
                     >
@@ -179,7 +177,7 @@ const CommentList = React.memo(({comments}) => {
                         cursor={"pointer"}
                         icon={faTrash}
                         color="crimson"
-                        onClick={() => handleDeleteComment(comment._id)}
+                        onClick={() => handleDeleteComment(comment)}
                       />
                     </div>
                   </div>

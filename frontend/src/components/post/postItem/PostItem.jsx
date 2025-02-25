@@ -17,7 +17,7 @@ import {
 
 import PostForm from "../postForm/PostForm";
 import CommentForm from "../postItem/comments/commentForm/CommentForm";
-// import CommentList from "./comments/commentList/CommentList";
+
 import { getComments } from "../../../features/comments/commentSlice";
 import "./postItem.css";
 
@@ -43,12 +43,10 @@ const PostItem = React.memo(({ post }) => {
 
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+     const postId = post?._id;
+     const comments = useSelector(state => state.comments.comments || {}); // Ensures comments is never undefined
+     const postComments = postId ? comments[postId] || [] : []; // Ensures safe access
 
-  const { comments } = useSelector((state) => state.comment);
-
-  const filteredComments = comments.filter(
-    (comment) => comment.post === post._id
-  );
 
   const togglePostOptions = useCallback(() => {
     setIsPostOptions(!isPostOptions);
@@ -70,15 +68,13 @@ const PostItem = React.memo(({ post }) => {
   const toggleCommentForm = useCallback(
     (postId) => {
       setOpenCommentFormId((prevId) => (prevId === postId ? null : postId));
-      
-      // Fetch comments only if opening a new form
-      // if (openCommentFormId !== postId) {
-      //   dispatch(getComments(postId));
-      // }
     },
-    [ openCommentFormId] // Dependency array to track latest state
+    [ openCommentFormId] 
   );
 
+  useEffect(() => {
+    dispatch(getComments(post._id));
+  }, [post._id])
 
   
   const toggle_upvoted = useCallback(() => {
@@ -226,11 +222,12 @@ const PostItem = React.memo(({ post }) => {
               </div>
             </div>
             <span
-              style={{ cursor: "pointer" }}
+
+              style={{ cursor: "pointer", gap:10 }}
               onClick={() => toggleCommentForm(post._id)}
             >
-              <FontAwesomeIcon icon={faComment} />
-            
+              <FontAwesomeIcon icon={faComment} color="purple" />
+            <>{ postComments.length}</>
             </span>
             <span>
               <FontAwesomeIcon

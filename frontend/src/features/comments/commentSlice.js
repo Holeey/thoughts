@@ -3,12 +3,13 @@ import commentService from "./commentService.js"
 
 
 const initialState = {
-    comments: [],
-    isloading: false,
+    comments: {},
+    isLoading: false,
     isError: false,
     isSuccess: false,
     message: ''
 }
+
 // Recursive function to update deleted replies in comments state
 function recursivelyDeleteReplies(comments, deletedReplyId) {
     const updatedComments = comments.map( (comment) => {
@@ -45,15 +46,17 @@ function recursivelyDeleteReplies(comments, deletedReplyId) {
     });
 }
 
-export const getComments = createAsyncThunk('comment/get', async (postId, thunkAPI) => {
+export const getComments = createAsyncThunk("comments/get", async (postId, thunkAPI) => {
     try {
-        const token = thunkAPI.getState().auth.user.token
-        return await commentService.getComments(postId, token)
+        const token = thunkAPI.getState().auth.user?.token;
+        const comments = await commentService.getComments(postId, token);
+        return { postId, comments };
     } catch (error) {
-        const message = error.response.data
-        return thunkAPI.rejectWithValue(message) 
+        const message = error.response?.data || "An error occurred";
+        return thunkAPI.rejectWithValue(message);
     }
-})
+});
+
 export const postComment = createAsyncThunk('comment/post', async (payload, thunkAPI) => {
     const {postId, reply} = payload 
     try {
@@ -83,30 +86,37 @@ export const replyReplies = createAsyncThunk('/reply/replies', async (payload, t
         return thunkAPI.rejectWithValue(message)
     }
 })
-export const deleteComment = createAsyncThunk('comment/delete', async (commentId, thunkAPI) => {
+export const deleteComment = createAsyncThunk('comment/delete', async (payload, thunkAPI) => {
+    const { post, _id } = payload;
     try {
-        const token = thunkAPI.getState().auth.user.token
-        console.log('delete_commentId:', commentId)
-        return await commentService.deleteComment(commentId, token)
+        const token = thunkAPI.getState().auth.user.token;
+        
+        await commentService.deleteComment(_id, token);
+
+        return { post, _id };
     } catch (error) {
-        const message = error.response.data
-        return thunkAPI.rejectWithValue(message)
+        const message = error.response?.data || 'Delete failed';
+        return thunkAPI.rejectWithValue(message);
     }
-})
-export const commentUpvotes = createAsyncThunk('comment/upvote', async (id, thunkAPI) => {
+});
+export const commentUpvotes = createAsyncThunk('comment/upvote', async (payload, thunkAPI) => {
+    const { post, id } = payload;
     try {
         const token = thunkAPI.getState().auth.user.token
-        return await commentService.upvotes(id, token)
+        await commentService.upvotes(id, token);
+        return { post, id };
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
         || error.message || error.toString()
         return thunkAPI.rejectWithValue(message)  
     }
 })
-export const commentDownvotes = createAsyncThunk('comment/downvote', async (id, thunkAPI) => {
+export const commentDownvotes = createAsyncThunk('comment/downvote', async (payload, thunkAPI) => {
+    const { post, id } = payload;
     try {
         const token = thunkAPI.getState().auth.user.token
-        return await commentService.downvotes(id, token)
+        await commentService.downvotes(id, token)
+        return { post, id };
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
         || error.message || error.toString()
@@ -149,35 +159,47 @@ const commentSlice = createSlice({
     initialState,
     reducers: {
         resetComment: (state) => {
-        state.comments = []
+        state.comments = {}
         state.isError = false
         state.isSuccess = false
-        state.isloading = false
+        state.isLoading = false
         state.message = ''
     }
     },
     extraReducers: (builder) => {
         builder
         .addCase(postComment.pending, (state) => {
-            state.isloading = true
+            state.isLoading = true
         })
         .addCase(postComment.fulfilled, (state, action) => {
-            state.isloading = false
-            state.isSuccess = true
-            state.comments.push(action.payload)
-        })
+            state.isLoading = false;
+            state.isSuccess = true;
+        
+            const postId = action.payload.post; // Assuming the payload contains the post ID
+            if (!state.comments[postId]) {
+                state.comments[postId] = []; // Ensure there's an array for this post
+            }
+            state.comments[postId].push(action.payload); // Add the new comment to the correct post
+        })        
         .addCase(postComment.rejected, (state, action) =>{
             state.isSuccess = false
             state.isError = true
             state.message = action.payload
         })
         .addCase(getComments.pending, (state) => {
-            state.isloading = true
+            state.isLoading = true
         })
         .addCase(getComments.fulfilled, (state, action) => {
-            state.isloading = false
-            state.isSuccess = true
-            state.comments = action.payload
+            state.isLoading = false;
+            const { postId, comments } = action.payload;
+
+            // Ensure postId key exists
+            if (!state.comments[postId]) {
+                state.comments[postId] = [];
+            }
+
+            // Overwrite with the fetched comments
+            state.comments[postId] = comments;
         })
         .addCase(getComments.rejected, (state, action) =>{
             state.isSuccess = false
@@ -185,20 +207,20 @@ const commentSlice = createSlice({
             state.message = action.payload
         })
         .addCase(replyComment.pending, (state) => {
-            state.isloading = true
+            state.isLoading = true
         })
         .addCase(replyComment.fulfilled, (state, action) => {
-            state.isloading = false
+            state.isLoading = false
             state.isSuccess = true
             let index 
             index = state.comments.findIndex((comment) => comment._id === action.payload._id)
             state.comments[index] = action.payload
         })
         .addCase(replyReplies.pending, (state) => {
-            state.isloading = true
+            state.isLoading = true
         })
         .addCase(replyReplies.fulfilled, (state, action) => {
-            state.isloading = false
+            state.isLoading = false
             state.isSuccess = true
             state.comments = recursivelyVoteReply(state.comments, action.payload)
         })
@@ -208,21 +230,29 @@ const commentSlice = createSlice({
             state.message = action.payload
         })
         .addCase(commentUpvotes.pending, (state) => {
-            state.isloading = true
+            state.isLoading = true
         })
         .addCase(commentUpvotes.fulfilled, (state, action) => {
-            state.isSuccess = true
-            const index = state.comments.findIndex(comment => comment._id === action.payload._id)
+            if (!action.payload || typeof action.payload !== "object") {
+                console.error("Invalid payload received in reducer:", action.payload);
+                return;
+            }
+        
+            state.isSuccess = true;
+            const { _id } = action.payload;
+        
+            const index = state.comments.findIndex(comment => comment._id === _id);
             if (index !== -1) {
-            state.comments[index] = action.payload 
-            } 
+                state.comments[index] = action.payload;
+            }
         })
+              
         .addCase(commentUpvotes.rejected, (state, action) => {
             state.isSuccess = false
             state.comments = action.payload
         })
         .addCase(commentDownvotes.pending, (state) => {
-            state.isloading = true
+            state.isLoading = true
         })
         .addCase(commentDownvotes.fulfilled, (state, action) => {
             state.isSuccess = true
@@ -236,11 +266,11 @@ const commentSlice = createSlice({
             state.comments = action.payload
         })
         .addCase(replyUpvotes.pending, (state) => {
-            state.isloading = true
+            state.isLoading = true
         })
         .addCase(replyUpvotes.fulfilled, (state, action) => {
             state.isSuccess = true
-            state.isloading = false
+            state.isLoading = false
             state.comments = recursivelyVoteReply(state.comments, action.payload)
         })
         .addCase(replyUpvotes.rejected, (state, action) => {
@@ -248,11 +278,11 @@ const commentSlice = createSlice({
             state.comments = action.payload
         })
         .addCase(replyDownvotes.pending, (state) => {
-            state.isloading = true
+            state.isLoading = true
         })
         .addCase(replyDownvotes.fulfilled, (state, action) => {
             state.isSuccess = true
-            state.isloading = false
+            state.isLoading = false
             state.comments = recursivelyVoteReply(state.comments, action.payload)
         })
         .addCase(replyDownvotes.rejected, (state, action) => {
@@ -260,23 +290,28 @@ const commentSlice = createSlice({
             state.comments = action.payload
         })
         .addCase(deleteComment.pending, (state) => {
-            state.isloading = true
+            state.isLoading = true
         })
         .addCase(deleteComment.fulfilled, (state, action) => {
-            state.isloading = false
-            state.isSuccess = true
-            state.comments = state.comments.filter(comment => comment._id !== action.payload.id);
-        })
+            state.isLoading = false;
+            state.isSuccess = true;
+        
+            const { post, _id } = action.payload;
+        
+            if (state.comments[post]) {
+                state.comments[post] = state.comments[post].filter(comment => comment._id !== _id);
+            }
+        })       
         .addCase(deleteComment.rejected, (state, action) =>{
             state.isSuccess = false
             state.isError = true
             state.message = action.payload
         })
         .addCase(deleteReply.pending, (state) => {
-            state.isloading = true
+            state.isLoading = true
         })
         .addCase(deleteReply.fulfilled, (state, action) => {
-            state.isloading = false;
+            state.isLoading = false;
             state.isSuccess = true;
             state.comments = recursivelyDeleteReplies(state.comments, action.payload.id);
         })       

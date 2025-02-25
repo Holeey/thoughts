@@ -19,18 +19,17 @@ const postComment = async (postId, reply, token) => {
 
 const getComments = async (postId, token) => {
     const config = {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    }
+        headers: { Authorization: `Bearer ${token}` }
+    };
+
     try {
         const response = await axios.get(`${API_URL}/${postId}`, config);
-        return response.data
+        return response.data; 
     } catch (error) {
-        console.error('get comment error:', error.respone.data)
-        throw error
+        console.error("getComments error:", error.response?.data);
+        throw error;
     }
-}
+};
 const replyComment = async (commentId, reply, token) => {
     const config = {
         headers: {

@@ -11,12 +11,6 @@ import "./commentForm.css";
 const Comment = ({ post }) => {
   const [reply, setReply] = useState("");
 
-  const { comments } = useSelector((state) => state.comment);
-
-  const filteredComments = comments.filter(
-    (comment) => comment.post === post._id
-  );
-
   const dispatch = useDispatch();
 
   const handleChange = (event) => {
@@ -32,15 +26,6 @@ const Comment = ({ post }) => {
     dispatch(postComment(commentData));
     setReply("");
   };
-
-  const toggleCommentForm = useCallback(
-    (postId) => {
-      // Fetch comments only if opening a new form
-
-      dispatch(getComments(postId));
-    },
-    [dispatch] // Dependency array to track latest state
-  );
 
   return (
     <>
@@ -60,17 +45,9 @@ const Comment = ({ post }) => {
               <FontAwesomeIcon icon={faPaperPlane} />
             </button>
           </div>
-          <h5
-            style={{ cursor: "pointer", color: "purple" }}
-            onClick={() => {
-              toggleCommentForm(post._id);
-            }}
-          >
-            View comments
-          </h5>
         </form>
       </div>
-      <CommentList comments={filteredComments} />
+      <CommentList post={post} />
     </>
   );
 };

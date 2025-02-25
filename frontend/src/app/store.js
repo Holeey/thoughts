@@ -7,6 +7,6 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     post: postReducer,
-    comment: commentReducer,
+    comments: commentReducer,
   },
 });

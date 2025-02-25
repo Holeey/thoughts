@@ -269,18 +269,31 @@ exports.deleteComment = async (req, res) => {
 
 
 ////// votes routes handler for comment and replies ///////////
+
+
 exports.commentUpvotes = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const comment = await commentModel.findOne({ _id: req.params.id });
-    const reply = await replyModel.findOne({ _id: req.params.id });
+    const { id } = req.params;
+
+    // Validate and Convert to ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ error: "Invalid comment or reply ID" });
+    }
+
+    const objectId = new mongoose.Types.ObjectId(id);
+
+    const comment = await commentModel.findOne({ _id: objectId });
+    const reply = await replyModel.findOne({ _id: objectId });
 
     if (!(comment || reply)) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(404).json({ error: "comment not found!" });
+      return res.status(404).json({ error: "Comment or reply not found!" });
     }
 
     if (!req.user) {
@@ -294,47 +307,44 @@ exports.commentUpvotes = async (req, res) => {
         (vote) => vote.user && vote.user._id.equals(req.user._id)
       );
       if (existingCommentUpvoteIndex === -1) {
-        // User has not upvoted, add the upvote
         comment.upvote.push({ user: req.user });
         comment.upvoteValue += 1;
       } else {
-        // User has already upvoted, remove the upvote
         comment.upvote.splice(existingCommentUpvoteIndex, 1);
         comment.upvoteValue -= 1;
       }
 
       await comment.save();
-
       const updatedComment = await populateComments(comment._id);
-
+     if (!updatedComment || typeof updatedComment !== "object") {
+        return res.status(500).json({ error: "Failed to update comment" });
+    }
       await session.commitTransaction();
       session.endSession();
-
       return res.status(200).json(updatedComment);
-
-    } else if (reply) {
+    } 
+    
+    if (reply) {
       const existingReplyUpvoteIndex = reply.upvote.findIndex(
         (vote) => vote.user && vote.user._id.equals(req.user._id)
       );
 
       if (existingReplyUpvoteIndex === -1) {
-        // User has not upvoted, add the upvote
         reply.upvote.push({ user: req.user });
         reply.upvoteValue += 1;
       } else {
-        // User has already upvoted, remove the upvote
         reply.upvote.splice(existingReplyUpvoteIndex, 1);
         reply.upvoteValue -= 1;
       }
 
-       await reply.save();
-
-       const updatedReply = await populateReplies(reply._id);
-
+      await reply.save();
+      const updatedReply = await populateReplies(reply._id);
+ 
       await session.commitTransaction();
       session.endSession();
-
       return res.status(200).json(updatedReply);
+
+    
     }
   } catch (error) {
     await session.abortTransaction();
