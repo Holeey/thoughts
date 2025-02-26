@@ -67,6 +67,13 @@ const CommentList = React.memo(({ post }) => {
     }
 };
 
+const handleUpvoteComment = (comment) => {
+
+  if (comment.post && comment._id) {
+      dispatch(commentUpvotes(comment));
+  }
+};
+
   return (
     <div>
       <div>
@@ -111,7 +118,7 @@ const CommentList = React.memo(({ post }) => {
                         if (downvoted !== -1) {
                           return;
                         } else {
-                          dispatch(commentUpvotes(comment));
+                          onclick=() => {handleUpvoteComment(comment)};
                         }
                       }}
                     >

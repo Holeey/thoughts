@@ -1,6 +1,5 @@
 const { commentModel, replyModel } = require("../../model/commentModel.js");
 const postModel = require("../../model/postModel.js");
-const mongoose = require("mongoose");
 
 const populateReplies = async (replyId) => {
    const reply = await replyModel.findById(replyId).populate({
@@ -268,37 +267,23 @@ exports.deleteComment = async (req, res) => {
 };
 
 
-////// votes routes handler for comment and replies ///////////
+////// votes controller for comment and replies ///////////
 
 
 exports.commentUpvotes = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
 
   try {
-    const { id } = req.params;
 
-    // Validate and Convert to ObjectId
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      await session.abortTransaction();
-      session.endSession();
-      return res.status(400).json({ error: "Invalid comment or reply ID" });
-    }
-
-    const objectId = new mongoose.Types.ObjectId(id);
-
-    const comment = await commentModel.findOne({ _id: objectId });
-    const reply = await replyModel.findOne({ _id: objectId });
+    const comment = await commentModel.findOne({ _id: req.params.id });
+    const reply = await replyModel.findOne({ _id: req.params.id });
 
     if (!(comment || reply)) {
-      await session.abortTransaction();
-      session.endSession();
+
       return res.status(404).json({ error: "Comment or reply not found!" });
     }
 
     if (!req.user) {
-      await session.abortTransaction();
-      session.endSession();
+
       return res.status(401).json({ error: "Unauthorized user!" });
     }
 
@@ -316,11 +301,10 @@ exports.commentUpvotes = async (req, res) => {
 
       await comment.save();
       const updatedComment = await populateComments(comment._id);
-     if (!updatedComment || typeof updatedComment !== "object") {
+     if (!updatedComment ) {
         return res.status(500).json({ error: "Failed to update comment" });
     }
-      await session.commitTransaction();
-      session.endSession();
+
       return res.status(200).json(updatedComment);
     } 
     
@@ -339,24 +323,20 @@ exports.commentUpvotes = async (req, res) => {
 
       await reply.save();
       const updatedReply = await populateReplies(reply._id);
+
+      console.log("updatedReply:", updatedReply)
  
-      await session.commitTransaction();
-      session.endSession();
       return res.status(200).json(updatedReply);
 
     
     }
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     console.error("comment/reply-upvote error:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 exports.commentDownvotes = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
 
   try {
     const comment = await commentModel.findOne({ _id: req.params.id });
@@ -391,9 +371,6 @@ exports.commentDownvotes = async (req, res) => {
        await comment.save()
   
       const updatedComment = await populateComments(comment._id);
-
-      await session.commitTransaction();
-      session.endSession();
       
       return res.status(200).json(updatedComment);
     
@@ -415,14 +392,9 @@ exports.commentDownvotes = async (req, res) => {
 
        const updatedReply = await populateReplies(reply._id);
 
-      await session.commitTransaction();
-      session.endSession();
-
       return res.status(200).json(updatedReply);
     }
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
     console.error("comment/reply-downvote error:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }

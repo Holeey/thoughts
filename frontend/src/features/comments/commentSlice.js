@@ -100,11 +100,11 @@ export const deleteComment = createAsyncThunk('comment/delete', async (payload, 
     }
 });
 export const commentUpvotes = createAsyncThunk('comment/upvote', async (payload, thunkAPI) => {
-    const { post, id } = payload;
+    const { _id } = payload;
     try {
         const token = thunkAPI.getState().auth.user.token
-        await commentService.upvotes(id, token);
-        return { post, id };
+        const responseData = await commentService.upvotes(_id, token);
+        return  responseData;
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
         || error.message || error.toString()
@@ -112,11 +112,11 @@ export const commentUpvotes = createAsyncThunk('comment/upvote', async (payload,
     }
 })
 export const commentDownvotes = createAsyncThunk('comment/downvote', async (payload, thunkAPI) => {
-    const { post, id } = payload;
+    const { _id } = payload;
     try {
         const token = thunkAPI.getState().auth.user.token
-        await commentService.downvotes(id, token)
-        return { post, id };
+         const responseData = await commentService.downvotes(_id, token)
+        return responseData;
     } catch (error) {
         const message = (error.response && error.response.data && error.response.message)
         || error.message || error.toString()
@@ -233,19 +233,19 @@ const commentSlice = createSlice({
             state.isLoading = true
         })
         .addCase(commentUpvotes.fulfilled, (state, action) => {
-            if (!action.payload || typeof action.payload !== "object") {
-                console.error("Invalid payload received in reducer:", action.payload);
-                return;
-            }
-        
             state.isSuccess = true;
-            const { _id } = action.payload;
         
-            const index = state.comments.findIndex(comment => comment._id === _id);
-            if (index !== -1) {
-                state.comments[index] = action.payload;
+            const { post, _id } = action.payload; // Extract post ID and comment ID
+        
+            if (state.comments[post]) {
+                // Find the comment in the specific post's comment array
+                const index = state.comments[post].findIndex(comment => comment._id === _id);
+                
+                if (index !== -1) {
+                    state.comments[post][index] = action.payload; // Update the comment
+                }
             }
-        })
+        })        
               
         .addCase(commentUpvotes.rejected, (state, action) => {
             state.isSuccess = false
@@ -256,10 +256,17 @@ const commentSlice = createSlice({
         })
         .addCase(commentDownvotes.fulfilled, (state, action) => {
             state.isSuccess = true
-            const index = state.comments.findIndex(comment => comment._id === action.payload._id)
-            if (index !== -1) {
-            state.comments[index] = action.payload 
-            } 
+
+            const { post, _id } = action.payload; // Extract post ID and comment ID
+        
+            if (state.comments[post]) {
+                // Find the comment in the specific post's comment array
+                const index = state.comments[post].findIndex(comment => comment._id === _id);
+                
+                if (index !== -1) {
+                    state.comments[post][index] = action.payload; // Update the comment
+                }
+            }
         })
         .addCase(commentDownvotes.rejected, (state, action) => {
             state.isSuccess = false
@@ -271,6 +278,8 @@ const commentSlice = createSlice({
         .addCase(replyUpvotes.fulfilled, (state, action) => {
             state.isSuccess = true
             state.isLoading = false
+
+
             state.comments = recursivelyVoteReply(state.comments, action.payload)
         })
         .addCase(replyUpvotes.rejected, (state, action) => {

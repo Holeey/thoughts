@@ -6,21 +6,36 @@ const replySchema = new mongoose.Schema({
         required: true,
         ref: 'User'
     },
-    reply: String,
-    upvote: [],
+    reply: {
+        type: String,
+        required: true
+    },
+    upvote: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
     upvoteValue: {
         type: Number,
         default: 0
     },
-    downvote: [],
+    downvote: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
     downvoteValue: {
         type: Number,
         default: 0
     },
-    replies: [{
+    parentReplyId: {  // 👈 NEW: Identifies whether it's a reply to a comment or another reply
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Reply'
-    }]  // Nested replies
+        ref: 'Reply',
+        default: null
+    },
+    commentId: {  // 👈 NEW: Helps query all replies belonging to a comment
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Comment',
+        required: true
+    }
 }, { timestamps: true });
 
 const commentSchema = new mongoose.Schema({
@@ -34,24 +49,29 @@ const commentSchema = new mongoose.Schema({
         required: true,
         ref: 'Post'
     },
-    comment: String,
-    replies: [{
+    comment: {
+        type: String,
+        required: true
+    },
+    upvote: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Reply'
-    }], // Top-level replies
-    upvote: [],
+        ref: 'User'
+    }],
     upvoteValue: {
         type: Number,
         default: 0
     },
-    downvote: [],
+    downvote: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
     downvoteValue: {
         type: Number,
         default: 0
-    },
+    }
 }, { timestamps: true });
 
-const commentModel = mongoose.model('Comment', commentSchema);
-const replyModel = mongoose.model('Reply', replySchema);
+const Comment = mongoose.model('Comment', commentSchema);
+const Reply = mongoose.model('Reply', replySchema);
 
-module.exports = { commentModel, replyModel };
+module.exports = { Comment, Reply };
